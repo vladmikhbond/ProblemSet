@@ -1,0 +1,29 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/python
+{
+	"name": "tss2-contfiner",
+
+	"build": {
+		"dockerfile": "../Dockerfile"
+	},
+
+	// "mounts": [
+    //     // Монтуємо папку <роб_простір>/data в контейнер як /data
+    //     "source=${localWorkspaceFolder}/data,target=/data,type=bind"
+    // ],
+   
+	// Features to add to the dev container. More info: https://containers.dev/features.
+	// "features": {},
+
+	// Use 'forwardPorts' to make a list of ports inside the container available locally.
+	// "forwardPorts": [],
+
+	// Use 'postCreateCommand' to run commands after the container is created.
+	"postCreateCommand": "python run.py"
+
+	// Configure tool-specific properties.
+	// "customizations": {},
+
+	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
+	// "remoteUser": "root"
+}
