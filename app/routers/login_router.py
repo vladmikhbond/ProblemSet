@@ -2,16 +2,14 @@ import os
 import logging
 import httpx
 
-from uuid import UUID, uuid4
 from fastapi import APIRouter, Depends, Request, Response, Form
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
-from ..models.sessions import SessionData, backend, cookie, verifier
-
+from ..models.schemas import ProblemHeader
 
 # логування
-# logging.basicConfig(level=logging.INFO)
-# logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # шаблони Jinja2
 path = os.path.join(os.getcwd(), 'app', 'templates')
@@ -19,6 +17,37 @@ templates = Jinja2Templates(directory=path)
 
 router = APIRouter()
 
+# HOST = "http://localhost:7000"
+PSS_HOST = "http://172.17.0.1:7000"
+
+
+@router.get("/probs")
+async def get_probs(request: Request):
+    
+    api_url = f"{PSS_HOST}/api/problems/lang/py"
+    token = request.session.get("token", "upset")
+    headers = { "Authorization": f"Bearer {token}" }
+
+    if token == "upset":
+        # redirect to login page
+        return templates.TemplateResponse("login.html", {
+            "request": request, 
+            "error": "No token"
+        })
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(api_url, headers=headers)
+        json = response.json()
+    except Exception as e:
+        logger.error(f"Error during login request: {e}")
+        return templates.TemplateResponse("login.html", {
+            "request": request, 
+            "error": "Invalid credentials"
+        })
+    else:
+        headers = [ProblemHeader(id=x["id"], title=x["title"], attr=x["attr"]) for x in json]
+        return headers   
+   
 
 
 @router.get("/login", response_class=HTMLResponse)
@@ -32,10 +61,8 @@ async def login(
     username: str = Form(...),
     password: str = Form(...)
 ):
-    # url = "http://localhost:7000/token"
-    url = "http://172.17.0.1:7000/token"
-    
-    
+   
+    url = f"{PSS_HOST}/token"
     data = {
         "username": username,
         "password": password
@@ -44,45 +71,19 @@ async def login(
         async with httpx.AsyncClient() as client:
             response = await client.post(url, data=data)
         json = response.json()
-        print(json)
-        
+        token = json["access_token"]
     except Exception as e:
         logger.error(f"Error during login request: {e}")
-        return {
-            "status_code": 500,
-            "response": {"error": "Internal server error"}
-        }
-
+        return templates.TemplateResponse("login.html", {
+            "request": request, 
+            "error": "Invalid credentials"
+        })
+    
+    # crate session
+    request.session["username"] = username
+    request.session["token"] = token
+    # redirect to list of problems
     return {
         "status_code": response.status_code,
         "response": response.json()
-    }
-    # if username == "admin" and password == "secret":
-    #     return HTMLResponse("Login successful!")
-    # else:
-    #     return templates.TemplateResponse("login.html", {"request": request, "error": "Invalid credentials"})
-
-
-
-@router.post("/create_session/{name}")
-async def create_session(name: str, response: Response):
-
-    session = uuid4()
-    data = SessionData(username=name)
-
-    await backend.create(session, data)
-    cookie.attach_to_response(response, session)
-
-    return f"created session for {name}"
-
-
-@router.get("/whoami", dependencies=[Depends(cookie)])
-async def whoami(session_data: SessionData = Depends(verifier)):
-    return session_data
-
-
-@router.post("/delete_session")
-async def del_session(response: Response, session_id: UUID = Depends(cookie)):
-    await backend.delete(session_id)
-    cookie.delete_from_response(response)
-    return "deleted session"
+    }    
