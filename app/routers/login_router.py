@@ -1,19 +1,25 @@
-from fastapi import APIRouter, Request, Form
-from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
 import os
 import logging
 import httpx
 
-# налаштуємо логування
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+from uuid import UUID, uuid4
+from fastapi import APIRouter, Depends, Request, Response, Form
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
+from ..models.sessions import SessionData, backend, cookie, verifier
 
+
+# логування
+# logging.basicConfig(level=logging.INFO)
+# logger = logging.getLogger(__name__)
+
+# шаблони Jinja2
+path = os.path.join(os.getcwd(), 'app', 'templates')
+templates = Jinja2Templates(directory=path)
 
 router = APIRouter()
 
-path = os.path.join(os.getcwd(), 'app', 'templates')
-templates = Jinja2Templates(directory=path)
+
 
 @router.get("/login", response_class=HTMLResponse)
 async def get_login(request: Request):
@@ -57,30 +63,26 @@ async def login(
     #     return templates.TemplateResponse("login.html", {"request": request, "error": "Invalid credentials"})
 
 
-from pydantic import BaseModel
 
-class SessionData(BaseModel):
-    username: str
-    token: str
+@router.post("/create_session/{name}")
+async def create_session(name: str, response: Response):
 
-###
+    session = uuid4()
+    data = SessionData(username=name)
 
-from fastapi_sessions.frontends.implementations import SessionCookie, CookieParameters
+    await backend.create(session, data)
+    cookie.attach_to_response(response, session)
 
-cookie_params = CookieParameters()
+    return f"created session for {name}"
 
-### Uses UUID
-cookie = SessionCookie(
-    cookie_name="cookie",
-    identifier="general_verifier",
-    auto_error=True,
-    secret_key="DONOTUSE",
-    cookie_params=cookie_params,
-)
 
-###
+@router.get("/whoami", dependencies=[Depends(cookie)])
+async def whoami(session_data: SessionData = Depends(verifier)):
+    return session_data
 
-from uuid import UUID
-from fastapi_sessions.backends.implementations import InMemoryBackend
 
-backend = InMemoryBackend[UUID, SessionData]()
+@router.post("/delete_session")
+async def del_session(response: Response, session_id: UUID = Depends(cookie)):
+    await backend.delete(session_id)
+    cookie.delete_from_response(response)
+    return "deleted session"
