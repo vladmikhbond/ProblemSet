@@ -20,8 +20,16 @@ router = APIRouter()
 # HOST = "http://localhost:7000"
 PSS_HOST = "http://172.17.0.1:7000"
 
+@router.get("/problem/{id}")
+async def get_probs(id: str, request: Request):
+    problem = id
+    return templates.TemplateResponse("problem.html", {
+            "request": request, 
+            "problem": problem
+        })
 
-@router.get("/probs")
+
+@router.get("/problems")
 async def get_probs(request: Request):
     
     api_url = f"{PSS_HOST}/api/problems/lang/py"
@@ -46,7 +54,7 @@ async def get_probs(request: Request):
         })
     else:
         headers = [ProblemHeader(id=x["id"], title=x["title"], attr=x["attr"]) for x in json]
-        return headers   
+        return templates.TemplateResponse("problem_list.html", {"request": request, "headers": headers})
    
 
 
