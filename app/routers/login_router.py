@@ -5,7 +5,7 @@ import httpx
 from fastapi import APIRouter, Depends, Request, Response, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
-from ..models.schemas import ProblemHeader, ProblemSchema
+from ..models.schemas import ProblemHeader, ProblemSchema, AnswerSchema
 
 # логування
 logging.basicConfig(level=logging.INFO)
@@ -72,6 +72,29 @@ async def get_probs(id: str, request: Request):
         return templates.TemplateResponse(
             "problem.html", 
             {"request": request, "problem": problem} )
+
+
+@router.post("/check")
+async def post_check(answer: AnswerSchema):
+    """
+    Виймає рішення з відповіді, відправляє його на перевірку до PSS і повертає відповідь від PSS   
+    """
+    api_url = f"{PSS_HOST}/api/check"
+    data = { "id": answer.id, "solving": answer.solving }
+
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(api_url, json=data)
+        # state = response.status_code
+        json = response.json()
+    except Exception as e:
+        err_mes = f"Error during a check solving: {e}"
+        logger.error(err_mes)
+        return err_mes
+    else:
+        return json
+
+    
 
 
 # ========================= Login suit =================================

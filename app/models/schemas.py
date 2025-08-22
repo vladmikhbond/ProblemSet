@@ -22,3 +22,10 @@ class ProblemSchema(BaseModel):
         # orm_mode = True
         from_attributes=True
 
+class AnswerSchema(BaseModel):
+    id: str
+    solving: str
+
+    class Config:
+        from_attributes=True
+
