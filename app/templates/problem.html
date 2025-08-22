@@ -3,7 +3,8 @@
 {% block title %}{% endblock %}
 
 {% block content %}
-   <h1>{{problem}}</h1>
-
-
+   <h1>{{problem.title}}</h1>
+   <div>{{problem.cond}}</div>
+   <textarea>{{problem.view}}</textarea>
+   <div><button>Check</button></div> 
 {% endblock %}
