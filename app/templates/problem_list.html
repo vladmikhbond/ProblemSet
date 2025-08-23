@@ -3,29 +3,34 @@
 {% block title %}{% endblock %}
 
 {% block content %}
-  <style>
-    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 2rem; }
-    table { border-collapse: collapse; width: 100%; }
-    th, td { border: 1px solid #ddd; padding: .5rem .75rem; }
-    th { background: #f6f6f6; text-align: left; }
-    caption { text-align: left; font-weight: 600; margin-bottom: .5rem; }
-    .muted { color: #777; }
-  </style>    
 
-{% if headers and headers|length %}
-    {% for h in headers %}
-      <div>
-      <a href="/problem/{{h.id}}">{{h.title}}</a>
+<section class="section">
+  <div class="container">
+    <h1 class="title has-text-centered">Задачник</h1>
+    {% if headers and headers|length %}
+      <div class="box">
+        <div class="list is-hoverable">
+          {% for h in headers %}
+            <a class="list-item" href="/problem/{{h.id}}">
+              <span class="icon has-text-info">
+                <i class="fas fa-book"></i>
+              </span>
+              <span>{{ h.title }}</span>
+              {% if h.attr %}
+                <span class="tag is-info is-light ml-2">{{ h.attr }}</span>
+              {% endif %}
+            </a>
+            <br/>
+          {% endfor %}
+        </div>
       </div>
-    {% endfor %}
-
-{% else %}
-  <p class="muted">Задач немає.</p>
-{% endif %}
-
-
-<!-- Іконки Font Awesome -->
-<script src="https://kit.fontawesome.com/a2e0f1f0a4.js" crossorigin="anonymous"></script>
-
-
+    {% else %}
+      <div class="notification is-warning has-text-centered">
+        Задач немає.
+      </div>
+    {% endif %}
+  </div>
+</section>
+<!-- Bulma icons (Font Awesome) -->
+<script defer src="https://use.fontawesome.com/releases/v5.15.4/js/all.js"></script>
 {% endblock %}

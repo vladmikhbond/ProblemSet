@@ -3,12 +3,33 @@
 {% block title %}{% endblock %}
 
 {% block content %}
-<h1>{{problem.title}}</h1>
-<div>{{problem.cond}}</div>
-<textarea id="codeArea">{{problem.view}}</textarea>
-<div><button id="checkButton">Check</button></div>
-<input type="hidden" id="problemId" value="{{problem.id}}">
-<div id="message"></div>
+<section class="section">
+  <div class="container">
+    <div class="box">
+      <h1 class="title has-text-info">{{ problem.title }}</h1>
+      <div class="content mb-4">
+        {{ problem.cond }}
+      </div>
+      <div class="field">
+        <label class="label">Ваш код:</label>
+        <div class="control">
+          <textarea id="codeArea" class="textarea is-family-monospace" rows="12">{{ problem.view }}</textarea>
+        </div>
+      </div>
+      <input type="hidden" id="problemId" value="{{ problem.id }}">
+      <div class="field is-grouped mt-3">
+        <div class="control">
+          <button id="checkButton" class="button is-primary is-medium">
+            <span class="icon"><i class="fas fa-check"></i></span>
+            <span>Перевірити</span>
+          </button>
+        </div>
+      </div>
+      <div id="message" class="notification is-light mt-4" style="display:none;"></div>
+    </div>
+  </div>
+</section>
+<script defer src="https://use.fontawesome.com/releases/v5.15.4/js/all.js"></script>
 
 <script>
    const codeArea = document.getElementById("codeArea");
@@ -37,6 +58,7 @@
 
          const data = await response.json(); // або response.text(), залежно від вашого API
          console.log("Server response:", data);
+         message.style.display = "block";
          message.innerHTML = data;
 
       } catch (err) {
