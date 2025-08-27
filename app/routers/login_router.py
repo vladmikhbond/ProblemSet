@@ -17,87 +17,9 @@ templates = Jinja2Templates(directory=path)
 
 router = APIRouter()
 
-PSS_HOST = "http://178.151.21.169:7000"            # for internet
-# PSS_HOST = "http://172.17.0.1:7000"           # for docker default net
+#PSS_HOST = "http://178.151.21.169:7000"            # for internet
+PSS_HOST = "http://172.17.0.1:7000"           # for docker default net
 
-@router.get("/problems")
-async def get_probs(request: Request):
-    
-    api_url = f"{PSS_HOST}/api/problems/lang/py"
-    token = request.session.get("token", "upset")
-    headers = { "Authorization": f"Bearer {token}" }
-
-    if token == "upset":
-        # redirect to login page
-        return templates.TemplateResponse(
-            "login.html", 
-            {"request": request, "error": "No token"})
-    try:
-        async with httpx.AsyncClient() as client:
-            response = await client.get(api_url, headers=headers)
-        json = response.json()
-    except Exception as e:
-        err_mes = f"Error during login request: {e}"
-        logger.error(err_mes)
-        return templates.TemplateResponse("login.html", {
-            "request": request, 
-            "error": err_mes
-        })
-    else:
-        headers = [ProblemHeader(id=x["id"], title=x["title"], attr=x["attr"]) for x in json]
-        return templates.TemplateResponse("problem_list.html", {"request": request, "headers": headers})
-
-@router.get("/problem/{id}")
-async def get_probs(id: str, request: Request):
-    api_url = f"{PSS_HOST}/api/problems/{id}"
-    token = request.session.get("token", "upset")
-    headers = { "Authorization": f"Bearer {token}" }
-
-    if token == "upset":
-        # redirect to login page
-        return templates.TemplateResponse("login.html", {
-            "request": request, 
-            "error": "No token"
-        })
-    try:
-        async with httpx.AsyncClient() as client:
-            response = await client.get(api_url, headers=headers)
-        json_obj = response.json()
-    except Exception as e:
-        err_mes = f"Error during a problem request: {e}"
-        logger.error(err_mes)
-        return RedirectResponse(url="/problems", status_code=302)
-    else:
-        problem = ProblemSchema(**json_obj) 
-        return templates.TemplateResponse(
-            "problem.html", 
-            {"request": request, "problem": problem} )
-
-
-@router.post("/check")
-async def post_check(answer: AnswerSchema):
-    """
-    Виймає рішення з відповіді, відправляє його на перевірку до PSS і повертає відповідь від PSS   
-    """
-    api_url = f"{PSS_HOST}/api/check"
-    data = { "id": answer.id, "solving": answer.solving }
-
-    try:
-        async with httpx.AsyncClient() as client:
-            response = await client.post(api_url, json=data)
-        # state = response.status_code
-        json = response.json()
-    except Exception as e:
-        err_mes = f"Error during a check solving: {e}"
-        logger.error(err_mes)
-        return err_mes
-    else:
-        return json
-
-    
-
-
-# ========================= Login suit =================================
 
 @router.get("/login", response_class=HTMLResponse)
 async def get_login(request: Request):

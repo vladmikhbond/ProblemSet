@@ -4,8 +4,8 @@ TODO
 
 ------------------------ запуск контейнеру pss-slim з PowerShell 
 cd C:\Git\DOCK\PSScont    
-docker build -t pss-slim .
-docker run -m 512m --restart unless-stopped -p 7000:7000 -v ${PWD}/data:/data tss2-slim
+docker build -t pss-img .
+docker run -m 512m --restart unless-stopped -p 7000:7000 -v ${PWD}/data:/data pss-img
 ----
 cd /mnt/c/git/py/tss2cont - це команда для bush
 ------------------------відповідь з токеном ----------------
