@@ -1,20 +1,39 @@
 TODO  
+моделі ProblemSet і Ticket
+створення і редагування задачників
+отримання звітів
 
 
-
------------------------- запуск контейнеру pss-slim з PowerShell 
+------------------------ запуск контейнеру pss з PowerShell 
 cd C:\Git\DOCK\PSScont    
 docker build -t pss-img .
 docker run -m 512m --restart unless-stopped -p 7000:7000 -v ${PWD}/data:/data pss-img
 ----
-cd /mnt/c/git/py/tss2cont - це команда для bush
-------------------------відповідь з токеном ----------------
-{
-  "status_code":200,
-  "response":{
-    "access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxSXZhbmVua28iLCJleHAiOjE3NTU3MDI1MjJ9.ZFsuIBY3KC9yiek3PmoRoOntSi-kOyhnvgvmwufNrN8",
-    "token_type":"bearer" 
-  }
-}
-------------- valuable command!
-> docker stats
+
+
+Користувачі - туденти, викладачі.
+Студенти
+  отримують задачник(и)
+  обирають задачу для вирішення
+  вирішують обрану задачу (надсилають виришення для перевірки)
+
+Викладачі   
+  1 створюють в змінюють задачники  ProblemSet
+  2 передивляються результати 
+  3 встановлюють фільтри на студентів і на задачники
+
+Задачник (ProblemSet):
+  name - назва    PK
+  user_id  - id викладача
+  problem_ids - список id задач 
+  активність
+  термін активації в хвилинах  
+
+Ticket  - створ, коли юзер відкриває задачу
+  user_id  - id викладача    PK
+  problem_id - id задачі   PK
+  last_change_time - дата-час отанньої зміни
+  solving - вирішення
+  check_message - повідомлення перевірки
+
+        

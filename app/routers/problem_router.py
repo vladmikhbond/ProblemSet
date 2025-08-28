@@ -18,14 +18,14 @@ templates = Jinja2Templates(directory=path)
 
 router = APIRouter()
 
-@router.get("/problems", summary="List of problem headers (id, title, attr)")
+@router.get("/problems", summary="List of problem headers. Header is {id, title, attr}")
 async def get_probs(request: Request):
     
     api_url = f"{PSS_HOST}/api/problems/lang/py"
-    token = request.session.get("token", "upset")
+    token = request.session.get("token", "")
     
-    # redirect to login page
-    if token == "upset":
+    # return the login page with error message
+    if token == "":
         return templates.TemplateResponse(
             "login.html", 
             {"request": request, "error": "No token"})
@@ -43,16 +43,16 @@ async def get_probs(request: Request):
             "error": err_mes
         })
     else:
-        headers = [ProblemHeader(id=x["id"], title=x["title"], attr=x["attr"]) for x in json]
-        return templates.TemplateResponse("problem_list.html", {"request": request, "headers": headers})
+        problem_headers = [ProblemHeader(id=x["id"], title=x["title"], attr=x["attr"]) for x in json]
+        return templates.TemplateResponse("problem_list.html", {"request": request, "headers": problem_headers})
 
-@router.get("/problem/{id}")
+@router.get("/problem/{id}", summary="Get a problem.")
 async def get_probs(id: str, request: Request):
     api_url = f"{PSS_HOST}/api/problems/{id}"
-    token = request.session.get("token", "upset")
+    token = request.session.get("token", "")
     headers = { "Authorization": f"Bearer {token}" }
 
-    if token == "upset":
+    if token == "":
         # redirect to login page
         return templates.TemplateResponse("login.html", {
             "request": request, 
@@ -73,7 +73,7 @@ async def get_probs(id: str, request: Request):
             {"request": request, "problem": problem} )
 
 
-@router.post("/check")
+@router.post("/check", summary="Check the answer to the problem")
 async def post_check(answer: AnswerSchema):
     """
     Виймає рішення з відповіді, відправляє його на перевірку до PSS і повертає відповідь від PSS   
