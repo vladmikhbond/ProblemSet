@@ -4,7 +4,7 @@
 	"name": "tss2-contfiner",
 
 	"build": {
-		"dockerfile": "../Dockerfile"
+		"dockerfile": "../Dockerfile.dev"
 	},
 
 	// "mounts": [
