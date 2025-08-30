@@ -6,13 +6,10 @@ FROM mcr.microsoft.com/devcontainers/python:1-3.12-bullseye
 COPY requirements.txt /tmp/requirements.txt
 COPY run.py /run.py
 COPY app /app
-COPY alembic /alembic
-COPY alembic.ini /alembic.ini
 
 
 # Встановлюємо Python-залежності
 RUN pip install --no-cache-dir -r /tmp/requirements.txt
-RUN pip install alembic
                                  
 # Відкриваємо порт
 EXPOSE 8000

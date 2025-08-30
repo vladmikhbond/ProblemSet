@@ -7,6 +7,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from ..models.schemas import ProblemHeader, ProblemSchema, AnswerSchema
 
+
 # логування
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -17,7 +18,7 @@ templates = Jinja2Templates(directory=path)
 
 router = APIRouter()
 
-#PSS_HOST = "http://178.151.21.169:7000"            # for internet
+# PSS_HOST = "http://178.151.21.169:7000"            # for internet
 PSS_HOST = "http://172.17.0.1:7000"           # for docker default net
 
 
