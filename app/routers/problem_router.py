@@ -47,6 +47,7 @@ async def get_probs(request: Request):
         problem_headers = [ProblemHeader(id=x["id"], title=x["title"], attr=x["attr"]) for x in json]
         return templates.TemplateResponse("problem_list.html", {"request": request, "headers": problem_headers})
 
+
 @router.get("/problem/{id}", summary="Get a problem.")
 async def get_probs(id: str, request: Request):
     api_url = f"{PSS_HOST}/api/problems/{id}"
