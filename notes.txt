@@ -1,0 +1,12 @@
+TODO  
+шаблон для problemsets.html
+створення і редагування задачників
+отримання звітів
+
+
+------------------------ запуск контейнеру pss з PowerShell 
+cd C:\Git\DOCK\PSScont    
+docker build -t pss-img .
+docker run -m 512m --restart unless-stopped -p 7000:7000 -v ${PWD}/data:/data pss-img
+----
+

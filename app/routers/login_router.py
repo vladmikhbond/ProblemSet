@@ -5,7 +5,6 @@ import httpx
 from fastapi import APIRouter, Depends, Request, Response, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
-from ..models.schemas import ProblemHeader, ProblemSchema, AnswerSchema
 
 
 # логування
