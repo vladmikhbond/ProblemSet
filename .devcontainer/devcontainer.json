@@ -9,10 +9,8 @@
 
 	"mounts": [
         // Монтуємо локальну папку ./data в контейнер як /data
-        // "source=${localWorkspaceFolder}/data,target=/data,type=bind"
-		
-		"source=${env:USERPROFILE}\\..\\..\\Git\\PY\\DBconverter,target=/data,type=bind"
-	
+        // "source=${localWorkspaceFolder}/data,target=/data,type=bind"		
+		"source=${env:USERPROFILE}\\..\\..\\Git\\PY\\DBconverter,target=/data,type=bind"	
     ],
 
    

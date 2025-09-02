@@ -6,11 +6,7 @@ from fastapi import APIRouter, Depends, Request, Response, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from ..models.schemas import ProblemHeader, ProblemSchema, AnswerSchema
-from .login_router import PSS_HOST
-
-# логування
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+from .login_router import PSS_HOST, logger
 
 # шаблони Jinja2
 path = os.path.join(os.getcwd(), 'app', 'templates')

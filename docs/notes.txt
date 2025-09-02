@@ -1,5 +1,5 @@
 TODO  
-моделі ProblemSet і Ticket
+problemset_edit.html
 створення і редагування задачників
 отримання звітів
 

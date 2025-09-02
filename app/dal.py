@@ -14,7 +14,15 @@ def read_all_problemsets() -> list[ProblemSet] | None:
             problemsets = session.query(ProblemSet).all()
         return problemsets    
     except SQLAlchemyError as e:
-        # logging.error(f"Error adding problem '{user.username}': {e}")
+        return None
+
+
+def read_problemset(id:str) -> ProblemSet | None:
+    try:
+        with Session(engine) as session:
+            problemset = session.get(ProblemSet, id)
+        return problemset    
+    except SQLAlchemyError as e:
         return None
 
 
