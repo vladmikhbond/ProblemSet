@@ -22,7 +22,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 @router.get("/problemsets", summary="List of problemsets")
-async def get_probs(request: Request):
+async def get_problemsets(request: Request):
     
     token = request.session.get("token", "")
     
@@ -32,14 +32,13 @@ async def get_probs(request: Request):
             "login.html", 
             {"request": request, "error": "No token"})
     
-    problemsets: list[ProblemSet] = db.read_all_problesets()
+    problemsets: list[ProblemSet] = db.read_all_problemsets()
     if problemsets == None:
         raise HTTPException(status_code=404, detail="Error reading problemsets")
-     
-    return templates.TemplateResponse(
-            "problemsets.html", 
-            {"request": request, problemsets: problemsets})
 
+    problemsets = [pset for pset in problemsets if pset.user_id == "1Ivanenko" ]     
+    return templates.TemplateResponse("problemset_list.html", {"request": request, "problemsets": problemsets})
+ 
 
 
 # @router.get("/problem/{id}", summary="Get a problem.")

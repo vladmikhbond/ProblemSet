@@ -6,9 +6,9 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError 
 from .models.models import ProblemSet
 
-engine = create_engine(f"sqlite:////data/TSS2.db", echo=True)
+engine = create_engine(f"sqlite:////data/PSS.db", echo=True)
 
-def read_all_problesets() -> list[ProblemSet] | None:
+def read_all_problemsets() -> list[ProblemSet] | None:
     try:
         with Session(engine) as session:
             problemsets = session.query(ProblemSet).all()
