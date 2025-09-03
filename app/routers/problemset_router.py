@@ -7,11 +7,12 @@ from fastapi.templating import Jinja2Templates
 from ..models.models import ProblemSet
 from ..models.schemas import ProblemSetSchema
 
-from .login_router import PSS_HOST, logger
+from .login_router import PSS_HOST, logger, get_current_user, AuthType
 
 from ..dal import get_db  # Функція для отримання сесії БД
 from datetime import datetime
 from sqlalchemy.orm import Session
+from typing import Annotated
 
 # шаблони Jinja2
 path = os.path.join(os.getcwd(), 'app', 'templates')
@@ -22,7 +23,8 @@ router = APIRouter()
 @router.get("/problemsets")
 async def get_problemsets(
     request: Request, 
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    username: str = Depends(get_current_user)
 ):
     """ 
     Усі задачники поточного юзера (викладача).
