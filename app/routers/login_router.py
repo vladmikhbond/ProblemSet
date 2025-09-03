@@ -100,31 +100,31 @@ async def get_current_user(request: Request) -> str:
 
 
 
-async def get_current_user111(
-        token: Annotated[str, Depends(oauth2_scheme)],
-        db: Session = Depends(get_db)
-):
-    """
-    Декодує токен і виймає з нього ім'я юзера.
-    Знаходить в БД юзера, чіє ім'я записано в токені.
-    """
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"} )
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username = payload.get("sub")
-        role = payload.get("role")
-        if username is None:
-            raise credentials_exception
-        token_data = TokenData(username=username)
-    except InvalidTokenError:
-        raise credentials_exception
+# async def get_current_user(
+#         token: Annotated[str, Depends(oauth2_scheme)],
+#         db: Session = Depends(get_db)
+# ):
+#     """
+#     Декодує токен і виймає з нього ім'я юзера.
+#     Знаходить в БД юзера, чіє ім'я записано в токені.
+#     """
+#     credentials_exception = HTTPException(
+#         status_code=status.HTTP_401_UNAUTHORIZED,
+#         detail="Could not validate credentials",
+#         headers={"WWW-Authenticate": "Bearer"} )
+#     try:
+#         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+#         username = payload.get("sub")
+#         role = payload.get("role")
+#         if username is None:
+#             raise credentials_exception
+#         token_data = TokenData(username=username)
+#     except InvalidTokenError:
+#         raise credentials_exception
     
-    user = db.get(User, token_data.username)    #  read_user(username=token_data.username)
-    if user is None:
-        raise credentials_exception
-    return user
+#     user = db.get(User, token_data.username)    #  read_user(username=token_data.username)
+#     if user is None:
+#         raise credentials_exception
+#     return user
 
-AuthType = Annotated[str, Depends(get_current_user111)]
+# AuthType = Annotated[str, Depends(get_current_user111)]
