@@ -22,6 +22,7 @@ class ProblemSchema(BaseModel):
         # orm_mode = True
         from_attributes=True
 
+
 class AnswerSchema(BaseModel):
     id: str
     solving: str
@@ -29,3 +30,16 @@ class AnswerSchema(BaseModel):
     class Config:
         from_attributes=True
 
+# =============================================================
+
+
+class ProblemSetSchema(BaseModel):
+    id: str
+    user_id: str
+    problem_ids: str
+    open_time: datetime
+    open_minutes: int
+
+    class Config:
+        # orm_mode = True
+        from_attributes=True

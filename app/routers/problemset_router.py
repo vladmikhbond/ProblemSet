@@ -1,14 +1,17 @@
 import os
 import logging
-import httpx
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from ..models.models import ProblemSet
-from .. import dal as db
+from ..models.schemas import ProblemSetSchema
+
 from .login_router import PSS_HOST, logger
 
+from ..dal import get_db  # Функція для отримання сесії БД
+from datetime import datetime
+from sqlalchemy.orm import Session
 
 # шаблони Jinja2
 path = os.path.join(os.getcwd(), 'app', 'templates')
@@ -16,12 +19,11 @@ templates = Jinja2Templates(directory=path)
 
 router = APIRouter()
 
-# логування
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
 @router.get("/problemsets")
-async def get_problemsets(request: Request):
+async def get_problemsets(
+    request: Request, 
+    db: Session = Depends(get_db)
+):
     """ 
     Усі задачники поточного юзера (викладача).
     """
@@ -35,7 +37,7 @@ async def get_problemsets(request: Request):
             "login.html", 
             {"request": request, "error": "No token"})
     
-    problemsets: list[ProblemSet] = db.read_all_problemsets()
+    problemsets: list[ProblemSet] = db.query(ProblemSet).all()
     if problemsets == None:
         err_mes = "Error reading problemsets"
         logger.error(err_mes)
@@ -45,46 +47,70 @@ async def get_problemsets(request: Request):
     return templates.TemplateResponse("problemset_list.html", {"request": request, "problemsets": problemsets})
  
 
+@router.get("/problemset/{pset_id}")
+async def edit_problemset_form(
+    pset_id: str, 
+    request: Request, 
+    db: Session = Depends(get_db)
+):
+    problemset = db.get(ProblemSet, pset_id)
+    if not problemset:
+        return RedirectResponse(url="/problemsets", status_code=302)
+    return templates.TemplateResponse("problemset_edit.html", {"request": request, "problemset": problemset})
 
-@router.get("/problemset/{id}", summary="Get a problemset.")
-async def get_problemset(id: str, request: Request):
-    """ 
-    Редагування обраного задачника поточного юзера (викладача).
-    """
-    token = request.session.get("token", "")
-    
-    # return the login page with error message
-    if token == "":
-        return templates.TemplateResponse(
-            "login.html", 
-            {"request": request, "error": "No token"})
-    
-    problemset: ProblemSet = db.read_problemset(id)
-    if problemset == None:
-        err_mes = "Error reading problemset"
-        logger.error(err_mes)
-        raise HTTPException(status_code=404, detail=err_mes)
+@router.post("/problemset/{pset_id}")
+async def edit_problemset(
+    pset_id: str,
+    request: Request,
+    user_id: str = Form(...),
+    problem_ids: str = Form(...),
+    open_time: str = Form(...),
+    open_minutes: int = Form(...),
+    db: Session = Depends(get_db)
+):
+    problemset = db.get(ProblemSet, pset_id)
+    if not problemset:
+        return RedirectResponse(url="/problemsets", status_code=302)
+    problemset.user_id = user_id
+    problemset.problem_ids = problem_ids
+    # open_time у форматі 'YYYY-MM-DDTHH:MM'
+    problemset.open_time = datetime.strptime(open_time, "%Y-%m-%dT%H:%M")
+    problemset.open_minutes = open_minutes
+    db.commit()
+    return RedirectResponse(url="/problemsets", status_code=302)
 
-    problemsets = [pset for pset in problemsets if pset.user_id == "1Ivanenko" ]     #TODO:
-    return templates.TemplateResponse("problemset_edit.html", {"request": request, "problemsets": problemsets})
 
 
-# @router.post("/check", summary="Check the answer to the problem")
-# async def post_check(answer: AnswerSchema):
+
+
+
+
+
+
+
+# @router.get("/problemset/{id}")
+# async def get_problemset(id: str, request: Request):
+#     """ 
+#     Редагування обраного задачника поточного юзера (викладача).
 #     """
-#     Виймає рішення з відповіді, відправляє його на перевірку до PSS і повертає відповідь від PSS   
-#     """
-#     api_url = f"{PSS_HOST}/api/check"
-#     data = { "id": answer.id, "solving": answer.solving }
-
-#     try:
-#         async with httpx.AsyncClient() as client:
-#             response = await client.post(api_url, json=data)
-#         # state = response.status_code
-#         json = response.json()
-#     except Exception as e:
-#         err_mes = f"Error during a check solving: {e}"
+#     token = request.session.get("token", "")
+    
+#     # return the login page with error message
+#     if token == "":
+#         return templates.TemplateResponse(
+#             "login.html", 
+#             {"request": request, "error": "No token"})
+    
+#     problemset: ProblemSet = db.read_problemset(id)
+#     if problemset == None:
+#         err_mes = "Error reading problemset"
 #         logger.error(err_mes)
-#         return err_mes
-#     else:
-#         return json
+#         raise HTTPException(status_code=404, detail=err_mes)
+
+
+#     return templates.TemplateResponse("problemset_edit.html", {"request": request, "problemset": problemset})
+
+# @router.post("/problemset/{id}")
+# async def post_problemset(problemset: ProblemSetSchema):
+#     pass
+

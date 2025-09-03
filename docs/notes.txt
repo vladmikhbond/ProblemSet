@@ -1,5 +1,6 @@
 TODO  
-problemset_edit.html
+додати get_current_user
+
 створення і редагування задачників
 отримання звітів
 
