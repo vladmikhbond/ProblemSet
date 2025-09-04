@@ -7,7 +7,7 @@ from fastapi.templating import Jinja2Templates
 from ..models.models import ProblemSet
 from ..models.schemas import ProblemSetSchema
 
-from .login_router import PSS_HOST, logger, get_current_user, AuthType
+from .login_router import PSS_HOST, logger, role_from_token
 
 from ..dal import get_db  # Функція для отримання сесії БД
 from datetime import datetime
@@ -24,20 +24,19 @@ router = APIRouter()
 async def get_problemsets(
     request: Request, 
     db: Session = Depends(get_db),
-    username: str = Depends(get_current_user)
+    role = Depends(role_from_token),
 ):
     """ 
     Усі задачники поточного юзера (викладача).
     """
     #TODO: define the current user
 
-    token = request.session.get("token", "")
-    
     # return the login page with error message
-    if token == "":
+    if role != "student":
         return templates.TemplateResponse(
             "login.html", 
-            {"request": request, "error": "No token"})
+            {"request": request, "error": "No valid token"})
+    
     
     problemsets: list[ProblemSet] = db.query(ProblemSet).all()
     if problemsets == None:
