@@ -53,7 +53,7 @@ async def login(
     request.session["token"] = token
 
     # redirect
-    role = role_from_token(request)
+    role = payload_from_token(request)
     if role == "tutor":
         return RedirectResponse(url="/problemsets", status_code=302)
     else:
@@ -64,9 +64,7 @@ async def login(
 
 # ===================================== get_token_payload ============================================
 
-from fastapi import Depends, HTTPException, status
-from typing import Annotated
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi import HTTPException, status
 import jwt
 from jwt.exceptions import InvalidTokenError
 
@@ -81,11 +79,12 @@ credentials_exception = HTTPException(
 # oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
-def role_from_token(request: Request):
+def payload_from_token(request: Request) -> tuple[str, str]:
     try:
         token = request.session.get("token", "")
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        return payload.get("role") 
-    except InvalidTokenError:
-        raise credentials_exception
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])        
+    except InvalidTokenError as e:
+        return (str(e), str(e))
+    else:
+        return (payload.get("username"), payload.get("role")) 
 

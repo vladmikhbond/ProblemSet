@@ -7,7 +7,7 @@ from fastapi.templating import Jinja2Templates
 from ..models.models import ProblemSet
 from ..models.schemas import ProblemSetSchema
 
-from .login_router import PSS_HOST, logger, role_from_token
+from .login_router import PSS_HOST, logger, payload_from_token
 
 from ..dal import get_db  # Функція для отримання сесії БД
 from datetime import datetime
@@ -24,7 +24,7 @@ router = APIRouter()
 async def get_problemsets(
     request: Request, 
     db: Session = Depends(get_db),
-    role = Depends(role_from_token),
+    payload = Depends(payload_from_token),
 ):
     """ 
     Усі задачники поточного юзера (викладача).
@@ -32,10 +32,10 @@ async def get_problemsets(
     #TODO: define the current user
 
     # return the login page with error message
-    if role != "student":
+    if payload[1] != "tutor":
         return templates.TemplateResponse(
             "login.html", 
-            {"request": request, "error": "No valid token"})
+            {"request": request, "error": payload[1]})
     
     
     problemsets: list[ProblemSet] = db.query(ProblemSet).all()
@@ -44,7 +44,7 @@ async def get_problemsets(
         logger.error(err_mes)
         raise HTTPException(status_code=404, detail=err_mes)
 
-    problemsets = [pset for pset in problemsets if pset.user_id == "1Ivanenko" ]     
+    problemsets = [pset for pset in problemsets if pset.user_id == payload[2] ]     ####################
     return templates.TemplateResponse("problemset_list.html", {"request": request, "problemsets": problemsets})
  
 
@@ -58,6 +58,7 @@ async def edit_problemset_form(
     if not problemset:
         return RedirectResponse(url="/problemsets", status_code=302)
     return templates.TemplateResponse("problemset_edit.html", {"request": request, "problemset": problemset})
+
 
 @router.post("/problemset/{pset_id}")
 async def edit_problemset(

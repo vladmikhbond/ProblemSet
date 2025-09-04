@@ -1,6 +1,6 @@
 """ All models for PSS.db """
 from datetime import datetime
-from sqlalchemy import String, DateTime, Integer, Text
+from sqlalchemy import String, DateTime, Integer, Text, LargeBinary
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import DeclarativeBase
@@ -27,7 +27,7 @@ class User(Base):
     """
     __tablename__ = "users"
     username: Mapped[str] = mapped_column(primary_key=True)
-    password: Mapped[str] = mapped_column(String)
+    hashed_password: Mapped[bytes] = mapped_column(LargeBinary)
     role: Mapped[str] = mapped_column(String)
 
 # =============================================================
@@ -50,4 +50,6 @@ class Ticket(Base):
     last_change_time: Mapped[datetime] = mapped_column(DateTime)
     solving: Mapped[str] = mapped_column(Text)
     check_message: Mapped[str] = mapped_column(String)
+
+
 
