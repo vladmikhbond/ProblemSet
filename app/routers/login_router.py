@@ -20,6 +20,15 @@ router = APIRouter()
 # PSS_HOST = "http://178.151.21.169:7000"            # for internet
 PSS_HOST = "http://172.17.0.1:7000"           # for docker default net
 
+def payload_from_token(request: Request):
+    try:
+        token = request.session.get("token", "")
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])        
+    except InvalidTokenError as e:
+        raise credentials_exception
+    else:
+        return payload
+
 
 @router.get("/login", response_class=HTMLResponse)
 async def get_login(request: Request):
@@ -30,7 +39,7 @@ async def get_login(request: Request):
 async def login(
     request: Request,
     username: str = Form(...),
-    password: str = Form(...)
+    password: str = Form(...),
 ):
     url = f"{PSS_HOST}/token"
     data = {
@@ -53,8 +62,8 @@ async def login(
     request.session["token"] = token
 
     # redirect
-    role = payload_from_token(request)
-    if role == "tutor":
+    payload = payload_from_token(request)
+    if payload.get("role") == "tutor":
         return RedirectResponse(url="/problemsets", status_code=302)
     else:
         return RedirectResponse(url="/problems", status_code=302)
@@ -78,13 +87,4 @@ credentials_exception = HTTPException(
 
 # oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-
-def payload_from_token(request: Request) -> tuple[str, str]:
-    try:
-        token = request.session.get("token", "")
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])        
-    except InvalidTokenError as e:
-        return (str(e), str(e))
-    else:
-        return (payload.get("username"), payload.get("role")) 
 

@@ -29,10 +29,8 @@ async def get_problemsets(
     """ 
     Усі задачники поточного юзера (викладача).
     """
-    #TODO: define the current user
-
     # return the login page with error message
-    if payload[1] != "tutor":
+    if payload.get("role") != "tutor":
         return templates.TemplateResponse(
             "login.html", 
             {"request": request, "error": payload[1]})
@@ -43,8 +41,8 @@ async def get_problemsets(
         err_mes = "Error reading problemsets"
         logger.error(err_mes)
         raise HTTPException(status_code=404, detail=err_mes)
-
-    problemsets = [pset for pset in problemsets if pset.user_id == payload[2] ]     ####################
+    username = payload.get("sub")
+    problemsets = [pset for pset in problemsets if pset.user_id == username ]   
     return templates.TemplateResponse("problemset_list.html", {"request": request, "problemsets": problemsets})
  
 
@@ -54,6 +52,9 @@ async def edit_problemset_form(
     request: Request, 
     db: Session = Depends(get_db)
 ):
+    """ 
+    Редагування обраного задачника поточного юзера (викладача).
+    """
     problemset = db.get(ProblemSet, pset_id)
     if not problemset:
         return RedirectResponse(url="/problemsets", status_code=302)
@@ -70,6 +71,9 @@ async def edit_problemset(
     open_minutes: int = Form(...),
     db: Session = Depends(get_db)
 ):
+    """ 
+    Редагування обраного задачника поточного юзера (викладача).
+    """
     problemset = db.get(ProblemSet, pset_id)
     if not problemset:
         return RedirectResponse(url="/problemsets", status_code=302)
@@ -80,39 +84,3 @@ async def edit_problemset(
     problemset.open_minutes = open_minutes
     db.commit()
     return RedirectResponse(url="/problemsets", status_code=302)
-
-
-
-
-
-
-
-
-
-
-# @router.get("/problemset/{id}")
-# async def get_problemset(id: str, request: Request):
-#     """ 
-#     Редагування обраного задачника поточного юзера (викладача).
-#     """
-#     token = request.session.get("token", "")
-    
-#     # return the login page with error message
-#     if token == "":
-#         return templates.TemplateResponse(
-#             "login.html", 
-#             {"request": request, "error": "No token"})
-    
-#     problemset: ProblemSet = db.read_problemset(id)
-#     if problemset == None:
-#         err_mes = "Error reading problemset"
-#         logger.error(err_mes)
-#         raise HTTPException(status_code=404, detail=err_mes)
-
-
-#     return templates.TemplateResponse("problemset_edit.html", {"request": request, "problemset": problemset})
-
-# @router.post("/problemset/{id}")
-# async def post_problemset(problemset: ProblemSetSchema):
-#     pass
-

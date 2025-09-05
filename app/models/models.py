@@ -1,5 +1,5 @@
 """ All models for PSS.db """
-from datetime import datetime
+import datetime as dt
 from sqlalchemy import String, DateTime, Integer, Text, LargeBinary
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
@@ -38,8 +38,14 @@ class ProblemSet(Base):
     id: Mapped[str] = mapped_column(String, primary_key=True)
     user_id: Mapped[str] = mapped_column(String)
     problem_ids: Mapped[str] = mapped_column(Text)
-    open_time: Mapped[datetime] = mapped_column(DateTime)
+    open_time: Mapped[dt.datetime] = mapped_column(DateTime)
     open_minutes: Mapped[int] = mapped_column(Integer)
+
+    def is_open(this):
+        if this.open_time is None or this.open_minutes is None:
+            return False
+        limit: dt.datetime = this.open_time + dt.timedelta(minutes=this.open_minutes)
+        return limit > dt.datetime.now()
 
 
 class Ticket(Base):
@@ -47,7 +53,7 @@ class Ticket(Base):
 
     user_id: Mapped[str] = mapped_column(String, primary_key=True)
     problem_id: Mapped[str] = mapped_column(String, primary_key=True)    
-    last_change_time: Mapped[datetime] = mapped_column(DateTime)
+    last_change_time: Mapped[dt.datetime] = mapped_column(DateTime)
     solving: Mapped[str] = mapped_column(Text)
     check_message: Mapped[str] = mapped_column(String)
 

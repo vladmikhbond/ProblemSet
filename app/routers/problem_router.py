@@ -6,7 +6,10 @@ from fastapi import APIRouter, Depends, Request, Response, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from ..models.schemas import ProblemHeader, ProblemSchema, AnswerSchema
-from .login_router import PSS_HOST, logger
+from .login_router import PSS_HOST, logger, payload_from_token
+from sqlalchemy.orm import Session
+from ..dal import get_db  # Функція для отримання сесії БД
+from ..models.models import ProblemSet
 
 # шаблони Jinja2
 path = os.path.join(os.getcwd(), 'app', 'templates')
@@ -16,32 +19,37 @@ router = APIRouter()
 
 
 @router.get("/problems", summary="List of problem headers. Header is {id, title, attr}")
-async def get_probs(request: Request):
-    
-    api_url = f"{PSS_HOST}/api/problems/lang/py"
+async def get_probs(
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    problemsets: list[ProblemSet] = db.query(ProblemSet).all()
+    open_problemsets = [ps for ps in problemsets if ps.is_open()]
+
     token = request.session.get("token", "")
-    
-    # return the login page with error message
     if token == "":
-        return templates.TemplateResponse(
-            "login.html", 
-            {"request": request, "error": "No token"})
-    
-    headers = { "Authorization": f"Bearer {token}" }
-    try:
-        async with httpx.AsyncClient() as client:
-            response = await client.get(api_url, headers=headers)
-        json = response.json()
-    except Exception as e:
-        err_mes = f"Error during login request: {e}"
-        logger.error(err_mes)
+        # redirect to login page
         return templates.TemplateResponse("login.html", {
             "request": request, 
-            "error": err_mes
+            "error": "No token"
         })
-    else:
-        problem_headers = [ProblemHeader(id=x["id"], title=x["title"], attr=x["attr"]) for x in json]
-        return templates.TemplateResponse("problem_list.html", {"request": request, "headers": problem_headers})
+    
+    headers = { "Authorization": f"Bearer {token}" }
+
+    psets = []
+    for problemset in open_problemsets:
+        pheaders = []
+        for id in problemset.problem_ids.split():
+            api_url = f"{PSS_HOST}/api/problems/{id}"
+            async with httpx.AsyncClient() as client:
+                response = await client.get(api_url, headers=headers)
+            json = response.json()
+            problem_header = ProblemHeader(id=json["id"], title=json["title"], attr=json["attr"])
+
+            pheaders.append(problem_header)
+        psets.append({"id": problemset.id, "headers": pheaders })
+
+    return templates.TemplateResponse("problem_list.html", {"request": request, "psets": psets})
 
 
 @router.get("/problem/{id}", summary="Get a problem.")
