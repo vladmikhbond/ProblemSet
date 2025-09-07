@@ -13,6 +13,10 @@
 		"source=C:\\Git\\PY\\DBconverter,target=/data,type=bind"	
     ],
 
+	"runArgs": [
+		"--network",
+		"mynet"
+	],
    
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	// "features": {},

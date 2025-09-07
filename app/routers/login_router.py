@@ -18,7 +18,10 @@ templates = Jinja2Templates(directory=path)
 router = APIRouter()
 
 # PSS_HOST = "http://178.151.21.169:7000"            # for internet
-PSS_HOST = "http://172.17.0.1:7000"           # for docker default net
+# PSS_HOST = "http://172.17.0.1:7000"           # for docker default net
+PSS_HOST = "http://pss_cont:7000"
+    
+          
 
 def payload_from_token(request: Request):
     try:

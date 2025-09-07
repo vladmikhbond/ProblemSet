@@ -4,10 +4,10 @@ TODO
 отримання звітів
 
 
---- збірка і запуск продуктового контейнеру pss_cont
+--- збірка і запуск продуктового контейнеру pss_cont в мережі mynet
 cd c:\git\dock\psscont
 docker build -t pss_img .
-docker run -p 7000:7000 -v C:\Git\PY\DBconverter:/data   --name pss_cont  pss_img
+docker run --network mynet -p 7000:7000 -v C:\Git\PY\DBconverter:/data   --name pss_cont  pss_img
 
 
 ----

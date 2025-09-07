@@ -4,7 +4,7 @@ import logging
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
-from ..models.models import ProblemSet
+from ..models.pss_models import ProblemSet
 from ..models.schemas import ProblemSetSchema
 
 from .login_router import PSS_HOST, logger, payload_from_token
@@ -42,7 +42,7 @@ async def get_problemsets(
         logger.error(err_mes)
         raise HTTPException(status_code=404, detail=err_mes)
     username = payload.get("sub")
-    problemsets = [pset for pset in problemsets if pset.user_id == username ]   
+    # open_problemsets = [pset for pset in problemsets if pset.user_id == username ]   
     return templates.TemplateResponse("problemset_list.html", {"request": request, "problemsets": problemsets})
  
 

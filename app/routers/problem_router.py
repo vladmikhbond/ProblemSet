@@ -9,7 +9,7 @@ from ..models.schemas import ProblemHeader, ProblemSchema, AnswerSchema
 from .login_router import PSS_HOST, logger, payload_from_token
 from sqlalchemy.orm import Session
 from ..dal import get_db  # Функція для отримання сесії БД
-from ..models.models import ProblemSet
+from ..models.pss_models import ProblemSet
 
 # шаблони Jinja2
 path = os.path.join(os.getcwd(), 'app', 'templates')
@@ -46,11 +46,12 @@ async def get_problem_list(
             api_url = f"{PSS_HOST}/api/problems/{id}"
             async with httpx.AsyncClient() as client:
                 response = await client.get(api_url, headers=headers)
-            json = response.json()
-            problem_header = ProblemHeader(id=json["id"], title=json["title"], attr=json["attr"])
+            if response.is_success:
+                json = response.json()
+                problem_header = ProblemHeader(id=json["id"], title=json["title"], attr=json["attr"])
 
-            pheaders.append(problem_header)
-        psets.append({"id": problemset.id, "headers": pheaders })
+                pheaders.append(problem_header)
+                psets.append({"id": problemset.id, "headers": pheaders })
 
     return templates.TemplateResponse("problem_list.html", {"request": request, "psets": psets})
 
