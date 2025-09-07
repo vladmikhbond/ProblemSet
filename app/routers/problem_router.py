@@ -1,6 +1,7 @@
 import os
 import logging
 import httpx
+import datetime as dt
 
 from fastapi import APIRouter, Depends, Request, Response, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -49,9 +50,15 @@ async def get_problem_list(
             if response.is_success:
                 json = response.json()
                 problem_header = ProblemHeader(id=json["id"], title=json["title"], attr=json["attr"])
-
                 pheaders.append(problem_header)
-                psets.append({"id": problemset.id, "headers": pheaders })
+
+        delta = problemset.open_time - dt.datetime.now()
+        rest_minutes:int = delta.total_seconds() / 60 + problemset.open_minutes
+        psets.append({
+                "id": problemset.id,
+                "user_id": problemset.user_id,
+                "rest_minutes": rest_minutes, 
+                "headers": pheaders })
 
     return templates.TemplateResponse("problem_list.html", {"request": request, "psets": psets})
 
