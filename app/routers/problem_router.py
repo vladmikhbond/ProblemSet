@@ -19,10 +19,13 @@ router = APIRouter()
 
 
 @router.get("/problems", summary="List of problem headers. Header is {id, title, attr}")
-async def get_probs(
+async def get_problem_list(
     request: Request,
     db: Session = Depends(get_db),
 ):
+    """
+    Показує студенту сторінку з задачами, розподіленими по відкритим задачникам.
+    """
     problemsets: list[ProblemSet] = db.query(ProblemSet).all()
     open_problemsets = [ps for ps in problemsets if ps.is_open()]
 
@@ -53,7 +56,13 @@ async def get_probs(
 
 
 @router.get("/problem/{id}", summary="Get a problem.")
-async def get_probs(id: str, request: Request):
+async def get_problem(
+    id: str, 
+    request: Request
+):
+    """Відкриває студенту вікно длоя вирішення задачі.
+       Створює тікет, якщо такий ще не існує.
+    """
     api_url = f"{PSS_HOST}/api/problems/{id}"
     token = request.session.get("token", "")
     headers = { "Authorization": f"Bearer {token}" }
@@ -79,10 +88,11 @@ async def get_probs(id: str, request: Request):
             {"request": request, "problem": problem} )
 
 
-@router.post("/check", summary="Check the answer to the problem")
+@router.post("/check", summary="Check the answer of a problem")
 async def post_check(answer: AnswerSchema):
     """
-    Виймає рішення з відповіді, відправляє його на перевірку до PSS і повертає відповідь від PSS   
+    Виймає рішення з відповіді, відправляє його на перевірку до PSS і повертає відповідь від PSS 
+    Створює тіскет з чергвим вирішенням
     """
     api_url = f"{PSS_HOST}/api/check"
     data = { "id": answer.id, "solving": answer.solving }

@@ -41,7 +41,7 @@ class ProblemSet(Base):
     open_time: Mapped[dt.datetime] = mapped_column(DateTime)
     open_minutes: Mapped[int] = mapped_column(Integer)
 
-    def is_open(this):
+    def is_open(this) -> bool:
         if this.open_time is None or this.open_minutes is None:
             return False
         limit: dt.datetime = this.open_time + dt.timedelta(minutes=this.open_minutes)
