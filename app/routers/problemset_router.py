@@ -37,6 +37,7 @@ async def get_problemsets(
     
     
     problemsets: list[ProblemSet] = db.query(ProblemSet).all()
+    
     if problemsets == None:
         err_mes = "Error reading problemsets"
         logger.error(err_mes)

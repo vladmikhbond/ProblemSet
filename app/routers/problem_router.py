@@ -9,7 +9,7 @@ from fastapi.templating import Jinja2Templates
 from ..models.schemas import ProblemHeader, ProblemSchema, AnswerSchema
 from .login_router import PSS_HOST, logger, payload_from_token
 from sqlalchemy.orm import Session
-from ..dal import get_db  # Функція для отримання сесії БД
+from ..dal import get_db, writedown_to_ticket  # Функція для отримання сесії БД
 from ..models.pss_models import ProblemSet
 
 # шаблони Jinja2
@@ -63,24 +63,22 @@ async def get_problem_list(
     return templates.TemplateResponse("problem_list.html", {"request": request, "psets": psets})
 
 
-@router.get("/problem/{id}", summary="Get a problem.")
+@router.get("/problem/{prob_id}", summary="Get a problem.")
 async def get_problem(
-    id: str, 
+    prob_id: str, 
     request: Request
 ):
-    """Відкриває студенту вікно длоя вирішення задачі.
+    """Відкриває студенту вікно для вирішення задачі.
        Створює тікет, якщо такий ще не існує.
     """
-    api_url = f"{PSS_HOST}/api/problems/{id}"
+    api_url = f"{PSS_HOST}/api/problems/{prob_id}"
     token = request.session.get("token", "")
     headers = { "Authorization": f"Bearer {token}" }
 
-    if token == "":
-        # redirect to login page
-        return templates.TemplateResponse("login.html", {
-            "request": request, 
-            "error": "No token"
-        })
+    # redirect to login page
+    if token == "": 
+        return templates.TemplateResponse("login.html", {"request": request, "error": "No token"})
+    
     try:
         async with httpx.AsyncClient() as client:
             response = await client.get(api_url, headers=headers)
@@ -90,6 +88,11 @@ async def get_problem(
         logger.error(err_mes)
         return RedirectResponse(url="/problems", status_code=302)
     else:
+        # create a ticket
+        username = payload_from_token(request).get("sub");
+        writedown_to_ticket(username, prob_id)
+
+        # open a problem window
         problem = ProblemSchema(**json_obj) 
         return templates.TemplateResponse(
             "problem.html", 
@@ -97,7 +100,7 @@ async def get_problem(
 
 
 @router.post("/check", summary="Check the answer of a problem")
-async def post_check(answer: AnswerSchema):
+async def post_check(answer: AnswerSchema, request: Request):
     """
     Виймає рішення з відповіді, відправляє його на перевірку до PSS і повертає відповідь від PSS 
     Створює тіскет з чергвим вирішенням
@@ -115,4 +118,8 @@ async def post_check(answer: AnswerSchema):
         logger.error(err_mes)
         return err_mes
     else:
+        # append a ticket
+        username = payload_from_token(request).get("sub");
+        writedown_to_ticket(username, answer.id, answer.solving, json)
+        
         return json

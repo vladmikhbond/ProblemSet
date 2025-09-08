@@ -6,17 +6,17 @@
 
 <section class="section">
   <div class="container">
-    <h1 class="title has-text-centered">Задачники</h1>
+    <h1 class="title has-text-centered">Мої задачники</h1>
     
     {% if problemsets and problemsets|length %}
       <div class="box">
         <div class="list is-hoverable">
-          {% for problem in problemsets %}
-            <a class="list-item" href="/problemset/{{problem.id}}">
+          {% for problemset in problemsets %}
+            <a class="list-item" href="/problemset/{{problemset.id}}">
               <span class="icon has-text-info">
                 <i class="fas fa-book"></i>
               </span>
-              <span>{{ problem.id }}</span>
+              <span>{{ problemset.id }}</span>
               
             </a>
             <br/>
