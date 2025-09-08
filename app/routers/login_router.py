@@ -2,7 +2,7 @@ import os
 import logging
 import httpx
 
-from fastapi import APIRouter, Depends, Request, Response, Form
+from fastapi import APIRouter, Depends, Request, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
@@ -31,6 +31,15 @@ def payload_from_token(request: Request):
         raise credentials_exception
     else:
         return payload
+
+def username_from_session(request: Request):
+    try:
+        token = request.session.get("token", "")
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])        
+    except InvalidTokenError as e:
+        raise credentials_exception
+    else:
+        return payload.get("sub")
 
 
 @router.get("/login", response_class=HTMLResponse)

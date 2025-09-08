@@ -6,8 +6,8 @@ import datetime as dt
 from fastapi import APIRouter, Depends, Request, Response, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
-from ..models.schemas import ProblemHeader, ProblemSchema, AnswerSchema
-from .login_router import PSS_HOST, logger, payload_from_token
+from ..models.schemas import ProblemHeaderSchema, ProblemSchema, AnswerSchema
+from .login_router import PSS_HOST, logger, username_from_session
 from sqlalchemy.orm import Session
 from ..dal import get_db, writedown_to_ticket  # Функція для отримання сесії БД
 from ..models.pss_models import ProblemSet
@@ -49,7 +49,7 @@ async def get_problem_list(
                 response = await client.get(api_url, headers=headers)
             if response.is_success:
                 json = response.json()
-                problem_header = ProblemHeader(id=json["id"], title=json["title"], attr=json["attr"])
+                problem_header = ProblemHeaderSchema(id=json["id"], title=json["title"], attr=json["attr"])
                 pheaders.append(problem_header)
 
         delta = problemset.open_time - dt.datetime.now()
@@ -89,7 +89,7 @@ async def get_problem(
         return RedirectResponse(url="/problems", status_code=302)
     else:
         # create a ticket
-        username = payload_from_token(request).get("sub");
+        username = username_from_session(request);
         writedown_to_ticket(username, prob_id)
 
         # open a problem window
@@ -119,7 +119,7 @@ async def post_check(answer: AnswerSchema, request: Request):
         return err_mes
     else:
         # append a ticket
-        username = payload_from_token(request).get("sub");
+        username = username_from_session(request)
         writedown_to_ticket(username, answer.id, answer.solving, json)
         
         return json
