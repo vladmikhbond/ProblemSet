@@ -1,4 +1,4 @@
-import datetime as dt
+from datetime import datetime
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 from .models.pss_models import Ticket
@@ -24,7 +24,7 @@ def get_db():
 def writedown_to_ticket(username, problem_id, solving="", check_message=""):
     db: Session = SessionLocal()
     ticket = db.query(Ticket).filter(Ticket.username == username and Ticket.problem_id == problem_id).first()
-    now = dt.datetime.now() 
+    now = datetime.now() 
     if (ticket is None):
         # new ticket
         db.add(Ticket(username=username, problem_id=problem_id, when=now, 

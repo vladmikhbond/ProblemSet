@@ -1,5 +1,5 @@
 import os
-import datetime as dt
+from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -47,7 +47,7 @@ async def get_problemsets(
 
 def dat2str(d): return d.strftime("%Y-%m-%dT%H:%M")
 
-def str2dat(s): return dt.datetime.strptime(s, "%Y-%m-%dT%H:%M")
+def str2dat(s): return datetime.strptime(s, "%Y-%m-%dT%H:%M")
 
 
 @router.get("/problemset/{id}")
@@ -102,10 +102,11 @@ async def new_problemset_form(
         id = "",
         user_id = payload.get("sub"),                   
         problem_ids = "",                    
-        open_time = str2dat(dat2str(dt.datetime.now())),  # форматування now
+        open_time = str2dat(dat2str(datetime.now())),  # форматування now
         open_minutes = 0
     )
     return templates.TemplateResponse("problemset_new.html", {"request": request, "problemset": problemset})
+
 
 @router.post("/problemset")
 async def new_problemset(
@@ -136,3 +137,34 @@ async def new_problemset(
         return templates.TemplateResponse("problemset_new.html", {"request": request, "problemset": problemset})
     return RedirectResponse(url="/problemsets", status_code=302)
     
+
+# ------- del 
+
+@router.get("/problemset/del/{id}")
+async def problemset_del_form(
+    id: str, 
+    request: Request, 
+    db: Session = Depends(get_db)
+):
+    """ 
+    Видалення задачника - GET.
+    """
+    problemset = db.get(ProblemSet, id)
+    if not problemset:
+        return RedirectResponse(url="/problemsets", status_code=302)
+    return templates.TemplateResponse("problemset_del.html", {"request": request, "problemset": problemset})
+
+
+@router.post("/problemset/del/{id}")
+async def problemset_del(
+    id: str,
+    request: Request,
+    db: Session = Depends(get_db)
+):
+    """ 
+    Видалення задачника - POST.
+    """
+    problemset = db.get(ProblemSet, id)
+    db.delete(problemset)
+    db.commit()
+    return RedirectResponse(url="/problemsets", status_code=302)

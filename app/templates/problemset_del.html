@@ -1,0 +1,51 @@
+{% extends "layout.html" %}
+
+{% block title %}{% endblock %}
+
+{% block content %}
+<section class="section">
+  <div class="container">
+    <h1 class="title">Видалення {{ problemset.id }}</h1>
+    <form method="post" >
+      <!-- <div class="field">
+        <label class="label">ID</label>
+        <div class="control">
+          <input class="input" type="text" name="id" value="{{ problemset.id }}" readonly>
+        </div>
+      </div> -->
+      <div class="field">
+        <label class="label">User ID</label>
+        <div class="control">
+          <input class="input" type="text" name="user_id" value="{{ problemset.user_id }}" readonly>
+        </div>
+      </div>
+      <div class="field">
+        <label class="label">Problem IDs (через пробіли)</label>
+        <div class="control">
+          <input class="input" type="text" name="problem_ids" value="{{ problemset.problem_ids }}" readonly>
+        </div>
+      </div>
+      <div class="field">
+        <label class="label">Open Time</label>
+        <div class="control">
+          <input class="input" type="datetime-local" name="open_time" value="{{ problemset.open_time|replace(' ', 'T') }}" readonly>
+        </div>
+      </div>
+      <div class="field">
+        <label class="label">Open Minutes</label>
+        <div class="control">
+          <input class="input" type="number" name="open_minutes" value="{{ problemset.open_minutes }}" readonly>
+        </div>
+      </div>
+      <div class="field is-grouped mt-4">
+        <div class="control">
+          <button class="button is-primary" type="submit">Видалити</button>
+        </div>
+        <div class="control">
+          <a class="button is-light" href="/problemsets">Скасувати</a>
+        </div>
+      </div>
+    </form>
+  </div>
+</section>
+{% endblock %}

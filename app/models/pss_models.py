@@ -1,5 +1,5 @@
 """ All models for PSS.db """
-import datetime as dt
+from datetime import datetime, timedelta
 from sqlalchemy import ForeignKey, String, DateTime, Integer, Text, LargeBinary
 from sqlalchemy.orm import Mapped, mapped_column, relationship, DeclarativeBase
 
@@ -44,14 +44,14 @@ class ProblemSet(Base):
     id: Mapped[str] = mapped_column(String, primary_key=True)
     user_id: Mapped[str] = mapped_column(String)
     problem_ids: Mapped[str] = mapped_column(Text)
-    open_time: Mapped[dt.datetime] = mapped_column(DateTime)
+    open_time: Mapped[datetime] = mapped_column(DateTime)
     open_minutes: Mapped[int] = mapped_column(Integer)
 
     def is_open(this) -> bool:
         if this.open_time is None or this.open_minutes is None:
             return False
-        limit: dt.datetime = this.open_time + dt.timedelta(minutes=this.open_minutes)
-        return limit > dt.datetime.now()
+        limit: datetime = this.open_time + timedelta(minutes=this.open_minutes)
+        return limit > datetime.now()
 
 
 class Ticket(Base):
@@ -60,7 +60,7 @@ class Ticket(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     username: Mapped[str] = mapped_column(String, ForeignKey("users.username", ondelete="CASCADE"))
     problem_id: Mapped[str] = mapped_column(String, ForeignKey("problems.id", ondelete="CASCADE")) 
-    when: Mapped[dt.datetime] = mapped_column(DateTime)
+    when: Mapped[datetime] = mapped_column(DateTime)
     solving: Mapped[str] = mapped_column(Text)
     check_message: Mapped[str] = mapped_column(String)   
     # 
