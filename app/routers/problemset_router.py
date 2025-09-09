@@ -35,12 +35,13 @@ async def get_problemsets(
             "login.html", 
             {"request": request, "error": role})
         
-    problemsets: list[ProblemSet] = db.query(ProblemSet).all()   
-    if problemsets == None:
-        err_mes = "Error reading problemsets"
-        logger.error(err_mes)
-        raise HTTPException(status_code=404, detail=err_mes)
- 
+    problemsets: list[ProblemSet] = db.query(ProblemSet).all()
+    # if problemsets == None:
+    #     err_mes = "Error reading problemsets"
+    #     logger.error(err_mes)
+    #     raise HTTPException(status_code=404, detail=err_mes)
+    username = payload.get("sub")
+    problemsets = [p for p in problemsets if p.user_id == username ] 
     return templates.TemplateResponse("problemset_list.html", {"request": request, "problemsets": problemsets})
 
 # ------- edit 
