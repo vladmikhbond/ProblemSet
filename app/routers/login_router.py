@@ -58,13 +58,14 @@ async def login(
         "username": username,
         "password": password
     }
-    try:
-        async with httpx.AsyncClient() as client:
-            response = await client.post(url, data=data)
+   
+    async with httpx.AsyncClient() as client:
+        response = await client.post(url, data=data)
+    if response.is_success:
         json = response.json()
         token = json["access_token"]
-    except Exception as e:
-        logger.error(f"Error during login request: {e}")
+    else: 
+        logger.error(f"Error. Response status_code: {response.status_code}")
         return templates.TemplateResponse("login.html", {
             "request": request, 
             "error": "Invalid credentials"
