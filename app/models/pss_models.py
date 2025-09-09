@@ -45,7 +45,8 @@ class ProblemSet(Base):
     user_id: Mapped[str] = mapped_column(String)
     problem_ids: Mapped[str] = mapped_column(Text)
     open_time: Mapped[datetime] = mapped_column(DateTime)
-    open_minutes: Mapped[int] = mapped_column(Integer)
+    open_minutes: Mapped[int] = mapped_column(Integer, default=0)
+    stud_filter: Mapped[str] = mapped_column(String, default='')
 
     def is_open(this) -> bool:
         if this.open_time is None or this.open_minutes is None:

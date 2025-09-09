@@ -74,6 +74,7 @@ async def edit_problemset(
     problem_ids: str = Form(...),
     open_time: str = Form(...),
     open_minutes: int = Form(...),
+    stud_filter: str = Form(...),
     db: Session = Depends(get_db)
 ):
     """ 
@@ -86,6 +87,7 @@ async def edit_problemset(
     problemset.problem_ids = problem_ids
     problemset.open_time = str2dat(open_time)
     problemset.open_minutes = open_minutes
+    problemset.stud_filter = stud_filter
     db.commit()
     return RedirectResponse(url="/problemsets", status_code=302)
 
@@ -104,7 +106,8 @@ async def new_problemset_form(
         user_id = payload.get("sub"),                   
         problem_ids = "",                    
         open_time = str2dat(dat2str(datetime.now())),  # форматування now
-        open_minutes = 0
+        open_minutes = 0,
+        stud_filter = ""
     )
     return templates.TemplateResponse("problemset_new.html", {"request": request, "problemset": problemset})
 
@@ -117,6 +120,7 @@ async def new_problemset(
     problem_ids: str = Form(...),
     open_time: str = Form(...),
     open_minutes: int = Form(...),
+    stud_filter: str = Form(...),
     db: Session = Depends(get_db)
 ):
     """ 
@@ -128,6 +132,7 @@ async def new_problemset(
         problem_ids = problem_ids,                    
         open_time = str2dat(open_time),
         open_minutes = open_minutes,
+        stud_filter = stud_filter
     )
     try:
         db.add(problemset)                        
