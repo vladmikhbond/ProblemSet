@@ -40,30 +40,34 @@ async def get_problemsets(
         err_mes = "Error reading problemsets"
         logger.error(err_mes)
         raise HTTPException(status_code=404, detail=err_mes)
-
-    # open_problemsets = [pset for pset in problemsets if pset.user_id == username ]   
+ 
     return templates.TemplateResponse("problemset_list.html", {"request": request, "problemsets": problemsets})
 
 # ------- edit 
 
-@router.get("/problemset/{pset_id}")
+def dat2str(d): return d.strftime("%Y-%m-%dT%H:%M")
+
+def str2dat(s): return dt.datetime.strptime(s, "%Y-%m-%dT%H:%M")
+
+
+@router.get("/problemset/{id}")
 async def edit_problemset_form(
-    pset_id: str, 
+    id: str, 
     request: Request, 
     db: Session = Depends(get_db)
 ):
     """ 
     Редагування обраного задачника поточного юзера (викладача).
     """
-    problemset = db.get(ProblemSet, pset_id)
+    problemset = db.get(ProblemSet, id)
     if not problemset:
         return RedirectResponse(url="/problemsets", status_code=302)
     return templates.TemplateResponse("problemset_edit.html", {"request": request, "problemset": problemset})
 
 
-@router.post("/problemset/{pset_id}")
+@router.post("/problemset/{id}")
 async def edit_problemset(
-    pset_id: str,
+    id: str,
     request: Request,
     user_id: str = Form(...),
     problem_ids: str = Form(...),
@@ -74,13 +78,12 @@ async def edit_problemset(
     """ 
     Редагування обраного задачника поточного юзера (викладача).
     """
-    problemset = db.get(ProblemSet, pset_id)
+    problemset = db.get(ProblemSet, id)
     if not problemset:
         return RedirectResponse(url="/problemsets", status_code=302)
     problemset.user_id = user_id
     problemset.problem_ids = problem_ids
-    # open_time у форматі 'YYYY-MM-DDTHH:MM'
-    problemset.open_time = dt.strptime(open_time, "%Y-%m-%dT%H:%M")
+    problemset.open_time = str2dat(open_time)
     problemset.open_minutes = open_minutes
     db.commit()
     return RedirectResponse(url="/problemsets", status_code=302)
@@ -93,22 +96,21 @@ async def new_problemset_form(
     payload = Depends(payload_from_token), 
 ):
     """ 
-    Створення нового задачника поточного юзера (викладача).
+    Створення нового задачника поточного юзера (викладача). 
     """
     problemset = ProblemSet(
         id = "",
         user_id = payload.get("sub"),                   
         problem_ids = "",                    
-        open_time = dt.datetime.now(),
+        open_time = str2dat(dat2str(dt.datetime.now())),  # форматування now
         open_minutes = 0
     )
-
     return templates.TemplateResponse("problemset_new.html", {"request": request, "problemset": problemset})
 
 @router.post("/problemset")
 async def new_problemset(
-    pset_id: str,
     request: Request,
+    id: str = Form(...),
     user_id: str = Form(...),
     problem_ids: str = Form(...),
     open_time: str = Form(...),
@@ -119,11 +121,11 @@ async def new_problemset(
     Створення нового задачника поточного юзера (викладача).
     """
     problemset = ProblemSet(
-        pset_id = pset_id,
+        id = id,
         user_id = user_id,                   
         problem_ids = problem_ids,                    
-        open_time = dt.datetime.strptime(open_time, "%Y-%m-%dT%H:%M"),
-        open_minutes = open_minutes
+        open_time = str2dat(open_time),
+        open_minutes = open_minutes,
     )
     try:
         db.add(problemset)                        
