@@ -1,13 +1,13 @@
 import os
 import logging
 import httpx
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from fastapi import APIRouter, Depends, Request, Response, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from ..models.schemas import ProblemHeaderSchema, ProblemSchema, AnswerSchema
-from .login_router import PSS_HOST, logger, username_from_session
+from ..utils.utils import PSS_HOST, delta2str, username_from_session
 from sqlalchemy.orm import Session
 from ..dal import get_db, writedown_to_ticket  # Функція для отримання сесії БД
 from ..models.pss_models import ProblemSet
@@ -19,8 +19,8 @@ templates = Jinja2Templates(directory=path)
 router = APIRouter()
 
 
-@router.get("/problems", summary="List of problem headers. Header is {id, title, attr}")
-async def get_problem_list(
+@router.get("/open_problems", summary="List of problem headers. Header is {id, title, attr}")
+async def get_open_problems(
     request: Request,
     db: Session = Depends(get_db),
 ):
@@ -34,12 +34,11 @@ async def get_problem_list(
     if token == "":
         # redirect to login page
         return templates.TemplateResponse("login.html", {
-            "request": request, 
+            "request": request,
             "error": "No token"
         })
-    
-    headers = { "Authorization": f"Bearer {token}" }
 
+    headers = {"Authorization": f"Bearer {token}"}
     psets = []
     for problemset in open_problemsets:
         pheaders = []
@@ -47,25 +46,25 @@ async def get_problem_list(
             api_url = f"{PSS_HOST}/api/problems/{id}"
             async with httpx.AsyncClient() as client:
                 response = await client.get(api_url, headers=headers)
-            if response.is_success:
-                json = response.json()
-                problem_header = ProblemHeaderSchema(id=json["id"], title=json["title"], attr=json["attr"])
-                pheaders.append(problem_header)
+                if response.is_success:
+                    json = response.json()
+                    problem_header = ProblemHeaderSchema(
+                        id=json["id"], title=json["title"], attr=json["attr"])
+                    pheaders.append(problem_header)
 
-        delta = problemset.open_time - datetime.now()
-        rest_minutes:int = delta.total_seconds() / 60 + problemset.open_minutes
+        rest_time: timedelta = problemset.open_time - datetime.now() + timedelta(minutes=problemset.open_minutes)
         psets.append({
-                "id": problemset.id,
-                "user_id": problemset.user_id,
-                "rest_minutes": rest_minutes, 
-                "headers": pheaders })
+            "id": problemset.id,
+            "user_id": problemset.user_id,
+            "rest_time": delta2str(rest_time),
+            "headers": pheaders})
 
-    return templates.TemplateResponse("problem_list.html", {"request": request, "psets": psets})
+    return templates.TemplateResponse("open_problems.html", {"request": request, "psets": psets})
 
 
 @router.get("/problem/{prob_id}", summary="Get a problem.")
 async def get_problem(
-    prob_id: str, 
+    prob_id: str,
     request: Request
 ):
     """Відкриває студенту вікно для вирішення задачі.
@@ -73,30 +72,30 @@ async def get_problem(
     """
     api_url = f"{PSS_HOST}/api/problems/{prob_id}"
     token = request.session.get("token", "")
-    headers = { "Authorization": f"Bearer {token}" }
+    headers = {"Authorization": f"Bearer {token}"}
 
     # redirect to login page
-    if token == "": 
+    if token == "":
         return templates.TemplateResponse("login.html", {"request": request, "error": "No token"})
-    
+
     try:
         async with httpx.AsyncClient() as client:
             response = await client.get(api_url, headers=headers)
         json_obj = response.json()
     except Exception as e:
         err_mes = f"Error during a problem request: {e}"
-        logger.error(err_mes)
-        return RedirectResponse(url="/problems", status_code=302)
+        print(err_mes)
+        return RedirectResponse(url="/open_problems", status_code=302)
     else:
         # create a ticket
-        username = username_from_session(request);
+        username = username_from_session(request)
         writedown_to_ticket(username, prob_id)
 
         # open a problem window
-        problem = ProblemSchema(**json_obj) 
+        problem = ProblemSchema(**json_obj)
         return templates.TemplateResponse(
-            "problem.html", 
-            {"request": request, "problem": problem} )
+            "problem.html",
+            {"request": request, "problem": problem})
 
 
 @router.post("/check", summary="Check the answer of a problem")
@@ -106,7 +105,7 @@ async def post_check(answer: AnswerSchema, request: Request):
     Створює тіскет з чергвим вирішенням
     """
     api_url = f"{PSS_HOST}/api/check"
-    data = { "id": answer.id, "solving": answer.solving }
+    data = {"id": answer.id, "solving": answer.solving}
 
     try:
         async with httpx.AsyncClient() as client:
@@ -115,11 +114,11 @@ async def post_check(answer: AnswerSchema, request: Request):
         json = response.json()
     except Exception as e:
         err_mes = f"Error during a check solving: {e}"
-        logger.error(err_mes)
+        print(err_mes)
         return err_mes
     else:
         # append a ticket
         username = username_from_session(request)
         writedown_to_ticket(username, answer.id, answer.solving, json)
-        
+
         return json

@@ -11,7 +11,7 @@
     {% if psets and psets|length %}
       <div class="box">
         {% for pset in psets %}
-          <h2>{{pset.id }} <small>{{pset.rest_minutes }}</small> </h2> 
+          <h2>{{pset.id }} <small><small>(закриється через {{pset.rest_time }})</small></small> </h2> 
           <div class="list is-hoverable">
           {% for h in pset.headers %}
             <a class="list-item" href="/problem/{{h.id}}">

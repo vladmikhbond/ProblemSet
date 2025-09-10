@@ -1,17 +1,14 @@
 import os
 from datetime import datetime
-
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from ..models.pss_models import ProblemSet
-from ..models.schemas import ProblemSetSchema
-
-from .login_router import PSS_HOST, logger, payload_from_token
-
+from ..models.schemas import ProblemHeaderSchema, ProblemSetSchema
+from ..utils.utils import payload_from_token, get_poblem_headers,str2dat, dat2str
 from ..dal import get_db  # Функція для отримання сесії БД
 from sqlalchemy.orm import Session
-from typing import Annotated
+
 
 # шаблони Jinja2
 path = os.path.join(os.getcwd(), 'app', 'templates')
@@ -36,20 +33,14 @@ async def get_problemsets(
             {"request": request, "error": role})
         
     problemsets: list[ProblemSet] = db.query(ProblemSet).all()
-    # if problemsets == None:
-    #     err_mes = "Error reading problemsets"
-    #     logger.error(err_mes)
-    #     raise HTTPException(status_code=404, detail=err_mes)
+
     username = payload.get("sub")
     problemsets = [p for p in problemsets if p.user_id == username ] 
     return templates.TemplateResponse("problemset_list.html", {"request": request, "problemsets": problemsets})
 
+
+
 # ------- edit 
-
-def dat2str(d): return d.strftime("%Y-%m-%dT%H:%M")
-
-def str2dat(s): return datetime.strptime(s, "%Y-%m-%dT%H:%M")
-
 
 @router.get("/problemset/{id}")
 async def edit_problemset_form(
@@ -61,9 +52,12 @@ async def edit_problemset_form(
     Редагування обраного задачника поточного юзера (викладача).
     """
     problemset = db.get(ProblemSet, id)
+    problem_headers = await get_poblem_headers(request)
+
     if not problemset:
         return RedirectResponse(url="/problemsets", status_code=302)
-    return templates.TemplateResponse("problemset_edit.html", {"request": request, "problemset": problemset})
+    return templates.TemplateResponse("problemset_edit.html", 
+            {"request": request, "problemset": problemset, "problem_headers": problem_headers})
 
 
 @router.post("/problemset/{id}")
@@ -139,10 +133,10 @@ async def new_problemset(
         db.commit()
     except Exception as e:
         err_mes = f"Error during a problem request: {e}"
-        logger.error(err_mes)
+        print(err_mes)
         return templates.TemplateResponse("problemset_new.html", {"request": request, "problemset": problemset})
     return RedirectResponse(url="/problemsets", status_code=302)
-    
+
 
 # ------- del 
 
