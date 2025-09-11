@@ -38,7 +38,7 @@ async def get_problem_heads(
 
 
 
-@router.get("/open_problems", summary="List of problem headers. Header is {id, title, attr}")
+@router.get("/problems/me", summary="List of problem headers. Header is {id, title, attr}")
 async def get_open_problems(
     request: Request,
     db: Session = Depends(get_db),
