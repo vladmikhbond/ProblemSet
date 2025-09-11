@@ -25,7 +25,7 @@ async function fetch_problems(lang) {
 function paint() {
   for (let child of problem_headers.children) {
     if (ids.indexOf(child.id) > -1) {
-      child.style.fontWeight = "800";
+      child.style.fontWeight = "700";
     } else {
       child.style.fontWeight = "400";
     }

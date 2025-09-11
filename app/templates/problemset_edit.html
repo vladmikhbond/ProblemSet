@@ -56,8 +56,18 @@
       </div>
     </form>
     <!-- ---------------------- problem headers --------------------- -->
-     <div><input id="filter"/> <button id="filterButton">Засстосувати</button></div>
+    <hr/>
+    <div>
+      <input id="filter" type="text" list="suggestions" value="py"  placeholder="Введи js, py або cs"/> 
+      <datalist id="suggestions">
+        <option value="py">
+        <option value="js">
+        <option value="cs">
+      </datalist>
 
+
+      <button id="filterButton">Застосувати</button>
+    </div>
     <div id="problem_headers">
       <!-- тут заголовки задач  -->
     </div>
