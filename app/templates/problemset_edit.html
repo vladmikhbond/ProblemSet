@@ -23,7 +23,7 @@
         <label class="label">Problem IDs (через пробіли)</label>
         <div class="control">
           <!-- <input class="input" type="text" name="problem_ids" value="{{ problemset.problem_ids }}"> -->
-          <textarea class="input" name="problem_ids">{{ problemset.problem_ids }}</textarea>
+          <textarea class="input" id="problem_ids" name="problem_ids">{{ problemset.problem_ids }}</textarea>
         </div>
       </div>
       <div class="field">
@@ -56,11 +56,13 @@
       </div>
     </form>
     <!-- ---------------------- problem headers --------------------- -->
-    {% for p in problem_headers %}
-      <div>{{p.id}} {{p.title}}</div>
-    {% endfor %}
+     <div><input id="filter"/> <button id="filterButton">Засстосувати</button></div>
 
-
+    <div id="problem_headers">
+      <!-- тут заголовки задач  -->
+    </div>
+    
   </div>
 </section>
+<script src="/static/problemset_edit.js"></script>
 {% endblock %}

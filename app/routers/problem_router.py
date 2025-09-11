@@ -19,6 +19,25 @@ templates = Jinja2Templates(directory=path)
 router = APIRouter()
 
 
+@router.get("/problems/lang/{lang}", summary="List of problem headers. Header is {id, title, attr}")
+async def get_problem_heads(
+    request: Request,
+    lang:str,
+):
+    token = request.session.get("token", "")
+    headers = {"Authorization": f"Bearer {token}"}
+    api_url = f"{PSS_HOST}/api/problems/lang/{lang}"
+    async with httpx.AsyncClient() as client:
+        response = await client.get(api_url, headers=headers)
+        if response.is_success:
+            # {"id", "title", "attr"}
+            json = response.json()
+            return json
+        else: 
+            return {}     # TODO
+
+
+
 @router.get("/open_problems", summary="List of problem headers. Header is {id, title, attr}")
 async def get_open_problems(
     request: Request,
