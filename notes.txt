@@ -19,3 +19,5 @@ docker run --network mynet -p 7000:7000 -v C:\Git\PY\DBconverter:/data   --name 
 скоп образи 
 скоп базу даних
 запустити контейнери з заданими іменами з урахуванням підмонтування бази і мережі
+
+docker run --network mynet -p 8000:8000 -v C:\Git\PY\DBconverter:/data   --name problemset_cont  problemset_img

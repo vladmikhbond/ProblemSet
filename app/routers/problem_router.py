@@ -13,8 +13,7 @@ from ..dal import get_db, writedown_to_ticket  # Функція для отри�
 from ..models.pss_models import ProblemSet
 
 # шаблони Jinja2
-path = os.path.join(os.getcwd(), 'app', 'templates')
-templates = Jinja2Templates(directory=path)
+templates = Jinja2Templates(directory="app/templates")
 
 router = APIRouter()
 
@@ -30,7 +29,7 @@ async def get_problem_heads(
     async with httpx.AsyncClient() as client:
         response = await client.get(api_url, headers=headers)
         if response.is_success:
-            # {"id", "title", "attr"}
+            # [{"id", "title", "attr"}]
             json = response.json()
             return json
         else: 

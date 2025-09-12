@@ -11,8 +11,7 @@ from sqlalchemy.orm import Session
 
 
 # шаблони Jinja2
-path = os.path.join(os.getcwd(), 'app', 'templates')
-templates = Jinja2Templates(directory=path)
+templates = Jinja2Templates(directory="app/templates")
 
 router = APIRouter()
 

@@ -55,7 +55,6 @@ async def get_poblem_headers(request: Request):
         response = await client.get(api_url, headers=headers)
     if response.is_success:
         json = response.json()
-        print(json)
     return json
 
 def delta2str(delta: timedelta):

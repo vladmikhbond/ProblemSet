@@ -7,11 +7,8 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from ..utils.utils import PSS_HOST, payload_from_token
 
-
-
 # шаблони Jinja2
-path = os.path.join(os.getcwd(), 'app', 'templates')
-templates = Jinja2Templates(directory=path)
+templates = Jinja2Templates(directory="app/templates")
 
 router = APIRouter()
 
