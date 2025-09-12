@@ -1,8 +1,10 @@
-filterButton = document.getElementById("filterButton").addEventListener('click', () => {
-    fetch_problems(filter.value);
-})
+lang_js.addEventListener('click', f)
+lang_py.addEventListener('click', f)
+lang_cs.addEventListener('click', f)
 
-
+async function f(e) {
+  await fetch_problems(this.value);
+}
 
 let ids = problem_ids.innerHTML.trim().split(/\s+/);
 

@@ -22,8 +22,12 @@
       <div class="field">
         <label class="label">Problem IDs (через пробіли)</label>
         <div class="control">
-          <!-- <input class="input" type="text" name="problem_ids" value="{{ problemset.problem_ids }}"> -->
-          <textarea class="input" id="problem_ids" name="problem_ids">{{ problemset.problem_ids }}</textarea>
+          <textarea class="input" id="problem_ids" name="problem_ids" readonly>{{ problemset.problem_ids }}</textarea>
+        </div>
+        <div> 
+          <input type="radio" name="lang" id="lang_js" value="js"> JS &nbsp;&nbsp;&nbsp;
+          <input type="radio" name="lang" id="lang_py" value="py"> PY &nbsp;&nbsp;&nbsp;
+          <input type="radio" name="lang" id="lang_cs" value="cs"> CS 
         </div>
       </div>
       <div class="field">
@@ -56,23 +60,12 @@
       </div>
     </form>
     <!-- ---------------------- problem headers --------------------- -->
-    <hr/>
-    <div>
-      <input id="filter" type="text" list="suggestions" value="py"  placeholder="Введи js, py або cs"/> 
-      <datalist id="suggestions">
-        <option value="py">
-        <option value="js">
-        <option value="cs">
-      </datalist>
 
-
-      <button id="filterButton">Застосувати</button>
-    </div>
     <div id="problem_headers">
       <!-- тут заголовки задач  -->
     </div>
     
   </div>
 </section>
-<script src="/static/problemset_edit.js"></script>
+<script src="/static/problemset_edit.js" type="text/javascript" charset="utf-8"></script>
 {% endblock %}
