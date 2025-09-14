@@ -26,14 +26,16 @@ def writedown_to_ticket(username, problem_id, solving="", check_message=""):
     """
     Формат запису: "~0~ answer ~1~ check messsage ~2~ datetime ~3~"
     """
-    RECORD = "~0~{0}\n~1~{1}\n~2~{2:%Y-%m-%dT%H:%M:%S}\n~3~"
+    RECORD = "~0~{0}\n~1~{1}\n~2~{2:%Y-%m-%dT%H:%M:%S}\n~3~\n"
     db: Session = SessionLocal()
     ticket = db.query(Ticket).filter(Ticket.username == username and Ticket.problem_id == problem_id).first()
     now = datetime.now()
-    record = RECORD.format(solving, solving, now)
+    record = RECORD.format(solving, check_message, now)
     if (ticket is None):
-        # new ticket
-        db.add(Ticket(username=username, problem_id=problem_id, when=now, solving=record))
+        # new ticket 
+        # TODO: when & check_message are not needed
+        ticket = Ticket(username=username, problem_id=problem_id, solving=record, when=now, check_message="") 
+        db.add(ticket)
     else:
         # existing ticket
         ticket.solving += record

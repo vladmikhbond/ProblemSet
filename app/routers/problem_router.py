@@ -108,7 +108,7 @@ async def get_problem(
         logger(err_mes)
         return RedirectResponse(url="/open_problems", status_code=302)
     else:
-        # create a ticket
+        # create a new ticket
         username = username_from_session(request)
         writedown_to_ticket(username, prob_id)
 
@@ -132,7 +132,7 @@ async def post_check(answer: AnswerSchema, request: Request):
         async with httpx.AsyncClient() as client:
             response = await client.post(api_url, json=data)
         # state = response.status_code
-        json = response.json()
+        check_message = response.json()
     except Exception as e:
         err_mes = f"Error during a check solving: {e}"
         print(err_mes)
@@ -140,6 +140,6 @@ async def post_check(answer: AnswerSchema, request: Request):
     else:
         # append a ticket
         username = username_from_session(request)
-        writedown_to_ticket(username, answer.id, answer.solving, json)
+        writedown_to_ticket(username, answer.id, answer.solving, check_message)
 
-        return json
+        return check_message
