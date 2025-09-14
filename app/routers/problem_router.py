@@ -16,12 +16,14 @@ from ..models.pss_models import ProblemSet
 templates = Jinja2Templates(directory="app/templates")
 
 router = APIRouter()
+# логування
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
-
-@router.get("/problems/lang/{lang}", summary="List of problem headers. Header is {id, title, attr}")
-async def get_problem_heads(
+@router.get("/problems/lang/{lang}", summary="List of problem headers (id, title, attr). AJAX")
+async def get_problem_headers(
     request: Request,
-    lang:str,
+    lang: str,
 ):
     token = request.session.get("token", "")
     headers = {"Authorization": f"Bearer {token}"}
@@ -32,13 +34,12 @@ async def get_problem_heads(
             # [{"id", "title", "attr"}]
             json = response.json()
             return json
-        else: 
+        else:
             return {}     # TODO
 
 
-
-@router.get("/problems/me", summary="List of problem headers. Header is {id, title, attr}")
-async def get_open_problems(
+@router.get("/problems/me")
+async def get_problems_for_me(
     request: Request,
     db: Session = Depends(get_db),
 ):
@@ -70,7 +71,8 @@ async def get_open_problems(
                         id=json["id"], title=json["title"], attr=json["attr"])
                     pheaders.append(problem_header)
 
-        rest_time: timedelta = problemset.open_time - datetime.now() + timedelta(minutes=problemset.open_minutes)
+        rest_time: timedelta = problemset.open_time - \
+            datetime.now() + timedelta(minutes=problemset.open_minutes)
         psets.append({
             "id": problemset.id,
             "user_id": problemset.user_id,
@@ -80,13 +82,14 @@ async def get_open_problems(
     return templates.TemplateResponse("open_problems.html", {"request": request, "psets": psets})
 
 
-@router.get("/problem/{prob_id}", summary="Get a problem.")
+@router.get("/problem/{prob_id}")
 async def get_problem(
     prob_id: str,
     request: Request
 ):
-    """Відкриває студенту вікно для вирішення задачі.
-       Створює тікет, якщо такий ще не існує.
+    """
+    Відкриває студенту вікно для вирішення задачі.
+    Отримує тікет і зберігає його в сесії, якщо це вже не зроблене.
     """
     api_url = f"{PSS_HOST}/api/problems/{prob_id}"
     token = request.session.get("token", "")
@@ -102,7 +105,7 @@ async def get_problem(
         json_obj = response.json()
     except Exception as e:
         err_mes = f"Error during a problem request: {e}"
-        print(err_mes)
+        logger(err_mes)
         return RedirectResponse(url="/open_problems", status_code=302)
     else:
         # create a ticket
@@ -116,11 +119,11 @@ async def get_problem(
             {"request": request, "problem": problem})
 
 
-@router.post("/check", summary="Check the answer of a problem")
+@router.post("/check")
 async def post_check(answer: AnswerSchema, request: Request):
     """
-    Виймає рішення з відповіді, відправляє його на перевірку до PSS і повертає відповідь від PSS 
-    Створює тіскет з чергвим вирішенням
+    Відправляє рішення задачі на перевірку до PSS і повертає відповідь від PSS.
+    Додає в тіскет рішення і відповідь. 
     """
     api_url = f"{PSS_HOST}/api/check"
     data = {"id": answer.id, "solving": answer.solving}

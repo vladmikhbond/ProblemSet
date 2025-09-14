@@ -13,28 +13,28 @@ engine = create_engine(
 # Створюємо фабрику сесій
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# Dependency для FastAPI
+# Dependency для роутерів
 def get_db():
     db: Session = SessionLocal()
     try:
         yield db
     finally:
         db.close()
+        
 
 def writedown_to_ticket(username, problem_id, solving="", check_message=""):
+    """
+    Формат запису: "~0~ answer ~1~ check messsage ~2~ datetime ~3~"
+    """
+    RECORD = "~0~{0}\n~1~{1}\n~2~{2:%Y-%m-%dT%H:%M:%S}\n~3~"
     db: Session = SessionLocal()
     ticket = db.query(Ticket).filter(Ticket.username == username and Ticket.problem_id == problem_id).first()
-    now = datetime.now() 
+    now = datetime.now()
+    record = RECORD.format(solving, solving, now)
     if (ticket is None):
         # new ticket
-        db.add(Ticket(username=username, problem_id=problem_id, when=now, 
-                      solving=f"------{now}\n", 
-                      check_message=f"------{now}\n"))
+        db.add(Ticket(username=username, problem_id=problem_id, when=now, solving=record))
     else:
         # existing ticket
-        ticket.solving += f"------{now}\n{solving}\n"
-        ticket.check_message += f"------{now}\n{check_message}\n" 
-
+        ticket.solving += record
     db.commit()
-   
-
