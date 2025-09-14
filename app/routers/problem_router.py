@@ -158,9 +158,7 @@ async def get_problem_show(
     """
     ticket = db.get(Ticket, id)
     
-    return ticket
-    
 
-    # return templates.TemplateResponse("problemset_show.html", {"request": request, "problemset": problemset, "dict": dict})
+    return templates.TemplateResponse("problem_show.html", {"request": request, "ticket": ticket})
 
 
