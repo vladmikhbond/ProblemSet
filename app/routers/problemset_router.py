@@ -7,7 +7,7 @@ from ..models.pss_models import Problem, ProblemSet, Ticket
 from ..models.schemas import ProblemHeaderSchema, ProblemSetSchema
 from ..utils.utils import payload_from_token, get_poblem_headers,str2dat, dat2str
 from ..dal import get_db  # Функція для отримання сесії БД
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, noload
 
 
 # шаблони Jinja2
@@ -184,6 +184,7 @@ async def problemset_show(
     dict = {}
     for problem_id in problem_ids:
         problem = db.get(Problem, problem_id)
+        # problem = db.query(Problem).options(noload(Problem.tickets)).get(problem_id)
         dict[problem_id] = problem
 
     return templates.TemplateResponse("problemset_show.html", {"request": request, "problemset": problemset, "dict": dict})

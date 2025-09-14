@@ -9,11 +9,7 @@
     {% for problem in dict.values() %}
       <h3>{{problem.title}}</h3>
       {% for ticket in problem.tickets %}
-        <h5>{{ticket.username}}</h5>
-        <div style="white-space: pre">{{ticket.solving}}</div>
-        <hr/>
-        <div style="white-space: pre">{{check_message}}</div>
-
+        <div><a href="/problem/show/{{ticket.id}}">{{ticket.username}}</a></div>
       {% endfor %}
 
     {% endfor %}

@@ -10,7 +10,7 @@ from ..models.schemas import ProblemHeaderSchema, ProblemSchema, AnswerSchema
 from ..utils.utils import PSS_HOST, delta2str, username_from_session
 from sqlalchemy.orm import Session
 from ..dal import get_db, writedown_to_ticket  # Функція для отримання сесії БД
-from ..models.pss_models import ProblemSet
+from ..models.pss_models import ProblemSet, Ticket
 
 # шаблони Jinja2
 templates = Jinja2Templates(directory="app/templates")
@@ -143,3 +143,24 @@ async def post_check(answer: AnswerSchema, request: Request):
         writedown_to_ticket(username, answer.id, answer.solving, check_message)
 
         return check_message
+
+
+# ------- show problem
+
+@router.get("/problem/show/{id}")
+async def get_problem_show(
+    id: str, 
+    request: Request, 
+    db: Session = Depends(get_db)
+):
+    """ 
+    Показ вирішень з одного тікету - GET.
+    """
+    ticket = db.get(Ticket, id)
+    
+    return ticket
+    
+
+    # return templates.TemplateResponse("problemset_show.html", {"request": request, "problemset": problemset, "dict": dict})
+
+
