@@ -47,7 +47,7 @@ async def login(
     # redirect
     payload = payload_from_token(request)
     if payload.get("role") == "tutor":
-        return RedirectResponse(url="/problemsets", status_code=302)
+        return RedirectResponse(url="/problemset/list", status_code=302)
     else:
         return RedirectResponse(url="/problems/me", status_code=302)
 

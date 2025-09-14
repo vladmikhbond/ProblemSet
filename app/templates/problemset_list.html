@@ -7,7 +7,7 @@
 
     <h1>Мої задачники</h1>
     <div>
-      <a class="list-item" href="/problemset">Новий</a>
+      <a class="list-item" href="/problemset/new">Новий</a>
     </div>
     {% if problemsets and problemsets|length %}
     <table>
@@ -16,7 +16,8 @@
         <tr>
           <td>{{ problemset.id }}</td>
           <td>
-              <a href="/problemset/{{problemset.id}}">edit</a> | 
+              <a href="/problemset/show/{{problemset.id}}">show</a> | 
+              <a href="/problemset/edit/{{problemset.id}}">edit</a> | 
               <a href="/problemset/del/{{problemset.id}}">del</a>
           </td>
         </tr>

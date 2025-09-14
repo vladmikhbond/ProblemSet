@@ -3,7 +3,7 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
-from ..models.pss_models import ProblemSet
+from ..models.pss_models import Problem, ProblemSet, Ticket
 from ..models.schemas import ProblemHeaderSchema, ProblemSetSchema
 from ..utils.utils import payload_from_token, get_poblem_headers,str2dat, dat2str
 from ..dal import get_db  # Функція для отримання сесії БД
@@ -15,7 +15,7 @@ templates = Jinja2Templates(directory="app/templates")
 
 router = APIRouter()
 
-@router.get("/problemsets")
+@router.get("/problemset/list")
 async def get_problemsets(
     request: Request, 
     db: Session = Depends(get_db),
@@ -41,7 +41,7 @@ async def get_problemsets(
 
 # ------- edit 
 
-@router.get("/problemset/{id}")
+@router.get("/problemset/edit/{id}")
 async def edit_problemset_form(
     id: str, 
     request: Request, 
@@ -59,7 +59,7 @@ async def edit_problemset_form(
             {"request": request, "problemset": problemset, "problem_headers": problem_headers})
 
 
-@router.post("/problemset/{id}")
+@router.post("/problemset/edit/{id}")
 async def edit_problemset(
     id: str,
     request: Request,
@@ -86,7 +86,7 @@ async def edit_problemset(
 
 # ------- new 
 
-@router.get("/problemset")
+@router.get("/problemset/new")
 async def new_problemset_form(
     request: Request,
     payload = Depends(payload_from_token), 
@@ -105,7 +105,7 @@ async def new_problemset_form(
     return templates.TemplateResponse("problemset_new.html", {"request": request, "problemset": problemset})
 
 
-@router.post("/problemset")
+@router.post("/problemset/new")
 async def new_problemset(
     request: Request,
     id: str = Form(...),
@@ -167,3 +167,24 @@ async def problemset_del(
     db.delete(problemset)
     db.commit()
     return RedirectResponse(url="/problemsets", status_code=302)
+
+# ------- show 
+
+@router.get("/problemset/show/{id}")
+async def problemset_show(
+    id: str, 
+    request: Request, 
+    db: Session = Depends(get_db)
+):
+    """ 
+    Показ результатів - GET.
+    """
+    problemset = db.get(ProblemSet, id)
+    problem_ids = problemset.problem_ids.split()
+    dict = {}
+    for problem_id in problem_ids:
+        problem = db.get(Problem, problem_id)
+        dict[problem_id] = problem
+
+    return templates.TemplateResponse("problemset_show.html", {"request": request, "problemset": problemset, "dict": dict})
+
