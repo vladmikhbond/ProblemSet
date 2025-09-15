@@ -3,16 +3,27 @@
 {% block title %}{% endblock %}
 
 {% block content %}
+<style>
+.ok {
+    color: green;
+  }
+.wrong {
+    color: blue;
+  }
+
+</style>
 <section class="section">
   <div class="container">
-    <h1 class="title">Показ {{ problemset.id }}</h1>
+
+    <h1 class="title">{{ problemset.id }}</h1>
     {% for problem in dict.values() %}
       <h3>{{problem.title}}</h3>
       {% for ticket in problem.tickets %}
-        <div><a href="/problem/show/{{ticket.id}}">{{ticket.username}}</a></div>
+        {% set cls = "ok" if ticket.check_message.startswith('OK') else "wrong"  %} 
+        <div><a href="/problem/show/{{ticket.id}}" class = "{{cls}}">{{ticket.username}}</a></div>
       {% endfor %}
-
     {% endfor %}
+
   </div>
 </section>
 {% endblock %}

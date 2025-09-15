@@ -39,4 +39,7 @@ def writedown_to_ticket(username, problem_id, solving="", check_message=""):
     else:
         # existing ticket
         ticket.solving += record
+        # one time OK is always OK
+        if not ticket.check_message.startswith('OK'):
+            ticket.check_message = check_message
     db.commit()

@@ -1,5 +1,6 @@
 import os
 import logging
+import re
 import httpx
 from datetime import datetime, timedelta
 
@@ -156,9 +157,13 @@ async def get_problem_show(
     """ 
     Показ вирішень з одного тікету - GET.
     """
+    TEMPLATE = r"~0~(.*?)~1~(.*?)~2~(.*?)~3~"
     ticket = db.get(Ticket, id)
-    
+    matches = re.findall(TEMPLATE, ticket.solving, flags=re.S)
+    records = [{"when": m[2], "code":m[0].strip(), "check":m[1].strip()} for m in matches]
 
-    return templates.TemplateResponse("problem_show.html", {"request": request, "ticket": ticket})
+    return templates.TemplateResponse("problem_show.html", 
+            {"request": request, "ticket": ticket, "records": records})
 
 
+# gs
