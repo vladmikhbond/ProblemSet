@@ -39,8 +39,8 @@ async def get_problem_headers(
             return {}     # TODO
 
 
-@router.get("/problems/me")
-async def get_problems_for_me(
+@router.get("/problems/active")
+async def get_problems_active(
     request: Request,
     db: Session = Depends(get_db),
 ):
@@ -80,7 +80,7 @@ async def get_problems_for_me(
             "rest_time": delta2str(rest_time),
             "headers": pheaders})
 
-    return templates.TemplateResponse("open_problems.html", {"request": request, "psets": psets})
+    return templates.TemplateResponse("problems_active.html", {"request": request, "psets": psets})
 
 
 @router.get("/problem/{prob_id}")
