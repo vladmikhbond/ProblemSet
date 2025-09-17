@@ -31,10 +31,10 @@ async def get_problemsets(
             "login.html", 
             {"request": request, "error": role})
         
-    problemsets: list[ProblemSet] = db.query(ProblemSet).all()
+    all_problemsets: list[ProblemSet] = db.query(ProblemSet).all()
 
     username = payload.get("sub")
-    problemsets = [p for p in problemsets if p.user_id == username ] 
+    problemsets = [p for p in all_problemsets if p.username == username ] 
     return templates.TemplateResponse("problemset_list.html", {"request": request, "problemsets": problemsets})
 
 
@@ -63,7 +63,7 @@ async def edit_problemset_form(
 async def edit_problemset(
     id: str,
     request: Request,
-    user_id: str = Form(...),
+    username: str = Form(...),
     problem_ids: str = Form(...),
     open_time: str = Form(...),
     open_minutes: int = Form(...),
@@ -76,7 +76,7 @@ async def edit_problemset(
     problemset = db.get(ProblemSet, id)
     if not problemset:
         return RedirectResponse(url="/problemsets", status_code=302)
-    problemset.user_id = user_id
+    problemset.username = username
     problemset.problem_ids = problem_ids
     problemset.open_time = str2dat(open_time)
     problemset.open_minutes = open_minutes
@@ -96,7 +96,7 @@ async def new_problemset_form(
     """
     problemset = ProblemSet(
         id = "",
-        user_id = payload.get("sub"),                   
+        username = payload.get("sub"),                   
         problem_ids = "",                    
         open_time = str2dat(dat2str(datetime.now())),  # форматування now
         open_minutes = 0,
@@ -109,7 +109,7 @@ async def new_problemset_form(
 async def new_problemset(
     request: Request,
     id: str = Form(...),
-    user_id: str = Form(...),
+    username: str = Form(...),
     problem_ids: str = Form(...),
     open_time: str = Form(...),
     open_minutes: int = Form(...),
@@ -121,7 +121,7 @@ async def new_problemset(
     """
     problemset = ProblemSet(
         id = id,
-        user_id = user_id,                   
+        username = username,                   
         problem_ids = problem_ids,                    
         open_time = str2dat(open_time),
         open_minutes = open_minutes,
@@ -184,7 +184,6 @@ async def problemset_show(
     dict = {}
     for problem_id in problem_ids:
         problem = db.get(Problem, problem_id)
-        # problem = db.query(Problem).options(noload(Problem.tickets)).get(problem_id)
         dict[problem_id] = problem
 
     return templates.TemplateResponse("problemset_show.html", {"request": request, "problemset": problemset, "dict": dict})

@@ -35,7 +35,7 @@ class AnswerSchema(BaseModel):
 
 class ProblemSetSchema(BaseModel):
     id: str
-    user_id: str
+    username: str
     problem_ids: str
     open_time: datetime
     open_minutes: int

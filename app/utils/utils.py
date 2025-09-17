@@ -46,6 +46,14 @@ def dat2str(d): return d.strftime("%Y-%m-%dT%H:%M")
 
 def str2dat(s): return datetime.strptime(s, "%Y-%m-%dT%H:%M")
 
+def delta2str(delta: timedelta):
+    days = delta.days
+    hours = delta.seconds // 3600
+    minutes = (delta.seconds % 3600) // 60
+
+    # Форматуємо рядок
+    return f"{days}дн. {hours}год. {minutes:02}хв."
+
 
 async def get_poblem_headers(request: Request):
     token = request.session.get("token", "") 
@@ -57,10 +65,4 @@ async def get_poblem_headers(request: Request):
         json = response.json()
     return json
 
-def delta2str(delta: timedelta):
-    days = delta.days
-    hours = delta.seconds // 3600
-    minutes = (delta.seconds % 3600) // 60
 
-    # Форматуємо рядок
-    return f"{days}дн. {hours}год. {minutes:02}хв."

@@ -125,6 +125,7 @@ async def post_check(answer: AnswerSchema, request: Request):
     """
     Відправляє рішення задачі на перевірку до PSS і повертає відповідь від PSS.
     Додає в тіскет рішення і відповідь. 
+    AJAX
     """
     api_url = f"{PSS_HOST}/api/check"
     data = {"id": answer.id, "solving": answer.solving}
@@ -157,13 +158,10 @@ async def get_problem_show(
     """ 
     Показ вирішень з одного тікету - GET.
     """
-    TEMPLATE = r"~0~(.*?)~1~(.*?)~2~(.*?)~3~"
+    RE_TEMPLATE = r"~0~(.*?)~1~(.*?)~2~(.*?)~3~"
     ticket = db.get(Ticket, id)
-    matches = re.findall(TEMPLATE, ticket.solving, flags=re.S)
+    matches = re.findall(RE_TEMPLATE, ticket.records, flags=re.S)
     records = [{"when": m[2], "code":m[0].strip(), "check":m[1].strip()} for m in matches]
 
     return templates.TemplateResponse("problem_show.html", 
             {"request": request, "ticket": ticket, "records": records})
-
-
-# gs

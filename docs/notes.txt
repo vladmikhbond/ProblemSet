@@ -3,11 +3,15 @@ TODO
 https://ace.c9.io/
 
 
------------------------- запуск контейнеру pss з PowerShell 
-cd C:\Git\DOCK\PSScont    
-docker build -t pss-img .
-docker run -m 512m --restart unless-stopped -p 7000:7000 -v ${PWD}/data:/data pss-img
-----
+--- збірка і запуск продуктового контейнеру pss_cont
+
+cd c:\git\dock\psscont
+docker build -t pss_img .
+docker run --env-file .env --network mynet -p 7000:7000 -v C:\Git\PY\DBconverter:/data   --name pss_cont  pss_img
+---
+
+docker run -m 512m --restart unless-stopped ...
+---
 
 
 Користувачі - студенти, викладачі.
