@@ -1,6 +1,9 @@
 TODO  
 
 https://ace.c9.io/
+додати settings
+додати pytest
+docker_compose
 
 
 --- збірка і запуск продуктового контейнеру pss_cont

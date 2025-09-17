@@ -75,8 +75,8 @@ async def get_problems_active(
         rest_time: timedelta = problemset.open_time - \
             datetime.now() + timedelta(minutes=problemset.open_minutes)
         psets.append({
-            "id": problemset.id,
-            "user_id": problemset.user_id,
+            "id": problemset.title,
+            "username": problemset.username,
             "rest_time": delta2str(rest_time),
             "headers": pheaders})
 

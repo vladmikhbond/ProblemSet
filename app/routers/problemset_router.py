@@ -82,7 +82,7 @@ async def edit_problemset(
     problemset.open_minutes = open_minutes
     problemset.stud_filter = stud_filter
     db.commit()
-    return RedirectResponse(url="/problemsets", status_code=302)
+    return RedirectResponse(url="/problemset/list", status_code=302)
 
 # ------- new 
 
@@ -134,7 +134,7 @@ async def new_problemset(
         err_mes = f"Error during a problem request: {e}"
         print(err_mes)
         return templates.TemplateResponse("problemset_new.html", {"request": request, "problemset": problemset})
-    return RedirectResponse(url="/problemsets", status_code=302)
+    return RedirectResponse(url="/problemset/list", status_code=302)
 
 
 # ------- del 
@@ -150,7 +150,7 @@ async def problemset_del_form(
     """
     problemset = db.get(ProblemSet, id)
     if not problemset:
-        return RedirectResponse(url="/problemsets", status_code=302)
+        return RedirectResponse(url="/problemset/list", status_code=302)
     return templates.TemplateResponse("problemset_del.html", {"request": request, "problemset": problemset})
 
 
@@ -166,7 +166,7 @@ async def problemset_del(
     problemset = db.get(ProblemSet, id)
     db.delete(problemset)
     db.commit()
-    return RedirectResponse(url="/problemsets", status_code=302)
+    return RedirectResponse(url="/problemset/list", status_code=302)
 
 # ------- show 
 
