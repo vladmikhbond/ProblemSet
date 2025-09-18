@@ -1,8 +1,8 @@
  
-# Базовий образ з Python 3.12 + dev tools
-FROM mcr.microsoft.com/devcontainers/python:1-3.12-bullseye
+# Базовий образ з Python 3.12 
+FROM python:3.12-slim
 
-# Копіюємо requirements.txt у контейнер (опціонально — VS Code і сам це зробить)
+# Копіюємо requirements.txt у контейнер 
 COPY requirements.txt /tmp/requirements.txt
 COPY run.py /run.py
 COPY app /app
