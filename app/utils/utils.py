@@ -4,14 +4,13 @@ import jwt
 from jwt.exceptions import InvalidTokenError
 from datetime import datetime, timedelta
 import httpx
+from  ..config import settings
 
-# import logging
-# # логування
-# logging.basicConfig(level=logging.INFO)
-# logger = logging.getLogger(__name__)        
+SECRET_KEY = settings.SECRET_KEY
+ALGORITHM = settings.ALGORITHM
+PSS_HOST = settings.PSS_HOST
 
-SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
-ALGORITHM = "HS256"
+
 
 credentials_exception = HTTPException(
     status_code=status.HTTP_401_UNAUTHORIZED,
@@ -20,7 +19,7 @@ credentials_exception = HTTPException(
 
 
 # PSS_HOST = "http://178.151.21.169:7000"       # for internet
-PSS_HOST = "http://pss_cont:7000"               # for docker net "mynet"
+# PSS_HOST = "http://pss_cont:7000"               # for docker net "mynet"
     
 
 def payload_from_token(request: Request):
