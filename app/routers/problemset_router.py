@@ -95,7 +95,7 @@ async def new_problemset_form(
     Створення нового задачника поточного юзера (викладача). 
     """
     problemset = ProblemSet(
-        id = "",
+        title = "",
         username = payload.get("sub"),                   
         problem_ids = "",                    
         open_time = str2dat(dat2str(datetime.now())),  # форматування now
@@ -108,7 +108,7 @@ async def new_problemset_form(
 @router.post("/problemset/new")
 async def new_problemset(
     request: Request,
-    id: str = Form(...),
+    title: str = Form(...),
     username: str = Form(...),
     problem_ids: str = Form(...),
     open_time: str = Form(...),
@@ -120,7 +120,7 @@ async def new_problemset(
     Створення нового задачника поточного юзера (викладача).
     """
     problemset = ProblemSet(
-        id = id,
+        title = title,
         username = username,                   
         problem_ids = problem_ids,                    
         open_time = str2dat(open_time),

@@ -5,7 +5,7 @@
 {% block content %}
 <section class="section">
   <div class="container">
-    <h1 class="title">Видалення {{ problemset.id }}</h1>
+    <h1 class="title">Видалення {{ problemset.title }}</h1>
     <form method="post" >
       <!-- <div class="field">
         <label class="label">ID</label>
@@ -14,9 +14,9 @@
         </div>
       </div> -->
       <div class="field">
-        <label class="label">User ID</label>
+        <label class="label">Username</label>
         <div class="control">
-          <input class="input" type="text" name="user_id" value="{{ problemset.user_id }}" readonly>
+          <input class="input" type="text" name="username" value="{{ problemset.username }}" readonly>
         </div>
       </div>
       <div class="field">
@@ -49,7 +49,7 @@
           <button class="button is-primary" type="submit">Видалити</button>
         </div>
         <div class="control">
-          <a class="button is-light" href="/problemsets">Скасувати</a>
+          <a class="button is-light" href="/problemset/list">Скасувати</a>
         </div>
       </div>
     </form>
