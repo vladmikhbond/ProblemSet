@@ -54,14 +54,3 @@ def delta2str(delta: timedelta):
     return f"{days}дн. {hours}год. {minutes:02}хв."
 
 
-async def get_poblem_headers(request: Request):
-    token = request.session.get("token", "") 
-    headers = { "Authorization": f"Bearer {token}" }
-    api_url = f"{PSS_HOST}/api/problems/lang/py"
-    async with httpx.AsyncClient() as client:
-        response = await client.get(api_url, headers=headers)
-    if response.is_success:
-        json = response.json()
-    return json
-
-

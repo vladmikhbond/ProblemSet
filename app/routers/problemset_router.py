@@ -5,7 +5,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from ..models.pss_models import Problem, ProblemSet, Ticket
 from ..models.schemas import ProblemHeaderSchema, ProblemSetSchema
-from ..utils.utils import payload_from_token, get_poblem_headers,str2dat, dat2str
+from ..utils.utils import payload_from_token,str2dat, dat2str
 from ..dal import get_db  # Функція для отримання сесії БД
 from sqlalchemy.orm import Session, noload
 
@@ -51,7 +51,7 @@ async def edit_problemset_form(
     Редагування обраного задачника поточного юзера (викладача).
     """
     problemset = db.get(ProblemSet, id)
-    problem_headers = await get_poblem_headers(request)
+    problem_headers = []
 
     if not problemset:
         return RedirectResponse(url="/problemsets", status_code=302)
