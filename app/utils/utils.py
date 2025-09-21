@@ -3,7 +3,6 @@ from fastapi import HTTPException, status, Request
 import jwt
 from jwt.exceptions import InvalidTokenError
 from datetime import datetime, timedelta
-import httpx
 from  ..config import settings
 
 SECRET_KEY = settings.SECRET_KEY
@@ -11,16 +10,11 @@ ALGORITHM = settings.ALGORITHM
 PSS_HOST = settings.PSS_HOST
 
 
-
 credentials_exception = HTTPException(
     status_code=status.HTTP_401_UNAUTHORIZED,
     detail="Could not validate credentials",
     headers={"WWW-Authenticate": "Bearer"} )
 
-
-# PSS_HOST = "http://178.151.21.169:7000"       # for internet
-# PSS_HOST = "http://pss_cont:7000"               # for docker net "mynet"
-    
 
 def payload_from_token(request: Request):
     try:
