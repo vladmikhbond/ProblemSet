@@ -1,5 +1,4 @@
 import os
-import logging
 import re
 import httpx
 from datetime import datetime, timedelta
@@ -17,7 +16,9 @@ from ..models.pss_models import ProblemSet, Ticket
 templates = Jinja2Templates(directory="app/templates")
 
 router = APIRouter()
+
 # логування
+import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 

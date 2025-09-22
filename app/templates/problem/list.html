@@ -6,21 +6,21 @@
 <section class="section">
   <div class="container">
 
-    <div><a href="/problems/active">До вирішення задач</a></div>
-    <h1>Мої задачники</h1>
+    <!-- <div><a href="/problems/active">До вирішення задач</a></div> -->
+    <h1>Мої задачі</h1>
     <div>
-      <a class="list-item" href="/problemset/new">Новий</a>
+      <a class="list-item" href="/problem/new">Нова</a>
     </div>
-    {% if problemsets and problemsets|length %}
+    {% if problems and problems|length %}
     <table>
       <tbody>
-        {% for problemset in problemsets %}
+        {% for problem in problems %}
         <tr>
-          <td>{{ problemset.title }}</td>
+          <td>{{ problem.title }}</td>
           <td>
-              <a href="/problemset/show/{{problemset.title}}">show</a> | 
-              <a href="/problemset/edit/{{problemset.title}}">edit</a> | 
-              <a href="/problemset/del/{{problemset.title}}">del</a>
+              <a href="/problem/copy/{{problem.id}}">copy</a> | 
+              <a href="/problem/edit/{{problem.id}}">edit</a> | 
+              <a href="/problem/del/{{problem.id}}">del</a>
           </td>
         </tr>
         {% endfor %}
@@ -28,7 +28,7 @@
     </table>
     {% else %}
       <div>
-        Задачників немає.
+        Задач немає.
       </div>
     {% endif %}
     

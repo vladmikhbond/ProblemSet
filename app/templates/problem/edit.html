@@ -5,45 +5,27 @@
 {% block content %}
 <section class="section">
   <div class="container">
-    <h1 class="title">Редагування "{{ problemset.title }}"</h1>
+    <h1 class="title">Редагування "{{ problem.title }}"</h1>
     <form method="post" >
-      
-      <div class="field">
-        <label class="label">Username</label>
-        <div class="control">
-          <input class="input" type="text" name="username" value="{{ problemset.username }}">
-        </div>
-      </div>
-      <div class="field">
-        <label class="label">Problem IDs (через пробіли)</label>
-        <div class="control">
-          <textarea class="input" id="problem_ids" name="problem_ids" readonly>{{ problemset.problem_ids }}</textarea>
-        </div>
-        <div> 
-          <input type="radio" name="lang" id="lang_js" value="js"> JS &nbsp;&nbsp;&nbsp;
-          <input type="radio" name="lang" id="lang_py" value="py"> PY &nbsp;&nbsp;&nbsp;
-          <input type="radio" name="lang" id="lang_cs" value="cs"> CS 
-        </div>
-      </div>
-      <div class="field">
-        <label class="label">Open Time</label>
-        <div class="control">
-          <input class="input" type="datetime-local" name="open_time" value="{{ problemset.open_time|replace(' ', 'T') }}">
-        </div>
-      </div>
-      <div class="field">
-        <label class="label">Open Minutes</label>
-        <div class="control">
-          <input class="input" type="number" name="open_minutes" value="{{ problemset.open_minutes }}">
-        </div>
-      </div>
 
+      {% for k in ['title','attr','lang','author'] %}
       <div class="field">
-        <label class="label">Filter</label>
+        <label class="label">{{k}}</label>
         <div class="control">
-          <input class="input" type="text" name="stud_filter" value="{{ problemset.stud_filter }}">
+          <input class="input" type="text" name="{{k}}" value="{{ problem[k] }}">
         </div>
       </div>
+      {% endfor %}
+      {% for k in ['cond','view','hint','code'] %}
+      <div class="field">
+        <label class="label">{{k}}</label>
+        <div class="control">
+          <textarea class="control" style="width: 100%; height: 100px;"  name="{{k}}"
+              >{{ problem[k] }}</textarea>
+        </div>
+      </div>
+      {% endfor %}
+
       
       <div class="field is-grouped mt-4">
         <div class="control">
@@ -54,13 +36,8 @@
         </div>
       </div>
     </form>
-    <!-- ---------------------- problem headers --------------------- -->
 
-    <div id="problem_headers">
-      <!-- тут заголовки задач  -->
-    </div>
     
   </div>
 </section>
-<script src="/static/problemset_edit.js" type="text/javascript" charset="utf-8"></script>
 {% endblock %}

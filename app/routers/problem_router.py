@@ -1,5 +1,6 @@
 import os
 from datetime import datetime
+import uuid
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
@@ -14,6 +15,12 @@ from sqlalchemy.orm import Session, noload
 templates = Jinja2Templates(directory="app/templates")
 
 router = APIRouter()
+
+# логування
+import logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 
 @router.get("/problem/list")
 async def get_problem_list(
@@ -32,31 +39,26 @@ async def get_problem_list(
             {"request": request, "error": role})
     
     username = payload.get("sub")
-    problems: list[Problem] = db.query(Problem).filter(Problem.author == username)
-    return problems
+    problems: list[Problem] = db.query(Problem).filter(Problem.author == username).all()
 
-    # return templates.TemplateResponse("problemset/problemset_list.html", {"request": request, "problemsets": problemsets})
-
-
+    return templates.TemplateResponse("problem/list.html", {"request": request, "problems": problems})
 
 # ------- edit 
 
-# @router.get("/problemset/edit/{id}")
-# async def edit_problemset_form(
-#     id: str, 
-#     request: Request, 
-#     db: Session = Depends(get_db)
-# ):
-#     """ 
-#     Редагування обраного задачника поточного юзера (викладача).
-#     """
-#     problemset = db.get(ProblemSet, id)
-#     problem_headers = []
-
-#     if not problemset:
-#         return RedirectResponse(url="/problemset/list", status_code=302)
-#     return templates.TemplateResponse("problemset/problemset_edit.html", 
-#             {"request": request, "problemset": problemset, "problem_headers": problem_headers})
+@router.get("/problem/edit/{id}")
+async def get_problem_edit(
+    id: str, 
+    request: Request, 
+    db: Session = Depends(get_db)
+):
+    """ 
+    Редагування задачі.
+    """
+    problem = db.get(Problem, id)
+    if not problem:
+        return RedirectResponse(url="/problem/list", status_code=302)
+    return templates.TemplateResponse("problem/edit.html", 
+            {"request": request, "problem": problem})
 
 
 # @router.post("/problemset/edit/{id}")
@@ -83,6 +85,46 @@ async def get_problem_list(
 #     problemset.stud_filter = stud_filter
 #     db.commit()
 #     return RedirectResponse(url="/problemset/list", status_code=302)
+
+
+
+# # ------- copy 
+
+# @router.get("/problem/copy/{id}")
+# async def get_problem_copy(
+#     id: str, 
+#     request: Request, 
+#     db: Session = Depends(get_db)
+# ):
+#     """ 
+#     Копіювання задачі.
+#     """
+#     old_problem = db.get(Problem, id)
+#     if not old_problem:
+#         return RedirectResponse(url="/problem/list", status_code=302)
+    
+#     new_problem = copy_instance(old_problem)
+#     new_problem.id = str(uuid())
+#     new_problem.title += " - Copy"
+#     db.add(new_problem)                              
+#     db.commit()
+
+#     return templates.TemplateResponse("problem/problem_edit.html", 
+#             {"request": request, "problem": new_problem})
+
+
+# from sqlalchemy.orm import make_transient
+
+# def copy_instance(obj):
+#     cls = obj.__class__
+#     new_obj = cls(**{
+#         key: value for key, value in obj.__dict__.items()
+#         if not key.startswith('_') and key != 'id'  # Пропускаємо SQLAlchemy службові поля і PK
+#     })
+#     return new_obj
+
+
+
 
 # # ------- new 
 
