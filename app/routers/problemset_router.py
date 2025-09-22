@@ -35,7 +35,7 @@ async def get_problemsets(
 
     username = payload.get("sub")
     problemsets = [p for p in all_problemsets if p.username == username ] 
-    return templates.TemplateResponse("problemset_list.html", {"request": request, "problemsets": problemsets})
+    return templates.TemplateResponse("problemset/problemset_list.html", {"request": request, "problemsets": problemsets})
 
 
 
@@ -54,8 +54,8 @@ async def edit_problemset_form(
     problem_headers = []
 
     if not problemset:
-        return RedirectResponse(url="/problemsets", status_code=302)
-    return templates.TemplateResponse("problemset_edit.html", 
+        return RedirectResponse(url="/problemset/list", status_code=302)
+    return templates.TemplateResponse("problemset/problemset_edit.html", 
             {"request": request, "problemset": problemset, "problem_headers": problem_headers})
 
 
@@ -102,7 +102,7 @@ async def new_problemset_form(
         open_minutes = 0,
         stud_filter = ""
     )
-    return templates.TemplateResponse("problemset_new.html", {"request": request, "problemset": problemset})
+    return templates.TemplateResponse("problemset/problemset_new.html", {"request": request, "problemset": problemset})
 
 
 @router.post("/problemset/new")
@@ -133,7 +133,7 @@ async def new_problemset(
     except Exception as e:
         err_mes = f"Error during a problem request: {e}"
         print(err_mes)
-        return templates.TemplateResponse("problemset_new.html", {"request": request, "problemset": problemset})
+        return templates.TemplateResponse("problemset/problemset_new.html", {"request": request, "problemset": problemset})
     return RedirectResponse(url="/problemset/list", status_code=302)
 
 
@@ -151,7 +151,7 @@ async def problemset_del_form(
     problemset = db.get(ProblemSet, id)
     if not problemset:
         return RedirectResponse(url="/problemset/list", status_code=302)
-    return templates.TemplateResponse("problemset_del.html", {"request": request, "problemset": problemset})
+    return templates.TemplateResponse("problemset/problemset_del.html", {"request": request, "problemset": problemset})
 
 
 @router.post("/problemset/del/{id}")
@@ -186,5 +186,5 @@ async def problemset_show(
         problem = db.get(Problem, problem_id)
         dict[problem_id] = problem
 
-    return templates.TemplateResponse("problemset_show.html", {"request": request, "problemset": problemset, "dict": dict})
+    return templates.TemplateResponse("problemset/problemset_show.html", {"request": request, "problemset": problemset, "dict": dict})
 

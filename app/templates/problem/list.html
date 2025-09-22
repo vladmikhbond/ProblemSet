@@ -1,0 +1,37 @@
+{% extends "layout.html" %}
+
+{% block title %}{% endblock %}
+
+{% block content %}
+<section class="section">
+  <div class="container">
+
+    <div><a href="/problems/active">До вирішення задач</a></div>
+    <h1>Мої задачники</h1>
+    <div>
+      <a class="list-item" href="/problemset/new">Новий</a>
+    </div>
+    {% if problemsets and problemsets|length %}
+    <table>
+      <tbody>
+        {% for problemset in problemsets %}
+        <tr>
+          <td>{{ problemset.title }}</td>
+          <td>
+              <a href="/problemset/show/{{problemset.title}}">show</a> | 
+              <a href="/problemset/edit/{{problemset.title}}">edit</a> | 
+              <a href="/problemset/del/{{problemset.title}}">del</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+      <div>
+        Задачників немає.
+      </div>
+    {% endif %}
+    
+  </div>
+</section>
+{% endblock %}
