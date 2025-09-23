@@ -1,12 +1,11 @@
-import os
+import httpx, os, uuid
 from datetime import datetime
-import uuid
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from ..models.pss_models import Problem, ProblemSet, Ticket
 from ..models.schemas import ProblemHeaderSchema, ProblemSetSchema
-from ..utils.utils import payload_from_token,str2dat, dat2str
+from ..utils.utils import payload_from_token,str2dat, dat2str, PSS_HOST
 from ..dal import get_db  # Функція для отримання сесії БД
 from sqlalchemy.orm import Session, noload
 
@@ -57,34 +56,54 @@ async def get_problem_edit(
     problem = db.get(Problem, id)
     if not problem:
         return RedirectResponse(url="/problem/list", status_code=302)
-    return templates.TemplateResponse("problem/edit.html", 
-            {"request": request, "problem": problem})
+    return templates.TemplateResponse("problem/edit.html", {"request": request, "problem": problem})
 
 
-# @router.post("/problemset/edit/{id}")
-# async def edit_problemset(
-#     id: str,
-#     request: Request,
-#     username: str = Form(...),
-#     problem_ids: str = Form(...),
-#     open_time: str = Form(...),
-#     open_minutes: int = Form(...),
-#     stud_filter: str = Form(...),
-#     db: Session = Depends(get_db)
-# ):
-#     """ 
-#     Редагування обраного задачника поточного юзера (викладача).
-#     """
-#     problemset = db.get(ProblemSet, id)
-#     if not problemset:
-#         return RedirectResponse(url="/problemsets", status_code=302)
-#     problemset.username = username
-#     problemset.problem_ids = problem_ids
-#     problemset.open_time = str2dat(open_time)
-#     problemset.open_minutes = open_minutes
-#     problemset.stud_filter = stud_filter
-#     db.commit()
-#     return RedirectResponse(url="/problemset/list", status_code=302)
+@router.post("/problem/edit/{id}")
+async def post_problem_edit(
+    id: str,
+    request: Request,
+    title: str = Form(...),
+    attr: str = Form(...),
+    lang: str = Form(...),
+    cond: str = Form(...),
+    view: str = Form(...),
+    hint: str = Form(...),
+    code: str = Form(...),
+    author: str = Form(...),
+    db: Session = Depends(get_db),
+):
+    """ 
+     Редагування задачі.
+     Оновити екземпляр задачі даними з форми. Перевірити код.
+    """
+    problem = db.get(Problem, id)
+    if not problem:
+        return RedirectResponse(url="/problem/list", status_code=302)
+    problem.title = title
+    problem.attr = attr
+    problem.lang = lang
+    problem.cond = cond
+    problem.view = view
+    problem.hint = hint
+    problem.code = code
+    problem.author = author    
+    problem.timestamp = datetime.now()
+
+    api_url = f"{PSS_HOST}/api/proof"
+    data = {"source": problem.code, "lang": problem.lang}
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(api_url, json=data)
+        check_message = response.json()
+        if not check_message.startswith("OK"):
+            return templates.TemplateResponse("problem/edit.html", {"request": request, "problem": problem, "error": check_message})
+    except Exception as e:
+        err_mes = f"Error during a check solving: {e}"
+        logger.error(err_mes)
+        return templates.TemplateResponse("problem/edit.html", {"request": request, "problem": problem, "error": err_mes})
+    db.commit()
+    return RedirectResponse(url="/problem/list", status_code=302)
 
 
 

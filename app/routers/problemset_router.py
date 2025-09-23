@@ -75,7 +75,7 @@ async def edit_problemset(
     """
     problemset = db.get(ProblemSet, id)
     if not problemset:
-        return RedirectResponse(url="/problemsets", status_code=302)
+        return RedirectResponse(url="/problemset/list", status_code=302)
     problemset.username = username
     problemset.problem_ids = problem_ids
     problemset.open_time = str2dat(open_time)
