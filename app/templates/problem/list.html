@@ -16,6 +16,7 @@
       <tbody>
         {% for problem in problems %}
         <tr>
+          <td>{{ problem.attr }}</td>
           <td>{{ problem.title }}</td>
           <td>
               <a href="/problem/copy/{{problem.id}}">copy</a> | 

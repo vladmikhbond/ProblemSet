@@ -38,7 +38,9 @@ async def get_problem_list(
             {"request": request, "error": role})
     
     username = payload.get("sub")
-    problems: list[Problem] = db.query(Problem).filter(Problem.author == username).all()
+    problems: list[Problem] = sorted(
+        db.query(Problem).filter(Problem.author == username).all(), 
+        key=lambda p: p.attr)
 
     return templates.TemplateResponse("problem/list.html", {"request": request, "problems": problems})
 
