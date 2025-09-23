@@ -1,7 +1,7 @@
 import httpx, os, uuid
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, Form
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, PlainTextResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from ..models.pss_models import Problem, ProblemSet, Ticket
 from ..models.schemas import ProblemHeaderSchema, ProblemSetSchema
@@ -109,127 +109,73 @@ async def post_problem_edit(
 
 
 
-# # ------- copy 
+# ------- copy 
 
-# @router.get("/problem/copy/{id}")
-# async def get_problem_copy(
-#     id: str, 
-#     request: Request, 
-#     db: Session = Depends(get_db)
-# ):
-#     """ 
-#     Копіювання задачі.
-#     """
-#     old_problem = db.get(Problem, id)
-#     if not old_problem:
-#         return RedirectResponse(url="/problem/list", status_code=302)
-    
-#     new_problem = copy_instance(old_problem)
-#     new_problem.id = str(uuid())
-#     new_problem.title += " - Copy"
-#     db.add(new_problem)                              
-#     db.commit()
+@router.get("/problem/copy/{id}")
+async def get_problem_copy(
+    id: str, 
+    request: Request, 
+    db: Session = Depends(get_db)
+):
+    """ 
+    Копіювання задачі.
+    """
+    old_problem = db.get(Problem, id)
+    if not old_problem:
+        return PlainTextResponse("Не знайдений оригінал задачі.")
+        
+    new_problem = copy_instance(old_problem)
+    new_problem.id = str(uuid.uuid4()) 
+    new_problem.title += " - Copy"
+    db.add(new_problem)                              
+    db.commit()
 
-#     return templates.TemplateResponse("problem/problem_edit.html", 
-#             {"request": request, "problem": new_problem})
-
-
-# from sqlalchemy.orm import make_transient
-
-# def copy_instance(obj):
-#     cls = obj.__class__
-#     new_obj = cls(**{
-#         key: value for key, value in obj.__dict__.items()
-#         if not key.startswith('_') and key != 'id'  # Пропускаємо SQLAlchemy службові поля і PK
-#     })
-#     return new_obj
+    return templates.TemplateResponse("problem/edit.html", 
+            {"request": request, "problem": new_problem})
 
 
+from sqlalchemy.orm import make_transient
+
+def copy_instance(obj):
+    cls = obj.__class__
+    new_obj = cls(**{
+        key: value for key, value in obj.__dict__.items()
+        if not key.startswith('_') and key != 'id'  # Пропускаємо SQLAlchemy службові поля і PK
+    })
+    return new_obj
 
 
-# # ------- new 
+# ------- del 
 
-# @router.get("/problemset/new")
-# async def new_problemset_form(
-#     request: Request,
-#     payload = Depends(payload_from_token), 
-# ):
-#     """ 
-#     Створення нового задачника поточного юзера (викладача). 
-#     """
-#     problemset = ProblemSet(
-#         title = "",
-#         username = payload.get("sub"),                   
-#         problem_ids = "",                    
-#         open_time = str2dat(dat2str(datetime.now())),  # форматування now
-#         open_minutes = 0,
-#         stud_filter = ""
-#     )
-#     return templates.TemplateResponse("problemset/problemset_new.html", {"request": request, "problemset": problemset})
+@router.get("/problem/del/{id}")
+async def get_problem_del(
+    id: str, 
+    request: Request, 
+    db: Session = Depends(get_db)
+):
+    """ 
+    Видалення задачі.
+    """
+    problem = db.get(Problem, id)
+    if not problem:
+        return RedirectResponse(url="/problemset/list", status_code=302)
+    return templates.TemplateResponse("problem/del.html", {"request": request, "problem": problem})
 
 
-# @router.post("/problemset/new")
-# async def new_problemset(
-#     request: Request,
-#     title: str = Form(...),
-#     username: str = Form(...),
-#     problem_ids: str = Form(...),
-#     open_time: str = Form(...),
-#     open_minutes: int = Form(...),
-#     stud_filter: str = Form(...),
-#     db: Session = Depends(get_db)
-# ):
-#     """ 
-#     Створення нового задачника поточного юзера (викладача).
-#     """
-#     problemset = ProblemSet(
-#         title = title,
-#         username = username,                   
-#         problem_ids = problem_ids,                    
-#         open_time = str2dat(open_time),
-#         open_minutes = open_minutes,
-#         stud_filter = stud_filter
-#     )
-#     try:
-#         db.add(problemset)                        
-#         db.commit()
-#     except Exception as e:
-#         err_mes = f"Error during a problem request: {e}"
-#         print(err_mes)
-#         return templates.TemplateResponse("problemset/problemset_new.html", {"request": request, "problemset": problemset})
-#     return RedirectResponse(url="/problemset/list", status_code=302)
+@router.post("/problem/del/{id}")
+async def post_problem_del(
+    id: str,
+    request: Request,
+    db: Session = Depends(get_db)
+):
+    """ 
+    Видалення задачі.
+    """
+    problem = db.get(Problem, id)
+    db.delete(problem)
+    db.commit()
+    return RedirectResponse(url="/problem/list", status_code=302)
 
-
-# # ------- del 
-
-# @router.get("/problemset/del/{id}")
-# async def problemset_del_form(
-#     id: str, 
-#     request: Request, 
-#     db: Session = Depends(get_db)
-# ):
-#     """ 
-#     Видалення задачника - GET.
-#     """
-#     problemset = db.get(ProblemSet, id)
-#     if not problemset:
-#         return RedirectResponse(url="/problemset/list", status_code=302)
-#     return templates.TemplateResponse("problemset/problemset_del.html", {"request": request, "problemset": problemset})
-
-
-# @router.post("/problemset/del/{id}")
-# async def problemset_del(
-#     id: str,
-#     request: Request,
-#     db: Session = Depends(get_db)
-# ):
-#     """ 
-#     Видалення задачника - POST.
-#     """
-#     problemset = db.get(ProblemSet, id)
-#     db.delete(problemset)
-#     db.commit()
-#     return RedirectResponse(url="/problemset/list", status_code=302)
 
 # # ------- show 
 

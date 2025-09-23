@@ -5,48 +5,38 @@
 {% block content %}
 <section class="section">
   <div class="container">
-    <h1 class="title">Видалення {{ problemset.title }}</h1>
-    <form method="post" >
-      <div class="field">
-        <label class="label">Username</label>
-        <div class="control">
-          <input class="input" type="text" name="username" value="{{ problemset.username }}" readonly>
-        </div>
-      </div>
-      <div class="field">
-        <label class="label">Problem IDs (через пробіли)</label>
-        <div class="control">
-          <input class="input" type="text" name="problem_ids" value="{{ problemset.problem_ids }}" readonly>
-        </div>
-      </div>
-      <div class="field">
-        <label class="label">Open Time</label>
-        <div class="control">
-          <input class="input" type="datetime-local" name="open_time" value="{{ problemset.open_time|replace(' ', 'T') }}" readonly>
-        </div>
-      </div>
-      <div class="field">
-        <label class="label">Open Minutes</label>
-        <div class="control">
-          <input class="input" type="number" name="open_minutes" value="{{ problemset.open_minutes }}" readonly>
-        </div>
-      <div class="field">
-        <label class="label">Filter</label>
-        <div class="control">
-          <input class="input" type="text" name="stud_filter" value="{{ problemset.stud_filter }}" readonly>
-        </div>
-      </div>
+    <h1 class="title">Видалення {{ problem.title }}</h1>
+    <form method="post" action="/problem/del/{{problem.id}}">
 
+      {% for k in ['title','attr','lang','author'] %}
+      <div class="field">
+        <label class="label">{{k}}</label>
+        <div class="control">
+          <input class="input" type="text" name="{{k}}" value="{{ problem[k] }}">
+        </div>
       </div>
+      {% endfor %}
+      {% for k in ['cond','view','hint','code'] %}
+      <div class="field">
+        <label class="label">{{k}}</label>
+        <div class="control">
+          <textarea class="control" style="width: 100%; height: 100px;"  name="{{k}}"
+              >{{ problem[k] }}</textarea>
+        </div>
+      </div>
+      {% endfor %}
+
+      
       <div class="field is-grouped mt-4">
         <div class="control">
-          <button class="button is-primary" type="submit">Видалити</button>
+          <button class="button is-danger" type="submit">Видалити</button>
         </div>
         <div class="control">
-          <a class="button is-light" href="/problemset/list">Скасувати</a>
+          <a class="button is-light" href="/problem/list">Скасувати</a>
         </div>
       </div>
     </form>
+
   </div>
 </section>
 {% endblock %}
