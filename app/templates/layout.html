@@ -3,13 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <title>{% block title %} {% endblock %}</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.0/css/bulma.min.css">
+    <!-- Підключення Pico.css -->
+   <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@latest/css/pico.min.css">
     <link rel="icon" href="/static/favicon.ico">
 </head>
 <body>
-    <h1>FOR ALL</h1>
-    <div class="content">
+    <main class="container">
+        <nav>
+        <ul>
+            <li><strong>PSS</strong></li>
+        </ul>
+        <ul>
+            <li><a href="/to_solve">Вирішення задач</a></li>
+            <li><a href="/problem/list">Задачі</a></li>
+            <li><a href="#">About</a></li>
+        </ul>
+        </nav>
+
         {% block content %}{% endblock %}
-    </div>
+    </main>
 </body>
 </html>

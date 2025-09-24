@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+
+{% block title %}{% endblock %}
+
+{% block content %}
+<h1>Задачі</h1>
+
+{% if psets and psets|length %}
+  {% for pset in psets %}
+    <article>
+      <header>
+        <h2>
+          {{ pset.id }}
+          <small>(закриється через {{ pset.rest_time }})</small>
+        </h2>
+      </header>
+
+      <ul>
+        {% for h in pset.headers %}
+          <li>
+            <a href="/to_solve/{{ h.id }}">
+              <strong>{{ h.title }}</strong><br>
+              <small>{{ h.attr }}</small>
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
+    </article>
+  {% endfor %}
+{% else %}
+  <p><em>Задач немає.</em></p>
+{% endif %}
+
+
+{% endblock %}

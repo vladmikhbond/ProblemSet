@@ -1,60 +1,35 @@
-{% extends "layout.html" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Login</title>
+  <!-- Підключення Pico.css -->
+  <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@latest/css/pico.min.css">
+</head>
+<body>
+  <main class="container">
+    <form method="post" action="{{ url_for('login') }}">
+      <h1>PSS Login</h1>
 
-{% block title %}{% endblock %}
+      <label for="username">
+        Username
+        <input type="text" id="username" name="username"
+               placeholder="Enter your username"
+               value="{{ request.form.username or '' }}" required>
+      </label>
 
-{% block content %}
-    
-<form method="post" action="{{ url_for('login') }}" class="box" style="max-width: 400px; margin: auto;">
-    <h1 class="title has-text-centered">Login</h1>
+      <label for="password">
+        Password
+        <input type="password" id="password" name="password"
+               placeholder="Enter your password" required>
+      </label>
 
-    <div class="field">
-        <label class="label" for="username">Username</label>
-        <div class="control has-icons-left">
-            <input 
-                class="input" 
-                type="text" 
-                id="username" 
-                name="username" 
-                placeholder="Enter your username" 
-                value="{{ request.form.username or '' }}" 
-                required
-            >
-            <span class="icon is-small is-left">
-                <i class="fas fa-user"></i>
-            </span>
-        </div>
-    </div>
+      <button type="submit">Login</button>
 
-    <div class="field">
-        <label class="label" for="password">Password</label>
-        <div class="control has-icons-left">
-            <input 
-                class="input" 
-                type="password" 
-                id="password" 
-                name="password" 
-                placeholder="Enter your password" 
-                required
-            >
-            <span class="icon is-small is-left">
-                <i class="fas fa-lock"></i>
-            </span>
-        </div>
-    </div>
-
-    <div class="field">
-        <div class="control">
-            <button class="button is-primary is-fullwidth">Login</button>
-        </div>
-    </div>
-
-    {% if error %}
-        <p class="help is-danger has-text-centered">{{ error }}</p>
-    {% endif %}
-</form>
-
-<!-- Іконки Font Awesome -->
-<script src="https://kit.fontawesome.com/a2e0f1f0a4.js" crossorigin="anonymous"></script>
-
-
-{% endblock %}
+      {% if error %}
+        <p style="color: var(--del-color);">{{ error }}</p>
+      {% endif %}
+    </form>
+  </main>
+</body>
+</html>

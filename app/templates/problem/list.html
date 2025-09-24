@@ -3,36 +3,29 @@
 {% block title %}{% endblock %}
 
 {% block content %}
-<section class="section">
-  <div class="container">
-
-    <!-- <div><a href="/problems/active">До вирішення задач</a></div> -->
-    <h1>Мої задачі</h1>
-    <div>
-      <a class="list-item" href="/problem/new">Нова</a>
-    </div>
-    {% if problems and problems|length %}
-    <table>
-      <tbody>
-        {% for problem in problems %}
-        <tr>
-          <td>{{ problem.attr }}</td>
-          <td>{{ problem.title }}</td>
-          <td>
-              <a href="/problem/copy/{{problem.id}}">copy</a> | 
-              <a href="/problem/edit/{{problem.id}}">edit</a> | 
-              <a href="/problem/del/{{problem.id}}">del</a>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-    {% else %}
-      <div>
-        Задач немає.
-      </div>
-    {% endif %}
     
+<h1>Мої задачі</h1>
+
+{% if problems and problems|length %}
+<table>
+  <tbody>
+    {% for problem in problems %}
+    <tr>
+      <td>{{ problem.attr }}</td>
+      <td>{{ problem.title }}</td>
+      <td>
+          <a href="/problem/copy/{{problem.id}}">copy</a> | 
+          <a href="/problem/edit/{{problem.id}}">edit</a> | 
+          <a href="/problem/del/{{problem.id}}">del</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+  <div>
+    Задач немає.
   </div>
-</section>
+{% endif %}
+
 {% endblock %}

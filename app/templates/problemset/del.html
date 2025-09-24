@@ -1,0 +1,43 @@
+{% extends "layout.html" %}
+
+{% block title %}{% endblock %}
+
+{% block content %}
+
+    <h1>Видалення {{ problemset.title }}</h1>
+
+    <form method="post">
+
+      <label>
+        Username
+        <input type="text" name="username" value="{{ problemset.username }}" readonly>
+      </label>
+
+      <label>
+        Problem IDs (через пробіли)
+        <textarea id="problem_ids" name="problem_ids" readonly>{{ problemset.problem_ids }}</textarea>
+      </label>
+
+      <label>
+        Open Time
+        <input type="datetime-local" name="open_time" value="{{ problemset.open_time|replace(' ', 'T') }}" readonly>
+      </label>
+
+      <label>
+        Open Minutes
+        <input type="number" name="open_minutes" value="{{ problemset.open_minutes }}" readonly>
+      </label>
+
+      <label>
+        Filter
+        <input type="text" name="stud_filter" value="{{ problemset.stud_filter }}" readonly>
+      </label>
+
+      <footer class="grid">
+        <button type="submit" style="--pico-color: var(--pico-del)">Видалити</button>
+        <a href="/problemset/list" role="button" class="secondary">Скасувати</a>
+      </footer>
+
+    </form>
+
+{% endblock %}

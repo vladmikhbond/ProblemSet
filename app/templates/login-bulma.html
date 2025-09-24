@@ -1,0 +1,60 @@
+{% extends "layout.html" %}
+
+{% block title %}{% endblock %}
+
+{% block content %}
+    
+<form method="post" action="{{ url_for('login') }}" class="box" style="max-width: 400px; margin: auto;">
+    <h1 class="title has-text-centered">Login</h1>
+
+    <div class="field">
+        <label class="label" for="username">Username</label>
+        <div class="control has-icons-left">
+            <input 
+                class="input" 
+                type="text" 
+                id="username" 
+                name="username" 
+                placeholder="Enter your username" 
+                value="{{ request.form.username or '' }}" 
+                required
+            >
+            <span class="icon is-small is-left">
+                <i class="fas fa-user"></i>
+            </span>
+        </div>
+    </div>
+
+    <div class="field">
+        <label class="label" for="password">Password</label>
+        <div class="control has-icons-left">
+            <input 
+                class="input" 
+                type="password" 
+                id="password" 
+                name="password" 
+                placeholder="Enter your password" 
+                required
+            >
+            <span class="icon is-small is-left">
+                <i class="fas fa-lock"></i>
+            </span>
+        </div>
+    </div>
+
+    <div class="field">
+        <div class="control">
+            <button class="button is-primary is-fullwidth">Login</button>
+        </div>
+    </div>
+
+    {% if error %}
+        <p class="help is-danger has-text-centered">{{ error }}</p>
+    {% endif %}
+</form>
+
+<!-- Іконки Font Awesome -->
+<script src="https://kit.fontawesome.com/a2e0f1f0a4.js" crossorigin="anonymous"></script>
+
+
+{% endblock %}

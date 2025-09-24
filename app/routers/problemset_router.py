@@ -35,7 +35,7 @@ async def get_problemsets(
 
     username = payload.get("sub")
     problemsets = [p for p in all_problemsets if p.username == username ] 
-    return templates.TemplateResponse("problemset/problemset_list.html", {"request": request, "problemsets": problemsets})
+    return templates.TemplateResponse("problemset/list.html", {"request": request, "problemsets": problemsets})
 
 
 
@@ -55,7 +55,7 @@ async def edit_problemset_form(
 
     if not problemset:
         return RedirectResponse(url="/problemset/list", status_code=302)
-    return templates.TemplateResponse("problemset/problemset_edit.html", 
+    return templates.TemplateResponse("problemset/edit.html", 
             {"request": request, "problemset": problemset, "problem_headers": problem_headers})
 
 
@@ -146,12 +146,12 @@ async def problemset_del_form(
     db: Session = Depends(get_db)
 ):
     """ 
-    Видалення задачника - GET.
+    Видалення задачника.
     """
     problemset = db.get(ProblemSet, id)
     if not problemset:
         return RedirectResponse(url="/problemset/list", status_code=302)
-    return templates.TemplateResponse("problemset/problemset_del.html", {"request": request, "problemset": problemset})
+    return templates.TemplateResponse("problemset/del.html", {"request": request, "problemset": problemset})
 
 
 @router.post("/problemset/del/{id}")
@@ -161,7 +161,7 @@ async def problemset_del(
     db: Session = Depends(get_db)
 ):
     """ 
-    Видалення задачника - POST.
+    Видалення задачника.
     """
     problemset = db.get(ProblemSet, id)
     db.delete(problemset)
@@ -177,7 +177,7 @@ async def problemset_show(
     db: Session = Depends(get_db)
 ):
     """ 
-    Показ результатів - GET.
+    Показ результатів.
     """
     problemset = db.get(ProblemSet, id)
     problem_ids = problemset.problem_ids.split()
