@@ -1,0 +1,9 @@
+/* кнопки схвадення і відмови на формах */
+footer.grid button,
+footer.grid a[role="button"] {
+    height: 3rem;       /* однакова висота */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+

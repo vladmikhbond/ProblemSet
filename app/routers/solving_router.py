@@ -1,5 +1,3 @@
-import os
-import re
 import httpx
 from datetime import datetime, timedelta
 
@@ -10,7 +8,7 @@ from ..models.schemas import ProblemHeaderSchema, ProblemSchema, AnswerSchema
 from ..utils.utils import PSS_HOST, delta2str, username_from_session
 from sqlalchemy.orm import Session
 from ..dal import get_db, writedown_to_ticket  # Функція для отримання сесії БД
-from ..models.pss_models import ProblemSet, Ticket
+from ..models.pss_models import ProblemSet
 
 # шаблони Jinja2
 templates = Jinja2Templates(directory="app/templates")
@@ -41,7 +39,7 @@ async def get_problem_headers(
 
 
 @router.get("/to_solve")
-async def get_problems_active(
+async def get_to_solve(
     request: Request,
     db: Session = Depends(get_db),
 ):
@@ -81,11 +79,11 @@ async def get_problems_active(
             "rest_time": delta2str(rest_time),
             "headers": pheaders})
 
-    return templates.TemplateResponse("to_solve.html", {"request": request, "psets": psets})
+    return templates.TemplateResponse("solving/to_solve.html", {"request": request, "psets": psets})
 
 
-@router.get("/to_solve/{prob_id}")
-async def get_problem(
+@router.get("/to_solve/problem/{prob_id}")
+async def get_to_solve_problem(
     prob_id: str,
     request: Request
 ):
@@ -117,7 +115,7 @@ async def get_problem(
         # open a problem window
         problem = ProblemSchema(**json_obj)
         return templates.TemplateResponse(
-            "problem.html",
+            "solving/to_solve_problem.html",
             {"request": request, "problem": problem})
 
 
@@ -147,22 +145,3 @@ async def post_check(answer: AnswerSchema, request: Request):
         return check_message
 
 
-# ------- show problem  -- 
-# TODO перенести
-
-@router.get("/problem/show/{id}")
-async def get_problem_show(
-    id: str, 
-    request: Request, 
-    db: Session = Depends(get_db)
-):
-    """ 
-    Показ вирішень з одного тікету - GET.
-    """
-    RE_TEMPLATE = r"~0~(.*?)~1~(.*?)~2~(.*?)~3~"
-    ticket = db.get(Ticket, id)
-    matches = re.findall(RE_TEMPLATE, ticket.records, flags=re.S)
-    records = [{"when": m[2], "code":m[0].strip(), "check":m[1].strip()} for m in matches]
-
-    return templates.TemplateResponse("problem_show.html", 
-            {"request": request, "ticket": ticket, "records": records})

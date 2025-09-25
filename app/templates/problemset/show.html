@@ -10,7 +10,6 @@
 .wrong {
     color: blue;
   }
-
 </style>
 <section class="section">
   <div class="container">
@@ -20,7 +19,7 @@
       <h3>{{problem.title}}</h3>
       {% for ticket in problem.tickets %}
         {% set class_ = "ok" if ticket.comment.startswith('OK') else "wrong"  %} 
-        <div><a href="/problem/show/{{ticket.id}}" class = "{{class_}}">{{ticket.username}}</a></div>
+        <div><a href="/ticket/show/{{ticket.id}}" class = "{{class_}}">{{ticket.username}}</a></div>
       {% endfor %}
     {% endfor %}
 

@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>{% block title %} {% endblock %}</title>
-    <!-- Підключення Pico.css -->
-   <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@latest/css/pico.min.css">
+    <link rel="stylesheet" href="/static/css/pico.min.css">
+    <link rel="stylesheet" href="/static/css/app.css">
     <link rel="icon" href="/static/favicon.ico">
 </head>
 <body>
@@ -14,9 +14,10 @@
             <li><strong>PSS</strong></li>
         </ul>
         <ul>
-            <li><a href="/to_solve">Вирішення задач</a></li>
+            <li><a href="/problemset/list">Задачники</a></li>
             <li><a href="/problem/list">Задачі</a></li>
-            <li><a href="#">About</a></li>
+            <li><a href="/to_solve">Вирішення задач</a></li>
+            <li><a href="#">Довідка</a></li>
         </ul>
         </nav>
 

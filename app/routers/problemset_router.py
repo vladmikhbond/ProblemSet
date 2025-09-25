@@ -1,14 +1,12 @@
-import os
+import re
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from ..models.pss_models import Problem, ProblemSet, Ticket
-from ..models.schemas import ProblemHeaderSchema, ProblemSetSchema
 from ..utils.utils import payload_from_token,str2dat, dat2str
 from ..dal import get_db  # Функція для отримання сесії БД
-from sqlalchemy.orm import Session, noload
-
+from sqlalchemy.orm import Session
 
 # шаблони Jinja2
 templates = Jinja2Templates(directory="app/templates")
@@ -102,7 +100,7 @@ async def new_problemset_form(
         open_minutes = 0,
         stud_filter = ""
     )
-    return templates.TemplateResponse("problemset/problemset_new.html", {"request": request, "problemset": problemset})
+    return templates.TemplateResponse("problemset/new.html", {"request": request, "problemset": problemset})
 
 
 @router.post("/problemset/new")
@@ -133,7 +131,7 @@ async def new_problemset(
     except Exception as e:
         err_mes = f"Error during a problem request: {e}"
         print(err_mes)
-        return templates.TemplateResponse("problemset/problemset_new.html", {"request": request, "problemset": problemset})
+        return templates.TemplateResponse("problemset/new.html", {"request": request, "problemset": problemset})
     return RedirectResponse(url="/problemset/list", status_code=302)
 
 
@@ -177,7 +175,7 @@ async def problemset_show(
     db: Session = Depends(get_db)
 ):
     """ 
-    Показ результатів.
+    Показ вирішень з одного задачника.
     """
     problemset = db.get(ProblemSet, id)
     problem_ids = problemset.problem_ids.split()
@@ -186,5 +184,22 @@ async def problemset_show(
         problem = db.get(Problem, problem_id)
         dict[problem_id] = problem
 
-    return templates.TemplateResponse("problemset/problemset_show.html", {"request": request, "problemset": problemset, "dict": dict})
+    return templates.TemplateResponse("problemset/show.html", {"request": request, "problemset": problemset, "dict": dict})
 
+
+@router.get("/ticket/show/{id}")
+async def get_solving_ticket(
+    id: str, 
+    request: Request, 
+    db: Session = Depends(get_db)
+):
+    """ 
+    Показ вирішень з одного тікету.
+    """
+    RE_TEMPLATE = r"~0~(.*?)~1~(.*?)~2~(.*?)~3~"
+    ticket = db.get(Ticket, id)
+    matches = re.findall(RE_TEMPLATE, ticket.records, flags=re.S)
+    records = [{"when": m[2], "code":m[0].strip(), "check":m[1].strip()} for m in matches]
+
+    return templates.TemplateResponse("problemset/ticket_show.html", 
+            {"request": request, "ticket": ticket, "records": records})
