@@ -61,7 +61,7 @@ async def edit_problemset_form(
 async def edit_problemset(
     id: str,
     request: Request,
-    username: str = Form(...),
+    username: str = Form(...),  # from hidden input
     problem_ids: str = Form(...),
     open_time: str = Form(...),
     open_minutes: int = Form(...),
@@ -74,12 +74,19 @@ async def edit_problemset(
     problemset = db.get(ProblemSet, id)
     if not problemset:
         return RedirectResponse(url="/problemset/list", status_code=302)
-    problemset.username = username
+    problemset.username = username  
     problemset.problem_ids = problem_ids
     problemset.open_time = str2dat(open_time)
     problemset.open_minutes = open_minutes
     problemset.stud_filter = stud_filter
-    db.commit()
+    try:                       
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        err_mes = f"Error during a problemset edit: {e}"
+        print(err_mes)
+        return templates.TemplateResponse("problemset/edit.html", {"request": request, "problemset": problemset})
+    
     return RedirectResponse(url="/problemset/list", status_code=302)
 
 # ------- new 
@@ -87,14 +94,13 @@ async def edit_problemset(
 @router.get("/problemset/new")
 async def new_problemset_form(
     request: Request,
-    payload = Depends(payload_from_token), 
 ):
     """ 
     Створення нового задачника поточного юзера (викладача). 
     """
     problemset = ProblemSet(
         title = "",
-        username = payload.get("sub"),                   
+        # username = payload.get("sub"),                   
         problem_ids = "",                    
         open_time = str2dat(dat2str(datetime.now())),  # форматування now
         open_minutes = 0,
@@ -107,19 +113,19 @@ async def new_problemset_form(
 async def new_problemset(
     request: Request,
     title: str = Form(...),
-    username: str = Form(...),
     problem_ids: str = Form(...),
     open_time: str = Form(...),
     open_minutes: int = Form(...),
     stud_filter: str = Form(...),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    payload = Depends(payload_from_token), 
 ):
     """ 
     Створення нового задачника поточного юзера (викладача).
     """
     problemset = ProblemSet(
         title = title,
-        username = username,                   
+        username = payload.get("sub"),                    
         problem_ids = problem_ids,                    
         open_time = str2dat(open_time),
         open_minutes = open_minutes,
@@ -129,6 +135,7 @@ async def new_problemset(
         db.add(problemset)                        
         db.commit()
     except Exception as e:
+        db.rollback()
         err_mes = f"Error during a problem request: {e}"
         print(err_mes)
         return templates.TemplateResponse("problemset/new.html", {"request": request, "problemset": problemset})

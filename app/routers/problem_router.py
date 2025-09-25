@@ -177,23 +177,4 @@ async def post_problem_del(
     return RedirectResponse(url="/problem/list", status_code=302)
 
 
-# # ------- show 
-
-# @router.get("/problemset/show/{id}")
-# async def problemset_show(
-#     id: str, 
-#     request: Request, 
-#     db: Session = Depends(get_db)
-# ):
-#     """ 
-#     Показ результатів - GET.
-#     """
-#     problemset = db.get(ProblemSet, id)
-#     problem_ids = problemset.problem_ids.split()
-#     dict = {}
-#     for problem_id in problem_ids:
-#         problem = db.get(Problem, problem_id)
-#         dict[problem_id] = problem
-
-#     return templates.TemplateResponse("problemset/problemset_show.html", {"request": request, "problemset": problemset, "dict": dict})
 
