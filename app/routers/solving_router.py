@@ -7,8 +7,8 @@ from fastapi.templating import Jinja2Templates
 from ..models.schemas import ProblemHeaderSchema, ProblemSchema, AnswerSchema
 from ..utils.utils import PSS_HOST, delta2str, username_from_session
 from sqlalchemy.orm import Session
-from ..dal import get_db, writedown_to_ticket  # Функція для отримання сесії БД
-from ..models.pss_models import ProblemSet
+from ..dal import get_db  # Функція для отримання сесії БД
+from ..models.pss_models import ProblemSet, Ticket
 
 # шаблони Jinja2
 templates = Jinja2Templates(directory="app/templates")
@@ -67,8 +67,17 @@ async def get_to_solve(
                 response = await client.get(api_url, headers=headers)
                 if response.is_success:
                     json = response.json()
+                    open_sec = (
+                        problemset.open_time - 
+                        datetime.now() + 
+                        timedelta(minutes=problemset.open_minutes)
+                    ).seconds
+
                     problem_header = ProblemHeaderSchema(
-                        id=json["id"], title=json["title"], attr=json["attr"])
+                        id=json["id"], 
+                        title=json["title"], 
+                        attr=json["attr"],
+                        open_sec=open_sec)
                     pheaders.append(problem_header)
 
         rest_time: timedelta = problemset.open_time - \
@@ -82,10 +91,12 @@ async def get_to_solve(
     return templates.TemplateResponse("solving/to_solve.html", {"request": request, "psets": psets})
 
 
-@router.get("/to_solve/problem/{prob_id}")
+@router.get("/to_solve/problem/{prob_id}/{open_sec}")
 async def get_to_solve_problem(
     prob_id: str,
-    request: Request
+    open_sec: int,
+    request: Request,
+    db: Session = Depends(get_db),
 ):
     """
     Відкриває студенту вікно для вирішення задачі.
@@ -107,24 +118,41 @@ async def get_to_solve_problem(
         err_mes = f"Error during a problem request: {e}"
         logger(err_mes)
         return RedirectResponse(url="/open_problems", status_code=302)
-    else:
-        # create a new ticket
-        username = username_from_session(request)
-        writedown_to_ticket(username, prob_id)
+    
+    username = username_from_session(request)
 
-        # open a problem window
-        problem = ProblemSchema(**json_obj)
-        return templates.TemplateResponse(
-            "solving/to_solve_problem.html",
-            {"request": request, "problem": problem})
+    ticket = db.query(Ticket).filter(Ticket.username == username and Ticket.problem_id == prob_id).first()
+    # create a new ticket
+    if ticket is None:
+        ticket = Ticket(username=username, problem_id=prob_id, records = "", comment=f"{open_sec};")
+        ticket.do_record("Вперше побачив задачу.", "User saw the task for the first time."); 
+        try:
+            db.add(ticket)
+            db.commit()
+        except Exception as e:
+            db.rollback()
+            err_mes = f"Error during a ticket creating: {e}"
+            logger(err_mes)
+    
+    # open a problem window
+    problem = ProblemSchema(**json_obj)
+    return templates.TemplateResponse(
+        "solving/to_solve_problem.html",
+        {"request": request, "problem": problem})
 
+#-------------- check
 
 @router.post("/check")
-async def post_check(answer: AnswerSchema, request: Request):
+async def post_check(
+    answer: AnswerSchema, 
+    request: Request, 
+    db: Session = Depends(get_db),
+):
     """    AJAX
     Відправляє рішення задачі на перевірку до PSS і повертає відповідь від PSS.
     Додає в тіскет рішення і відповідь. 
     """
+
     api_url = f"{PSS_HOST}/api/check"
     data = {"id": answer.id, "solving": answer.solving}
 
@@ -137,11 +165,14 @@ async def post_check(answer: AnswerSchema, request: Request):
         err_mes = f"Error during a check solving: {e}"
         print(err_mes)
         return err_mes
-    else:
-        # append a ticket
-        username = username_from_session(request)
-        writedown_to_ticket(username, answer.id, answer.solving, check_message)
-
-        return check_message
+  
+    # write solving to ticket
+    username = username_from_session(request)
+    ticket = db.query(Ticket).filter(Ticket.username == username and Ticket.problem_id == answer.id).first()
+    if (ticket is None):
+        raise RuntimeError("не знайдений тікет")
+    ticket.do_record(answer.solving, check_message)
+    db.commit()
+    return check_message
 
 

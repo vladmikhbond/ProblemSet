@@ -18,7 +18,7 @@
       <ul>
         {% for problem in pset.headers %}
           <li>
-            <a href="/to_solve/problem/{{ problem.id }}">
+            <a href="/to_solve/problem/{{ problem.id }}/{{ problem.open_sec }}">
               <strong>{{ problem.title }}</strong><br>
               <small>{{ problem.attr }}</small>
             </a>

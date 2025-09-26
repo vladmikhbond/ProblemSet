@@ -57,7 +57,7 @@ class ProblemSet(Base):
 
 class Ticket(Base):
     __tablename__ = "tickets"
- 
+     
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
 
     username: Mapped[str] = mapped_column(String, ForeignKey("users.username", ondelete="CASCADE"))
@@ -69,3 +69,7 @@ class Ticket(Base):
     problem: Mapped["Problem"] = relationship(back_populates="tickets")
    
 
+    def do_record(self, solving, check_message): 
+        RECORD = "~0~{0}\n~1~{1}\n~2~{2:%Y-%m-%dT%H:%M:%S}\n~3~\n"
+        self.records += RECORD.format(solving, check_message, datetime.now())
+        

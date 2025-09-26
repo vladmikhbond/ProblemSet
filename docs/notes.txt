@@ -1,6 +1,7 @@
 TODO  
 
-layout pages
+контроль часу при отриманні рішення (check)
+аналіз успішності в тікеті
 codereview for problem_router 
 problem/del.html,  problem/edit.html, 
 
