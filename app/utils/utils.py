@@ -35,9 +35,13 @@ def username_from_session(request: Request):
         return payload.get("sub")
 
 
-def dat2str(d): return d.strftime("%Y-%m-%dT%H:%M")
+def dat2str(d): 
+    s = d.strftime("%Y-%m-%d %H:%M")
+    return s.replace(' ', 'T')
 
-def str2dat(s): return datetime.strptime(s, "%Y-%m-%dT%H:%M")
+def str2dat(s): 
+    s = s.replace('T', ' ')
+    return datetime.strptime(s, "%Y-%m-%d %H:%M")
 
 def delta2str(delta: timedelta):
     days = delta.days

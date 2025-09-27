@@ -5,7 +5,7 @@ from fastapi.responses import HTMLResponse, PlainTextResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from ..models.pss_models import Problem, ProblemSet, Ticket
 from ..models.schemas import ProblemHeaderSchema, ProblemSetSchema
-from ..utils.utils import payload_from_token,str2dat, dat2str, PSS_HOST
+from ..utils.utils import payload_from_token, str2dat, dat2str, PSS_HOST
 from ..dal import get_db  # Функція для отримання сесії БД
 from sqlalchemy.orm import Session, noload
 

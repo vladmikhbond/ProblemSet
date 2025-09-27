@@ -1,5 +1,6 @@
 import httpx
 from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 
 from fastapi import APIRouter, Depends, Request, Response, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -67,9 +68,12 @@ async def get_to_solve(
                 response = await client.get(api_url, headers=headers)
                 if response.is_success:
                     json = response.json()
+                    # now = datetime.now(ZoneInfo("Europe/Kyiv"))
+                    now = datetime.now()
+                    
                     open_sec = (
                         problemset.open_time - 
-                        datetime.now() + 
+                        now + 
                         timedelta(minutes=problemset.open_minutes)
                     ).seconds
 
