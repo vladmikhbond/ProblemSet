@@ -48,28 +48,33 @@ class ProblemSet(Base):
     open_minutes: Mapped[int] = mapped_column(Integer, default=0)
     stud_filter: Mapped[str] = mapped_column(String, default='')
 
-    def is_open(this) -> bool:
-        if this.open_time is None or this.open_minutes is None:
+    def is_open(self) -> bool:
+        if self.open_time is None or self.open_minutes is None:
             return False
-        limit: datetime = this.open_time + timedelta(minutes=this.open_minutes)
+        limit: datetime = self.open_time + timedelta(minutes=self.open_minutes)
         return limit > datetime.now()
-
+    
+    def exspire_time(self):
+        return self.open_time + timedelta(minutes=self.open_minutes)
 
 class Ticket(Base):
     __tablename__ = "tickets"
-     
+ 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
 
     username: Mapped[str] = mapped_column(String, ForeignKey("users.username", ondelete="CASCADE"))
     problem_id: Mapped[str] = mapped_column(String, ForeignKey("problems.id", ondelete="CASCADE")) 
-    records: Mapped[str] = mapped_column(Text)
-    comment: Mapped[str] = mapped_column(String)   
+    records: Mapped[str] = mapped_column(Text, default="")
+    comment: Mapped[str] = mapped_column(String)
+    expire_time: Mapped[datetime] = mapped_column(DateTime)
+    state: Mapped[int] = mapped_column(Integer, default=0) # 1 - problem is solved
     #  nav
     user: Mapped["User"] = relationship(back_populates="tickets")
     problem: Mapped["Problem"] = relationship(back_populates="tickets")
-   
 
-    def do_record(self, solving, check_message): 
-        RECORD = "~0~{0}\n~1~{1}\n~2~{2:%Y-%m-%dT%H:%M:%S}\n~3~\n"
+    def do_record(self, solving, check_message):  
+        RECORD = "~0~{0}\n~1~{1}\n~2~{2:%Y-%m-%d %H:%M:%S}\n~3~\n"
         self.records += RECORD.format(solving, check_message, datetime.now())
-        
+        if check_message.startswith("OK") and self.state == 0:
+            self.state = 1
+    

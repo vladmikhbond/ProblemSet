@@ -1,9 +1,9 @@
 TODO  
 
-контроль часу при отриманні рішення (check)
-аналіз успішності в тікеті
+відображення результатів по задачнику
+
 codereview for problem_router 
-problem/del.html,  problem/edit.html, 
+
 
 https://ace.c9.io/
 

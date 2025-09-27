@@ -1,7 +1,7 @@
-/* кнопки схвадення і відмови на формах */
+/* однакова висота кнопок схвалення і відмови на формах */
 footer.grid button,
 footer.grid a[role="button"] {
-    height: 3rem;       /* однакова висота */
+    height: 3rem; 
     display: inline-flex;
     align-items: center;
     justify-content: center;

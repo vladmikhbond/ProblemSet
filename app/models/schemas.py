@@ -5,7 +5,6 @@ class ProblemHeaderSchema (BaseModel):
     id: str
     title: str
     attr: str
-    open_sec: int
     
 
 class ProblemSchema(BaseModel):

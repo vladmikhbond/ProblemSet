@@ -35,20 +35,5 @@ def username_from_session(request: Request):
         return payload.get("sub")
 
 
-def dat2str(d): 
-    s = d.strftime("%Y-%m-%d %H:%M")
-    return s.replace(' ', 'T')
-
-def str2dat(s): 
-    s = s.replace('T', ' ')
-    return datetime.strptime(s, "%Y-%m-%d %H:%M")
-
-def delta2str(delta: timedelta):
-    days = delta.days
-    hours = delta.seconds // 3600
-    minutes = (delta.seconds % 3600) // 60
-
-    # Форматуємо рядок
-    return f"{days}дн. {hours}год. {minutes:02}хв."
 
 
