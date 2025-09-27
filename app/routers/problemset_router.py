@@ -203,20 +203,3 @@ async def problemset_show(
 
     return templates.TemplateResponse("problemset/show.html", {"request": request, "problemset": problemset, "dict": dict})
 
-
-@router.get("/ticket/show/{id}")
-async def get_solving_ticket(
-    id: str, 
-    request: Request, 
-    db: Session = Depends(get_db)
-):
-    """ 
-    Показ вирішень з одного тікету.
-    """
-    RE_TEMPLATE = r"~0~(.*?)~1~(.*?)~2~(.*?)~3~"
-    ticket = db.get(Ticket, id)
-    matches = re.findall(RE_TEMPLATE, ticket.records, flags=re.S)
-    records = [{"when": m[2], "code":m[0].strip(), "check":m[1].strip()} for m in matches]
-
-    return templates.TemplateResponse("problemset/ticket_show.html", 
-            {"request": request, "ticket": ticket, "records": records})

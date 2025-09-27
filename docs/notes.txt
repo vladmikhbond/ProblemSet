@@ -1,6 +1,6 @@
 TODO  
 
-відображення результатів по задачнику
+видалення тікетів 
 
 codereview for problem_router 
 

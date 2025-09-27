@@ -18,8 +18,14 @@
     {% for problem in dict.values() %}
       <h3>{{problem.title}}</h3>
       {% for ticket in problem.tickets %}
-        {% set class_ = "ok" if ticket.comment.startswith('OK') else "wrong"  %} 
-        <div><a href="/ticket/show/{{ticket.id}}" class = "{{class_}}">{{ticket.username}}</a></div>
+        {% if ticket.state == 1 %} 
+        <span style="margin-left: 50px; color:green;">OK</span>
+        {% endif%}
+        <div>
+          <a href="/ticket/show/{{ticket.id}}" class = "{{class_}}">{{ticket.username}}</a>
+          <a href="/ticket/del/{{ticket.id}}" style="margin-left: 50px; color:red;"> x </a>
+          
+        </div>
       {% endfor %}
     {% endfor %}
 
