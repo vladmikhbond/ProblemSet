@@ -56,6 +56,11 @@ class ProblemSet(Base):
     
     def exspire_time(self):
         return self.open_time + timedelta(minutes=self.open_minutes)
+    
+    
+
+
+
 
 class Ticket(Base):
     __tablename__ = "tickets"

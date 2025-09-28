@@ -7,3 +7,6 @@ footer.grid a[role="button"] {
     justify-content: center;
 }
 
+.my-error {
+    color: red;
+}

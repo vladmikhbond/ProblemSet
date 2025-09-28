@@ -23,7 +23,7 @@
         {% endif%}
         <div>
           <a href="/ticket/show/{{ticket.id}}" class = "{{class_}}">{{ticket.username}}</a>
-          <a href="/ticket/del/{{ticket.id}}" style="margin-left: 50px; color:red;"> x </a>
+          <a href="/ticket/del/{{ticket.id}}/{{problemset.title}}" style="margin-left: 50px; color:red;"> x </a>
           
         </div>
       {% endfor %}

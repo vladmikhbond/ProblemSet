@@ -1,8 +1,8 @@
-import httpx
+import httpx, re
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
-from fastapi import APIRouter, Depends, Request, Response, Form
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from ..models.schemas import ProblemHeaderSchema, ProblemSchema, AnswerSchema
@@ -21,7 +21,8 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-@router.get("/problems/lang/{lang}", summary="List of problem headers (id, title, attr). AJAX")
+# --------------- List of problem headers (id, title, attr). AJAX
+@router.get("/problems/lang/{lang}")
 async def get_problem_headers(
     request: Request,
     lang: str,
@@ -36,7 +37,7 @@ async def get_problem_headers(
             json = response.json()
             return json
         else:
-            return {}     # TODO
+            raise HTTPException(status_code=404, detail="Problems not found")
 
 
 @router.get("/to_solve")
@@ -45,10 +46,12 @@ async def get_to_solve(
     db: Session = Depends(get_db),
 ):
     """
-    Показує студенту сторінку з задачами, розподіленими по відкритим задачникам.
+    Показує студенту сторінку з задачами, розподіленими по задачникам.
+    Враховуються лише відкриті та доступні поточному юзеру задачники.
     """
+    username = username_from_session(request)
     problemsets: list[ProblemSet] = db.query(ProblemSet).all()
-    open_problemsets = [ps for ps in problemsets if ps.is_open()]
+    open_problemsets = [ps for ps in problemsets if ps.is_open() and re.match(ps.stud_filter, username)]
 
     token = request.session.get("token", "")
     if token == "":

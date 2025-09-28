@@ -37,3 +37,38 @@ async def get_solving_ticket(
 
     return templates.TemplateResponse("problemset/ticket_show.html", 
             {"request": request, "ticket": ticket, "records": records})
+
+# ------- del 
+
+@router.get("/ticket/del/{id}/{pset_title}")
+async def get_ticket_del(
+    id: str, 
+    pset_title: str, 
+    request: Request, 
+    db: Session = Depends(get_db)
+):
+    """ 
+    Видалення тікету.
+    """
+    ticket = db.get(Ticket, id)
+    if not ticket:
+        return "No ticket to delete."
+    return templates.TemplateResponse("ticket/del.html", 
+            {"request": request, "ticket": ticket, "pset_title": pset_title})
+
+
+@router.post("/ticket/del/{id}/{pset_title}")
+async def post_ticket_del(
+    id: str,
+    pset_title: str, 
+    request: Request,
+    db: Session = Depends(get_db)
+):
+    """ 
+    Видалення тікету.
+    """
+    ticket = db.get(Ticket, id)
+    db.delete(ticket)
+    db.commit()
+    return RedirectResponse(url=f"/problemset/show/{pset_title}", status_code=302)
+

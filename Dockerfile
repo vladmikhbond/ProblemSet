@@ -11,6 +11,6 @@ COPY app /app
 RUN pip install --no-cache-dir -r /tmp/requirements.txt
                                  
 # Відкриваємо порт
-EXPOSE 8000
+EXPOSE 7001
 
 CMD ["python", "run.py"]

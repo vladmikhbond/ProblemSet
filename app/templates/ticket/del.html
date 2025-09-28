@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+
+{% block title %}{% endblock %}
+
+{% block content %}
+
+<h1>Видалення тікету {{ ticket.username }}</h1>
+
+<form method="post" action="/ticket/del/{{ticket.id}}/{{pset_title}}"> 
+
+  <footer class="grid">
+    <button type="submit" style="--pico-color: white; background-color: red;">Видалити</button>
+    <button type="button" lass="secondary" onclick="history.back()">Скасувати</button>
+  </footer>
+</form>
+
+{% endblock %}
+

@@ -8,11 +8,14 @@ async function f(e) {
 
 let ids = problem_ids.innerHTML.trim().split(/\s+/);
 
-
-async function fetch_problems(lang) {
+async function fetch_problems(lang) 
+{
   const response = await fetch(`/problems/lang/${lang}`);
+  if (!response.ok) {
+      error_message.innerHTML = response.statusText;
+      return 
+  }
   const headers_json = await response.json();
-
   problem_headers.innerHTML = "";
   for (const  h of headers_json) {
     const el = document.createElement("div");
