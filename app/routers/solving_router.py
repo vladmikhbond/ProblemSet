@@ -22,6 +22,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # --------------- List of problem headers (id, title, attr). AJAX
+
 @router.get("/problems/lang/{lang}")
 async def get_problem_headers(
     request: Request,
