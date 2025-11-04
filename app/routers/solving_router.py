@@ -2,7 +2,7 @@ import httpx, re
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
-from fastapi import APIRouter, Depends, HTTPException, Request, Response, Form
+from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from ..models.schemas import ProblemHeaderSchema, ProblemSchema, AnswerSchema

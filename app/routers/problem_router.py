@@ -101,7 +101,7 @@ async def post_problem_edit(
         if not check_message.startswith("OK"):
             return templates.TemplateResponse("problem/edit.html", {"request": request, "problem": problem, "error": check_message})
     except Exception as e:
-        err_mes = f"Error during a check solving: {e}"
+        err_mes = f"Помилка при перевірці рішення задачі: {e}"
         logger.error(err_mes)
         return templates.TemplateResponse("problem/edit.html", {"request": request, "problem": problem, "error": err_mes})
     db.commit()

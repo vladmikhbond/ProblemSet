@@ -127,9 +127,7 @@ async def post_problemset_edit(
     stud_filter: str = Form(...),
     db: Session = Depends(get_db)
 ):
-    """ 
-    Редагування обраного задачника поточного юзера (викладача).
-    """
+    
     problemset = db.get(ProblemSet, id)
     if not problemset:
         return RedirectResponse(url="/problemset/list", status_code=302)
