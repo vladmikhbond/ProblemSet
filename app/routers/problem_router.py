@@ -178,3 +178,22 @@ async def post_problem_del(
 
 
 
+# --------------- List of problem headers (id, title, attr). AJAX
+
+@router.get("/problem/lang/{lang}")
+async def get_problem_headers(
+    request: Request,
+    lang: str,
+):
+    token = request.session.get("token", "")
+    headers = {"Authorization": f"Bearer {token}"}
+    api_url = f"{PSS_HOST}/api/problems/lang/{lang}"
+    async with httpx.AsyncClient() as client:
+        response = await client.get(api_url, headers=headers)
+        if response.is_success:
+            # [{"id", "title", "attr"}]
+            json = response.json()
+            return json
+        else:
+            raise HTTPException(status_code=404, detail="Problems not found")
+

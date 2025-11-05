@@ -10,7 +10,7 @@ let ids = problem_ids.innerHTML.trim().split(/\s+/);
 
 async function fetch_problems(lang) 
 {
-  const response = await fetch(`/problems/lang/${lang}`);
+  const response = await fetch(`/problem/lang/${lang}`);
   if (!response.ok) {
       error_message.innerHTML = response.statusText;
       return 

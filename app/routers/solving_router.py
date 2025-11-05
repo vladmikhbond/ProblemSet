@@ -21,28 +21,9 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# --------------- List of problem headers (id, title, attr). AJAX
 
-@router.get("/problems/lang/{lang}")
-async def get_problem_headers(
-    request: Request,
-    lang: str,
-):
-    token = request.session.get("token", "")
-    headers = {"Authorization": f"Bearer {token}"}
-    api_url = f"{PSS_HOST}/api/problems/lang/{lang}"
-    async with httpx.AsyncClient() as client:
-        response = await client.get(api_url, headers=headers)
-        if response.is_success:
-            # [{"id", "title", "attr"}]
-            json = response.json()
-            return json
-        else:
-            raise HTTPException(status_code=404, detail="Problems not found")
-
-
-@router.get("/to_solve")
-async def get_to_solve(
+@router.get("/solving")
+async def get_solveing(
     request: Request,
     db: Session = Depends(get_db),
 ):
@@ -87,11 +68,11 @@ async def get_to_solve(
             "t": rest_time,
             "headers": pheaders})
 
-    return templates.TemplateResponse("solving/to_solve.html", {"request": request, "psets": psets})
+    return templates.TemplateResponse("solving/list.html", {"request": request, "psets": psets})
 
 
-@router.get("/to_solve/problem/{prob_id}/{pset_title}")  
-async def get_to_solve_problem(
+@router.get("/solving/problem/{prob_id}/{pset_title}")  
+async def get_solveing_problem(
     prob_id: str,
     pset_title: str,
     request: Request,
@@ -134,7 +115,6 @@ async def get_to_solve_problem(
         )
         ticket.do_record("Вперше побачив задачу.", "User saw the task for the first time.");
 
-
         try:
             db.add(ticket)
             db.commit()
@@ -146,10 +126,10 @@ async def get_to_solve_problem(
     # open a problem window
     problem = ProblemSchema(**json_obj)
     return templates.TemplateResponse(
-        "solving/to_solve_problem.html",
+        "solving/problem.html",
         {"request": request, "problem": problem})
 
-#-------------- check
+#-------------- check (AJAX)
 
 @router.post("/check")
 async def post_check(
@@ -157,7 +137,7 @@ async def post_check(
     request: Request, 
     db: Session = Depends(get_db),
 ):
-    """    AJAX
+    """
     Відправляє рішення задачі на перевірку до PSS і повертає відповідь від PSS.
     Додає в тіскет рішення і відповідь. 
     """
