@@ -1,13 +1,13 @@
 import re
 
-from fastapi import APIRouter, Depends, Request, Response, Form
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi import APIRouter, Depends, Request
+from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
-from ..models.schemas import ProblemHeaderSchema, ProblemSchema, AnswerSchema
-from ..utils.utils import PSS_HOST, username_from_session
 from sqlalchemy.orm import Session
+
+from app.routers.login_router import get_current_user
 from ..dal import get_db  # Функція для отримання сесії БД
-from ..models.pss_models import ProblemSet, Ticket
+from ..models.pss_models import Ticket
 
 # шаблони Jinja2
 templates = Jinja2Templates(directory="app/templates")
@@ -25,7 +25,8 @@ logger = logging.getLogger(__name__)
 async def get_solving_ticket(
     id: str, 
     request: Request, 
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    user: dict = Depends(get_current_user)
 ):
     """ 
     Показ вирішень з одного тікету.
@@ -45,7 +46,8 @@ async def get_ticket_del(
     id: str, 
     pset_title: str, 
     request: Request, 
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    user: dict = Depends(get_current_user)
 ):
     """ 
     Видалення тікету.
@@ -61,8 +63,8 @@ async def get_ticket_del(
 async def post_ticket_del(
     id: str,
     pset_title: str, 
-    request: Request,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    user: dict = Depends(get_current_user)
 ):
     """ 
     Видалення тікету.

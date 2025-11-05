@@ -1,13 +1,7 @@
 TODO  
-причесать solving_routrer
-захистити ресурси залежністю get_current_user
 
-зміна паролю юзером
-
-
-
-
-https://ace.c9.io/
+пеервірити все
+імплементувати    https://ace.c9.io/
 
 додати pytest
 docker_compose

@@ -8,7 +8,7 @@ from jwt.exceptions import InvalidTokenError
 from fastapi import APIRouter, Depends, HTTPException, Request, Form, Response
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
-from ..utils.utils import PSS_HOST, payload_from_token
+
 from  ..config import settings
 
 SECRET_KEY = settings.SECRET_KEY
@@ -38,17 +38,17 @@ async def login(
     data = {"username": username, "password": password}
     client = httpx.AsyncClient()
     try:
-        response = await client.post(url, data=data)
+        pss_response = await client.post(url, data=data)
     except Exception as e:
         raise HTTPException(500, f"{e}\nА чи працює pss_cont на :7000 у мережі докера mynet?")
     finally:
         await client.aclose()
 
-    if response.is_success:
-        json = response.json()
+    if pss_response.is_success:
+        json = pss_response.json()
         token = json["access_token"]
     else: 
-        print(f"Error. Response status_code: {response.status_code}")
+        print(f"Error. Response status_code: {pss_response.status_code}")
         return templates.TemplateResponse("login.html", {
             "request": request, 
             "error": "Invalid credentials"
@@ -58,7 +58,7 @@ async def login(
     request.session["token"] = token
 
     # redirect
-    payload = payload_from_token(request)
+    payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM]) 
     if payload.get("role") == "tutor":
         return RedirectResponse(url="/problemset/list", status_code=302)
     else:
@@ -74,11 +74,12 @@ def get_current_user(request: Request) -> dict:
     except InvalidTokenError as e:
         raise HTTPException(401, detail="Could not validate credentials")
     
-    # get username from token
+    # get payload from token
     username: Optional[str] = payload.get("sub")
     if username is None:
         raise HTTPException(401, detail="Token missing username")
+    role: str = payload.get("role")
     
-    return {"username": username}
+    return {"username": username, "role": role}
 
 

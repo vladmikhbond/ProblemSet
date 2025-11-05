@@ -16,24 +16,6 @@ credentials_exception = HTTPException(
     headers={"WWW-Authenticate": "Bearer"} )
 
 
-def payload_from_token(request: Request):
-    try:
-        token = request.session.get("token", "")
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])        
-    except InvalidTokenError as e:
-        raise credentials_exception
-    else:
-        return payload
-
-def username_from_session(request: Request):
-    try:
-        token = request.session.get("token", "")
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])        
-    except InvalidTokenError as e:
-        raise credentials_exception
-    else:
-        return payload.get("sub")
-
 
 
 

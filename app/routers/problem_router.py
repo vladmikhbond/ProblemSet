@@ -1,13 +1,14 @@
 import httpx, os, uuid
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, Form
-from fastapi.responses import HTMLResponse, PlainTextResponse, RedirectResponse
+from fastapi.responses import PlainTextResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
-from ..models.pss_models import Problem, ProblemSet, Ticket
-from ..models.schemas import ProblemHeaderSchema, ProblemSetSchema
-from ..utils.utils import payload_from_token, PSS_HOST
+
+from app.routers.login_router import get_current_user
+from ..models.pss_models import Problem
+from ..utils.utils import PSS_HOST
 from ..dal import get_db  # Функція для отримання сесії БД
-from sqlalchemy.orm import Session, noload
+from sqlalchemy.orm import Session
 
 
 # шаблони Jinja2
@@ -25,19 +26,19 @@ logger = logging.getLogger(__name__)
 async def get_problem_list(
     request: Request, 
     db: Session = Depends(get_db),
-    payload = Depends(payload_from_token),
+    user: dict = Depends(get_current_user)
 ):
     """ 
     Усі задачі поточного юзера (викладача).
     """
     # return the login page with error message
-    role = payload.get("role")
+    role = user["role"]
     if role != "tutor":
         return templates.TemplateResponse(
             "login.html", 
             {"request": request, "error": role})
     
-    username = payload.get("sub")
+    username = user["username"]
     problems: list[Problem] = sorted(
         db.query(Problem).filter(Problem.author == username).all(), 
         key=lambda p: p.attr)
@@ -50,7 +51,8 @@ async def get_problem_list(
 async def get_problem_edit(
     id: str, 
     request: Request, 
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    user: dict = Depends(get_current_user)
 ):
     """ 
     Редагування задачі.
@@ -74,6 +76,7 @@ async def post_problem_edit(
     code: str = Form(...),
     author: str = Form(...),
     db: Session = Depends(get_db),
+    user: dict = Depends(get_current_user)
 ):
     """ 
      Редагування задачі.
@@ -115,7 +118,8 @@ async def post_problem_edit(
 async def get_problem_copy(
     id: str, 
     request: Request, 
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    user: dict = Depends(get_current_user)
 ):
     """ 
     Копіювання задачі.
@@ -151,7 +155,8 @@ def copy_instance(obj):
 async def get_problem_del(
     id: str, 
     request: Request, 
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    user: dict = Depends(get_current_user)
 ):
     """ 
     Видалення задачі.
@@ -165,8 +170,8 @@ async def get_problem_del(
 @router.post("/problem/del/{id}")
 async def post_problem_del(
     id: str,
-    request: Request,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    user: dict = Depends(get_current_user)
 ):
     """ 
     Видалення задачі.

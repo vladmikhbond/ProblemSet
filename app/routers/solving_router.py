@@ -5,8 +5,10 @@ from zoneinfo import ZoneInfo
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
+
+from app.routers.login_router import get_current_user
 from ..models.schemas import ProblemHeaderSchema, ProblemSchema, AnswerSchema
-from ..utils.utils import PSS_HOST, username_from_session
+from ..utils.utils import PSS_HOST
 from sqlalchemy.orm import Session
 from ..dal import get_db  # Функція для отримання сесії БД
 from ..models.pss_models import ProblemSet, Ticket
@@ -26,12 +28,13 @@ logger = logging.getLogger(__name__)
 async def get_solveing(
     request: Request,
     db: Session = Depends(get_db),
+    user: dict = Depends(get_current_user)
 ):
     """
     Показує студенту сторінку з задачами, розподіленими по задачникам.
     Враховуються лише відкриті та доступні поточному юзеру задачники.
     """
-    username = username_from_session(request)
+    username = user["username"]
     problemsets: list[ProblemSet] = db.query(ProblemSet).all()
     open_problemsets = [ps for ps in problemsets if ps.is_open() and re.match(ps.stud_filter, username)]
 
@@ -77,6 +80,7 @@ async def get_solveing_problem(
     pset_title: str,
     request: Request,
     db: Session = Depends(get_db),
+    user: dict = Depends(get_current_user)
 ):
     """
     Відкриває студенту вікно для вирішення задачі.
@@ -99,7 +103,7 @@ async def get_solveing_problem(
         logger(err_mes)
         return RedirectResponse(url="/open_problems", status_code=302)
     
-    username = username_from_session(request)
+    username = user["username"]
 
     ticket = db.query(Ticket).filter(Ticket.username == username and Ticket.problem_id == prob_id).first()
     # create a new ticket
@@ -134,15 +138,15 @@ async def get_solveing_problem(
 @router.post("/check")
 async def post_check(
     answer: AnswerSchema, 
-    request: Request, 
     db: Session = Depends(get_db),
+    user: dict = Depends(get_current_user)
 ):
     """
     Відправляє рішення задачі на перевірку до PSS і повертає відповідь від PSS.
     Додає в тіскет рішення і відповідь. 
     """
     # get a ticket
-    username = username_from_session(request)
+    username = user["username"]
     ticket = db.query(Ticket).filter(Ticket.username == username and Ticket.problem_id == answer.id).first()
     if (ticket is None):
         raise RuntimeError("не знайдений тікет")

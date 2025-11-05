@@ -4,8 +4,9 @@ from zoneinfo import ZoneInfo
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
+
+from app.routers.login_router import get_current_user
 from ..models.pss_models import Problem, ProblemSet, Ticket
-from ..utils.utils import payload_from_token
 from ..dal import get_db  # Функція для отримання сесії БД
 from sqlalchemy.orm import Session
 
@@ -18,13 +19,13 @@ router = APIRouter()
 async def get_problemset_list(
     request: Request, 
     db: Session = Depends(get_db),
-    payload = Depends(payload_from_token),
+    user: dict = Depends(get_current_user)
 ):
     """ 
     Усі задачники поточного юзера (викладача).
     """
     # return the login page with error message
-    role = payload.get("role")
+    role = user["role"]
     if role != "tutor":
         return templates.TemplateResponse(
             "login.html", 
@@ -32,7 +33,7 @@ async def get_problemset_list(
         
     all_problemsets: list[ProblemSet] = db.query(ProblemSet).all()
 
-    username = payload.get("sub")
+    username = user["username"]
     problemsets = [p for p in all_problemsets if p.username == username ] 
     return templates.TemplateResponse("problemset/list.html", {"request": request, "problemsets": problemsets})
 
@@ -41,6 +42,7 @@ async def get_problemset_list(
 @router.get("/problemset/new")
 async def get_problemset_new(
     request: Request,
+    user: dict = Depends(get_current_user)
 ):
     """ 
     Створення нового задачника поточного юзера (викладача). 
@@ -65,7 +67,7 @@ async def post_problemset_new(
     open_minutes: int = Form(...),
     stud_filter: str = Form(...),
     db: Session = Depends(get_db),
-    payload = Depends(payload_from_token), 
+    user: dict = Depends(get_current_user)
 ):
     """ 
     Створення нового задачника поточного юзера (викладача).
@@ -76,7 +78,7 @@ async def post_problemset_new(
 
     problemset = ProblemSet(
         title = title,
-        username = payload.get("sub"),                    
+        username = user["username"],                   
         problem_ids = problem_ids,                    
         open_time = dt,
         open_minutes = open_minutes,
@@ -99,7 +101,8 @@ async def post_problemset_new(
 async def get_problemset_edit(
     id: str, 
     request: Request, 
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    user: dict = Depends(get_current_user)
 ):
     """ 
     Редагування обраного задачника поточного юзера (викладача).
@@ -125,7 +128,8 @@ async def post_problemset_edit(
     open_time: str = Form(...),
     open_minutes: int = Form(...),
     stud_filter: str = Form(...),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    user: dict = Depends(get_current_user)
 ):
     
     problemset = db.get(ProblemSet, id)
@@ -156,7 +160,8 @@ async def post_problemset_edit(
 async def get_problemset_del(
     id: str, 
     request: Request, 
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    user: dict = Depends(get_current_user)
 ):
     """ 
     Видалення задачника.
@@ -171,7 +176,8 @@ async def get_problemset_del(
 async def post_problemset_del(
     id: str,
     request: Request,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    user: dict = Depends(get_current_user)
 ):
     """ 
     Видалення задачника.
@@ -187,7 +193,8 @@ async def post_problemset_del(
 async def problemset_show(
     id: str, 
     request: Request, 
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    user: dict = Depends(get_current_user)
 ):
     """ 
     Показ вирішень з одного задачника.
