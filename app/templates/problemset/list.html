@@ -3,9 +3,9 @@
 {% block title %}{% endblock %}
 
 {% block content %}
-    <h1>Мої задачники</h1>
+    <h1>Задачники</h1>
     <div>
-      <a href="/problemset/new">Новий</a>
+      <a href="/problemset/new">Новий задачник</a>
     </div>
     {% if problemsets and problemsets|length %}
     <table>
@@ -14,7 +14,7 @@
         <tr>
           <td>{{ problemset.title }}</td>
           <td>
-              <a href="/problemset/show/{{problemset.title}}">show</a> | 
+              <a href="/problemset/show/{{problemset.title}}">open</a> | 
               <a href="/problemset/edit/{{problemset.title}}">edit</a> | 
               <a href="/problemset/del/{{problemset.title}}">del</a>
           </td>
