@@ -1,22 +1,24 @@
 {% extends "layout.html" %}
 
-{% block title %}{% endblock %}
+{% block title %}{{ problem.title }}{% endblock %}
 
 {% block content %}
 <section class="section">
   <div class="container">
     <div class="box">
-      <h1 class="title has-text-info">{{ problem.title }}  <small>.{{problem.lang}}</small></h1>
+      <h1 class="title has-text-info">{{ problem.title }} <small> ({{ problem.lang }})</small></h1>
+      
       <div class="content mb-4">
         {{ problem.cond }}
       </div>
+      
       <div class="field">
         <label class="label">Ваш код:</label>
-        <div class="control">
-          <textarea id="codeArea" class="textarea is-family-monospace" rows="12">{{ problem.view }}</textarea>
-        </div>
+        <div id="editor" style="height: 400px; width: 100%; border: 1px solid #ddd;"></div>
       </div>
+      
       <input type="hidden" id="problemId" value="{{ problem.id }}">
+      
       <div class="field is-grouped mt-3">
         <div class="control">
           <button id="checkButton" class="button is-primary is-medium">
@@ -25,46 +27,56 @@
           </button>
         </div>
       </div>
-      <div id="message" class="notification is-light mt-4" style="display:none; white-space: pre;"></div>
+      
+      <textarea id="message" style="color: red;"></textarea>
     </div>
   </div>
 </section>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.2/ace.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.2/mode-{{ problem.lang }}.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.2/theme-twilight.min.js"></script>
 
 <script>
-   const codeArea = document.getElementById("codeArea");
-   const checkButton = document.getElementById("checkButton");
-   const problemId = document.getElementById("problemId");
-   const message = document.getElementById("message");
+    const editor = ace.edit("editor");
+    editor.setTheme("ace/theme/twilight");
+    editor.session.setMode("ace/mode/{{ problem.lang }}");
+    editor.setValue(`{{ problem.view|safe }}`);
+    editor.setFontSize(14);
 
-   checkButton.addEventListener("click", async () => {
-      const payload = {
-         id: problemId.value,
-         solving: codeArea.value
-      };
+    const checkButton = document.getElementById("checkButton");
+    const problemId = document.getElementById("problemId");
+    const message = document.getElementById("message");
 
-      try {
-         const response = await fetch("/check", {
-            method: "POST",
-            headers: {
-               "Content-Type": "application/json"
-            },
-            body: JSON.stringify(payload)
-         });
+    checkButton.addEventListener("click", async () => {
+        const payload = {
+            id: problemId.value,
+            solving: editor.getValue()
+        };
 
-         if (!response.ok) {
-            throw new Error("HTTP error " + response.status);
-         }
+        try {
+            const response = await fetch("/check", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
 
-         const data = await response.json(); // або response.text(), залежно від вашого API
-         console.log("Server response:", data);
-         message.style.display = "block";
-         message.innerHTML = data;
+            if (!response.ok) {
+                throw new Error("HTTP error " + response.status);
+            }
 
-      } catch (err) {
-         console.error("Request failed:", err);
-      }
-   });
+            const data = await response.json();
+            
+            let check_mes = data.message || data;
+            let ok = check_mes.slice(0, 4).indexOf("OK") != -1;
+            message.style.color = ok ? "green" : "red";
+            message.innerHTML = check_mes;
+
+        } catch (err) {
+            console.error("Request failed:", err);
+            message.innerHTML = "Помилка: " + err.message;
+        }
+    });
 </script>
 
 {% endblock %}

@@ -129,6 +129,10 @@ async def get_solveing_problem(
     
     # open a problem window
     problem = ProblemSchema(**json_obj)
+
+    dict = {"py": "python", "js": "javascript", "cs": "csharp"}
+    problem.lang = dict[problem.lang] 
+
     return templates.TemplateResponse(
         "solving/problem.html",
         {"request": request, "problem": problem})
@@ -140,7 +144,7 @@ async def post_check(
     answer: AnswerSchema, 
     db: Session = Depends(get_db),
     user: dict = Depends(get_current_user)
-):
+) -> str:
     """
     Відправляє рішення задачі на перевірку до PSS і повертає відповідь від PSS.
     Додає в тіскет рішення і відповідь. 
@@ -160,7 +164,7 @@ async def post_check(
         async with httpx.AsyncClient() as client:
             response = await client.post(api_url, json=data)
         # state = response.status_code
-        check_message = response.json()
+        check_message: str = response.json()
     except Exception as e:
         err_mes = f"Error during a check solving: {e}"
         print(err_mes)
