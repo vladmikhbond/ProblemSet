@@ -163,12 +163,11 @@ async def post_check(
     try:
         async with httpx.AsyncClient() as client:
             response = await client.post(api_url, json=data)
-        # state = response.status_code
         check_message: str = response.json()
     except Exception as e:
-        err_mes = f"Error during a check solving: {e}"
-        print(err_mes)
-        return err_mes
+        err_message = f"Error during a check solving: {e}"
+        print(err_message)
+        return err_message
   
     # write solving to the ticket
     ticket.do_record(answer.solving, check_message)
