@@ -71,7 +71,7 @@ async def get_solveing(
             "t": rest_time,
             "headers": pheaders})
 
-    return templates.TemplateResponse("solving/list.html", {"request": request, "psets": psets})
+    return templates.TemplateResponse("solving/list.html", {"request": request, "psets": psets, "user": user})
 
 
 @router.get("/solving/problem/{prob_id}/{pset_title}")  
@@ -135,7 +135,7 @@ async def get_solveing_problem(
 
     return templates.TemplateResponse(
         "solving/problem.html",
-        {"request": request, "problem": problem})
+        {"request": request, "problem": problem, "user": user})
 
 #-------------- check (AJAX)
 

@@ -1,7 +1,7 @@
 TODO  
 
 пеервірити все
-імплементувати    https://ace.c9.io/
+
 
 додати pytest
 docker_compose
