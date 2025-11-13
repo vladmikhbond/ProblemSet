@@ -3,25 +3,24 @@
 {% block title %}{% endblock %}
 
 {% block content %}
-<h1>Задачі</h1>
 
 {% if psets and psets|length %}
   {% for pset in psets %}
     {% set d = pset.t.days %} {% set h = pset.t.seconds // 3600 %} {% set m = (pset.t.seconds % 3600) // 60 %} 
     <article>
       <header>
-        <h2>
+        <h4>
           {{ pset.title }}
           <small>(закриється через {{d}} днів {{h}} годин {{m}} хвилин)</small>
-        </h2>
+        </h4>
       </header>
 
       <ul>
         {% for problem in pset.headers %}
           <li>
             <a href="/solving/problem/{{ problem.id }}/{{ pset.title }}">
-              <strong>{{ problem.title }}</strong><br>
-              <small>{{ problem.attr }}</small>
+              <span>{{ problem.title }} <small>/{{ problem.attr }}</small></span><br>
+
             </a>
           </li>
         {% endfor %}
