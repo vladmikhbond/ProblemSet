@@ -10,11 +10,11 @@ docker_compose
 
 cd c:\git\dock\psscont
 docker build -t pss_img .
-docker run --env-file .env --network mynet -p 7000:7000 -v C:\Git\PY\DBconverter:/data   --name pss_cont  pss_img
+docker run --env-file env.lis --network mynet -p 7000:7000 -v C:\Git\PY\DBconverter:/data   --name pss_cont  pss_img
 
 --- збірка і запуск продуктового контейнеру pset_cont
 
 cd c:\git\dock\ProblemSet
 docker build -t pset_img .
-docker run --env-file .env --network mynet -p 7001:7001 -v C:\Git\PY\DBconverter:/data   --name pset_cont  pset_img
+docker run --env-file env.lis --network mynet -p 7001:7001 -v C:\Git\PY\DBconverter:/data   --name pset_cont  pset_img
 ---

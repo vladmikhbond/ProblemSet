@@ -3,7 +3,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 from .models.pss_models import Ticket
 
-# Створюємо engine (SQLite файл лежить у /data/PSS.db)
+# --------------------------- PSS.db ------------------------
 engine = create_engine(
     "sqlite:////data/PSS.db",
     echo=True,
@@ -20,3 +20,4 @@ def get_db():
         yield db
     finally:
         db.close()
+
