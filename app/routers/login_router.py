@@ -23,12 +23,12 @@ router = APIRouter()
 
 # ----------------------- login
 
-@router.get("/login", response_class=HTMLResponse)
+@router.get("/", response_class=HTMLResponse)
 async def get_login(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
 
 
-@router.post("/login")
+@router.post("/")
 async def login(
     request: Request,
     username: str = Form(...),
