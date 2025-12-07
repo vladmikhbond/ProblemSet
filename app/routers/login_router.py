@@ -1,20 +1,22 @@
 import os
 from typing import Optional
 
+from fastapi.security import APIKeyCookie
 import httpx
 import jwt
 from jwt.exceptions import InvalidTokenError
 
-from fastapi import APIRouter, Depends, HTTPException, Request, Form, Response
+from fastapi.security import OAuth2PasswordRequestForm
+from fastapi import APIRouter, Depends, HTTPException, Request, Form, Response, Security
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
-from  ..config import settings
+from ..models.pss_models import User
 
-SECRET_KEY = settings.SECRET_KEY
-ALGORITHM = settings.ALGORITHM
-PSS_HOST = settings.PSS_HOST
-
+SECRET_KEY = os.getenv("SECRET_KEY")
+ALGORITHM = os.getenv("ALGORITHM")
+TOKEN_LIFETIME = int(os.getenv("TOKEN_LIFETIME"))
+PSS_HOST = os.getenv("PSS_HOST")
 
 # шаблони Jinja2
 templates = Jinja2Templates(directory="app/templates")
@@ -57,29 +59,70 @@ async def login(
     # crate session
     request.session["token"] = token
 
-    # redirect
-    payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM]) 
-    if payload.get("role") == "tutor":
-        return RedirectResponse(url="/problemset/list", status_code=302)
-    else:
-        return RedirectResponse(url="/solving", status_code=302)
+    redirect = RedirectResponse("/problemset/list", status_code=302)
 
-# --------------------------------------------------
+    # Встановлюємо cookie у відповідь
+    redirect.set_cookie(
+        key="access_token",
+        value=token,
+        httponly=True,        # ❗ Забороняє доступ з JS
+        # secure=True,        # ❗ Передавати лише по HTTPS
+        samesite="lax",       # ❗ Захист від CSRF
+        # max_age=TOKEN_LIFETIME * 60,  # in seconds 
+    )
+    return redirect    
 
-def get_current_user(request: Request) -> dict:    
-    # get token from session
+@router.get("/logout")
+def logout(response: Response):
+    response.delete_cookie(
+        key="access_token"
+    )
+    return {"message": "Session ended"}   
+
+# =================================================================
+
+# описуємо джерело токена (cookie)
+cookie_scheme = APIKeyCookie(name="access_token")
+
+def get_current_user(token: str = Security(cookie_scheme)):
     try:
-        token = request.session.get("token", "")
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])        
-    except InvalidTokenError as e:
-        raise HTTPException(401, detail="Could not validate credentials")
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        return User(username=payload.get("sub"), role=payload.get("role"))
+    except Exception:
+        raise HTTPException(status_code=401, detail="Invalid or expired token")
+
+def get_current_tutor(token: str = Security(cookie_scheme)):
+    user = get_current_user(token)
+    if user.role != "tutor":
+        raise HTTPException(status_code=401, detail="You are not a tutor.")
+    return user
+
+
+
+
+
+
+
+
+
+
+
+# # --------------------------------------------------
+
+# def get_current_user(request: Request) -> dict:    
+#     # get token from session
+#     try:
+#         token = request.session.get("token", "")
+#         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])        
+#     except InvalidTokenError as e:
+#         raise HTTPException(401, detail="Could not validate credentials")
     
-    # get payload from token
-    username: Optional[str] = payload.get("sub")
-    if username is None:
-        raise HTTPException(401, detail="Token missing username")
-    role: str = payload.get("role")
+#     # get payload from token
+#     username: Optional[str] = payload.get("sub")
+#     if username is None:
+#         raise HTTPException(401, detail="Token missing username")
+#     role: str = payload.get("role")
     
-    return {"username": username, "role": role}
+#     return {"username": username, "role": role}
 
 

@@ -4,8 +4,8 @@ from fastapi import APIRouter, Depends, HTTPException, Request, Response, Form
 from fastapi.responses import PlainTextResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
-from app.routers.login_router import get_current_user
-from ..models.pss_models import Problem
+from .login_router import get_current_tutor
+from ..models.pss_models import Problem, User
 from ..utils.utils import PSS_HOST
 from ..dal import get_db  # Функція для отримання сесії БД
 from sqlalchemy.orm import Session
@@ -26,21 +26,13 @@ logger = logging.getLogger(__name__)
 async def get_problem_list(
     request: Request, 
     db: Session = Depends(get_db),
-    user: dict = Depends(get_current_user)
+    user: User=Depends(get_current_tutor)
 ):
     """ 
     Усі задачі поточного юзера (викладача).
     """
-    # return the login page with error message
-    role = user["role"]
-    if role != "tutor":
-        return templates.TemplateResponse(
-            "login.html", 
-            {"request": request, "error": role})
-    
-    username = user["username"]
     problems: list[Problem] = sorted(
-        db.query(Problem).filter(Problem.author == username).all(), 
+        db.query(Problem).filter(Problem.author == user.username).all(), 
         key=lambda p: p.attr)
 
     return templates.TemplateResponse("problem/list.html", {"request": request, "problems": problems})
@@ -52,7 +44,7 @@ async def get_problem_edit(
     id: str, 
     request: Request, 
     db: Session = Depends(get_db),
-    user: dict = Depends(get_current_user)
+    user: User=Depends(get_current_tutor)
 ):
     """ 
     Редагування задачі.
@@ -76,7 +68,7 @@ async def post_problem_edit(
     code: str = Form(...),
     author: str = Form(...),
     db: Session = Depends(get_db),
-    user: dict = Depends(get_current_user)
+    user: User=Depends(get_current_tutor)
 ):
     """ 
      Редагування задачі.
@@ -119,7 +111,7 @@ async def get_problem_copy(
     id: str, 
     request: Request, 
     db: Session = Depends(get_db),
-    user: dict = Depends(get_current_user)
+    user: User=Depends(get_current_tutor)
 ):
     """ 
     Копіювання задачі.
@@ -156,7 +148,7 @@ async def get_problem_del(
     id: str, 
     request: Request, 
     db: Session = Depends(get_db),
-    user: dict = Depends(get_current_user)
+    user: User=Depends(get_current_tutor)
 ):
     """ 
     Видалення задачі.
@@ -171,7 +163,7 @@ async def get_problem_del(
 async def post_problem_del(
     id: str,
     db: Session = Depends(get_db),
-    user: dict = Depends(get_current_user)
+    user: User=Depends(get_current_tutor)
 ):
     """ 
     Видалення задачі.
@@ -190,7 +182,8 @@ async def get_problem_headers(
     request: Request,
     lang: str,
 ):
-    token = request.session.get("token", "")
+    # token = request.session.get("token", "")
+    token = request.cookies["access_token"]
     headers = {"Authorization": f"Bearer {token}"}
     api_url = f"{PSS_HOST}/api/problems/lang/{lang}"
     async with httpx.AsyncClient() as client:

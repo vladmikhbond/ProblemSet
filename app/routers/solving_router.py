@@ -6,12 +6,12 @@ from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
-from app.routers.login_router import get_current_user
+from .login_router import get_current_tutor
 from ..models.schemas import ProblemHeaderSchema, ProblemSchema, AnswerSchema
 from ..utils.utils import PSS_HOST
 from sqlalchemy.orm import Session
 from ..dal import get_db  # Функція для отримання сесії БД
-from ..models.pss_models import ProblemSet, Ticket
+from ..models.pss_models import ProblemSet, Ticket, User
 
 # шаблони Jinja2
 templates = Jinja2Templates(directory="app/templates")
@@ -28,15 +28,14 @@ logger = logging.getLogger(__name__)
 async def get_solveing(
     request: Request,
     db: Session = Depends(get_db),
-    user: dict = Depends(get_current_user)
+    user: User=Depends(get_current_tutor)
 ):
     """
-    Показує студенту сторінку з задачами, розподіленими по задачникам.
+    Показує сторінку з задачами, розподіленими по задачникам.
     Враховуються лише відкриті та доступні поточному юзеру задачники.
     """
-    username = user["username"]
     problemsets: list[ProblemSet] = db.query(ProblemSet).all()
-    open_problemsets = [ps for ps in problemsets if ps.is_open() and re.match(ps.stud_filter, username)]
+    open_problemsets = [ps for ps in problemsets if ps.is_open() and re.match(ps.stud_filter, user.username)]
 
     token = request.session.get("token", "")
     if token == "":
@@ -71,7 +70,7 @@ async def get_solveing(
             "t": rest_time,
             "headers": pheaders})
 
-    return templates.TemplateResponse("solving/list.html", {"request": request, "psets": psets, "user": user})
+    return templates.TemplateResponse("solving/list.html", {"request": request, "psets": psets})
 
 
 @router.get("/solving/problem/{prob_id}/{pset_title}")  
@@ -80,11 +79,11 @@ async def get_solveing_problem(
     pset_title: str,
     request: Request,
     db: Session = Depends(get_db),
-    user: dict = Depends(get_current_user)
+    user: User=Depends(get_current_tutor)
 ):
     """
-    Відкриває студенту вікно для вирішення задачі.
-    Створює тікет і зберігає його в сесії, якщо це вже не зроблене раніше.
+    Відкриває вікно для вирішення задачі.
+    Створює тікет і зберігає його в базі даних, якщо це вже не зроблене раніше.
     """
     api_url = f"{PSS_HOST}/api/problems/{prob_id}"
     token = request.session.get("token", "")
@@ -103,15 +102,12 @@ async def get_solveing_problem(
         logger(err_mes)
         return RedirectResponse(url="/open_problems", status_code=302)
     
-    username = user["username"]
-
-    ticket = db.query(Ticket).filter(Ticket.username == username and Ticket.problem_id == prob_id).first()
+    ticket = db.query(Ticket).filter(Ticket.username == user.username and Ticket.problem_id == prob_id).first()
     # create a new ticket
     if ticket is None:
         problemset:ProblemSet = db.query(ProblemSet).get(pset_title)
-        
         ticket = Ticket(
-            username=username, 
+            username=user.username, 
             problem_id=prob_id, 
             records="",
             comment="",
@@ -135,7 +131,7 @@ async def get_solveing_problem(
 
     return templates.TemplateResponse(
         "solving/problem.html",
-        {"request": request, "problem": problem, "user": user})
+        {"request": request, "problem": problem})
 
 #-------------- check (AJAX)
 
@@ -143,15 +139,14 @@ async def get_solveing_problem(
 async def post_check(
     answer: AnswerSchema, 
     db: Session = Depends(get_db),
-    user: dict = Depends(get_current_user)
+    user: User=Depends(get_current_tutor)
 ) -> str:
     """
     Відправляє рішення задачі на перевірку до PSS і повертає відповідь від PSS.
     Додає в тіскет рішення і відповідь. 
     """
     # get a ticket
-    username = user["username"]
-    ticket = db.query(Ticket).filter(Ticket.username == username and Ticket.problem_id == answer.id).first()
+    ticket = db.query(Ticket).filter(Ticket.username == user.username and Ticket.problem_id == answer.id).first()
     if (ticket is None):
         raise RuntimeError("не знайдений тікет")
     if ticket.expire_time < datetime.now():
