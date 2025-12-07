@@ -182,7 +182,6 @@ async def get_problem_headers(
     request: Request,
     lang: str,
 ):
-    # token = request.session.get("token", "")
     token = request.cookies["access_token"]
     headers = {"Authorization": f"Bearer {token}"}
     api_url = f"{PSS_HOST}/api/problems/lang/{lang}"

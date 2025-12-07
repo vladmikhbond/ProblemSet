@@ -37,7 +37,8 @@ async def get_solveing(
     problemsets: list[ProblemSet] = db.query(ProblemSet).all()
     open_problemsets = [ps for ps in problemsets if ps.is_open() and re.match(ps.stud_filter, user.username)]
 
-    token = request.session.get("token", "")
+    token = request.cookies["access_token"]
+
     if token == "":
         # redirect to login page
         return templates.TemplateResponse("login.html", {
@@ -86,7 +87,8 @@ async def get_solveing_problem(
     Створює тікет і зберігає його в базі даних, якщо це вже не зроблене раніше.
     """
     api_url = f"{PSS_HOST}/api/problems/{prob_id}"
-    token = request.session.get("token", "")
+
+    token = request.cookies["access_token"]
     headers = {"Authorization": f"Bearer {token}"}
 
     # redirect to login page
