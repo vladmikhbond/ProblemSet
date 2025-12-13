@@ -21,6 +21,7 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# ----------------------------------- list
 
 @router.get("/problem/list")
 async def get_problem_list(
@@ -37,7 +38,26 @@ async def get_problem_list(
 
     return templates.TemplateResponse("problem/list.html", {"request": request, "problems": problems})
 
-# ------- edit 
+# ---------------------- new
+
+@router.get("/problem/new")
+async def get_problem_new( 
+    request: Request, 
+    db: Session = Depends(get_db),
+    user: User=Depends(get_current_tutor)
+):
+    """ 
+    Створення нової задачі.
+    """
+    problem = Problem(
+        id = str(uuid.uuid4()),
+        author=user.username,
+        timestamp=datetime.now(),
+        title="", attr="", lang="js", cond="", view="", hint="", code="", 
+    )
+    return templates.TemplateResponse("problem/edit.html", {"request": request, "problem": problem})
+
+# ---------------------- edit 
 
 @router.get("/problem/edit/{id}")
 async def get_problem_edit(
@@ -75,8 +95,12 @@ async def post_problem_edit(
      Оновити екземпляр задачі даними з форми. Перевірити код.
     """
     problem = db.get(Problem, id)
-    if not problem:
-        return RedirectResponse(url="/problem/list", status_code=302)
+    is_new = len(id) > 32 and not problem
+    # нова задача
+    if is_new:
+        problem = Problem(
+            id = str(uuid.uuid4()),
+        )
     problem.title = title
     problem.attr = attr
     problem.lang = lang
@@ -87,11 +111,12 @@ async def post_problem_edit(
     problem.author = author    
     problem.timestamp = datetime.now()
 
-    api_url = f"{PSS_HOST}/api/proof"
+    # check author's solving
+
     data = {"source": problem.code, "lang": problem.lang}
     try:
         async with httpx.AsyncClient() as client:
-            response = await client.post(api_url, json=data)
+            response = await client.post(f"{PSS_HOST}/api/proof", json=data)
         check_message = response.json()
         if not check_message.startswith("OK"):
             return templates.TemplateResponse("problem/edit.html", {"request": request, "problem": problem, "error": check_message})
@@ -99,7 +124,12 @@ async def post_problem_edit(
         err_mes = f"Помилка при перевірці рішення задачі: {e}"
         logger.error(err_mes)
         return templates.TemplateResponse("problem/edit.html", {"request": request, "problem": problem, "error": err_mes})
+    
+    # save changes in DB
+    if is_new:
+        db.add(problem)
     db.commit()
+    
     return RedirectResponse(url="/problem/list", status_code=302)
 
 

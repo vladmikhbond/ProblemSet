@@ -79,7 +79,7 @@ async def logout(response: Response):
 # описуємо джерело токена (cookie)
 cookie_scheme = APIKeyCookie(name="access_token")
 
-def get_current_user(token: str = Security(cookie_scheme)):
+def get_current_user(token: str = Security(cookie_scheme)) -> User:
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
     except jwt.ExpiredSignatureError:
@@ -90,7 +90,7 @@ def get_current_user(token: str = Security(cookie_scheme)):
         return User(username=payload.get("sub"), role=payload.get("role"))
 
 
-def get_current_tutor(token: str = Security(cookie_scheme)):
+def get_current_tutor(token: str = Security(cookie_scheme)) -> User:
     user = get_current_user(token)
     if user.role != "tutor":
         raise HTTPException(status_code=403, detail="Permission denied: tutors only.")
