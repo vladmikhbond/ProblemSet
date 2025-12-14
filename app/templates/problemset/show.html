@@ -18,14 +18,11 @@
     {% for problem in dict.values() %}
       <h6>Problem "{{problem.title}}"</h6>
       {% for ticket in problem.tickets %}
-        {% if ticket.state == 1 %} 
-        <span style="margin-left: 50px; color:green;">OK</span>
-        {% endif%}
-        <div>
-          <a href="/ticket/show/{{ticket.id}}" class = "{{class_}}">{{ticket.username}}</a>
-          <a href="/ticket/del/{{ticket.id}}/{{problemset.title}}" style="margin-left: 50px; color:red;"> x </a>
-          
-        </div>
+        {% set color = "green" if ticket.state == 1 else "red" %} 
+        <span>
+          <a href="/ticket/show/{{ticket.id}}" style="color: {{color}};">{{ticket.username}}</a>
+          <a href="/ticket/del/{{ticket.id}}/{{problemset.title}}" style="margin-left: 50px; color:red;"> x </a> 
+        </span>
       {% endfor %}
     {% endfor %}
 

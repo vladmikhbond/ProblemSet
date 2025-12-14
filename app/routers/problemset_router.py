@@ -192,7 +192,5 @@ async def problemset_show(
         problem = db.get(Problem, problem_id)
         dict[problem_id] = problem
 
-        
-
     return templates.TemplateResponse("problemset/show.html", {"request": request, "problemset": problemset, "dict": dict})
 
