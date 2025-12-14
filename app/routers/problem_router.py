@@ -4,7 +4,8 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, Form
 from fastapi.responses import PlainTextResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
-from sqlalchemy.orm import Session, or_
+from sqlalchemy.orm import Session
+from sqlalchemy import or_
 
 from .login_router import get_current_tutor
 from ..models.pss_models import Problem, User
@@ -84,7 +85,7 @@ async def post_problem_edit(
     lang: str = Form(...),
     cond: str = Form(...),
     view: str = Form(...),
-    hint: str = Form(...),
+    hint: str = Form(""),
     code: str = Form(...),
     author: str = Form(...),
     db: Session = Depends(get_db),

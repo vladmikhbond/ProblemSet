@@ -12,9 +12,8 @@
       <tbody>
         {% for problemset in problemsets %}
         <tr>
-          <td>{{ problemset.title }}</td>
+          <td><a href="/problemset/show/{{problemset.title}}">{{ problemset.title }}</a></td> 
           <td>
-              <a href="/problemset/show/{{problemset.title}}">open</a> | 
               <a href="/problemset/edit/{{problemset.title}}">edit</a> | 
               <a href="/problemset/del/{{problemset.title}}">del</a>
           </td>

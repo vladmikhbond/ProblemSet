@@ -149,7 +149,7 @@ async def post_check(
     """
     # get a ticket
     ticket = db.query(Ticket).filter(Ticket.username == user.username and Ticket.problem_id == answer.id).first()
-    if (ticket is None):
+    if ticket is None:
         raise RuntimeError("не знайдений тікет")
     if ticket.expire_time < datetime.now():
         return "Your time is over."

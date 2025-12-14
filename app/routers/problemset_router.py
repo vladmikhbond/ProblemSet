@@ -44,8 +44,6 @@ async def get_problemset_new(
         title = "",                
         problem_ids = "",                    
         open_time = now_str,  
-        open_minutes = 0,
-        stud_filter = ""
     )
     return templates.TemplateResponse("problemset/new.html", {"request": request, "problemset": problemset})
 
@@ -56,14 +54,11 @@ async def post_problemset_new(
     title: str = Form(...),
     problem_ids: str = Form(...),
     open_time: str = Form(...),
-    open_minutes: int = Form(...),
-    stud_filter: str = Form(...),
+    open_minutes: int = Form(0),
+    stud_filter: str = Form(""),
     db: Session = Depends(get_db),
     user: User=Depends(get_current_tutor)
 ):
-    """ 
-    Створення нового задачника поточного юзера (викладача).
-    """
 
     dt = datetime.strptime(open_time, "%Y-%m-%dT%H:%M")
     dt = dt.replace(tzinfo=ZoneInfo("Europe/Kyiv")).astimezone(ZoneInfo("UTC"))
@@ -118,8 +113,8 @@ async def post_problemset_edit(
     username: str = Form(...),  # from hidden input
     problem_ids: str = Form(...),
     open_time: str = Form(...),
-    open_minutes: int = Form(...),
-    stud_filter: str = Form(...),
+    open_minutes: int = Form(0),
+    stud_filter: str = Form(""),
     db: Session = Depends(get_db),
     user: User=Depends(get_current_tutor)
 ):
@@ -196,6 +191,8 @@ async def problemset_show(
     for problem_id in problem_ids:
         problem = db.get(Problem, problem_id)
         dict[problem_id] = problem
+
+        
 
     return templates.TemplateResponse("problemset/show.html", {"request": request, "problemset": problemset, "dict": dict})
 
