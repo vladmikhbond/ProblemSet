@@ -2,12 +2,11 @@
 
 const key = "problemset_problem_filter";
 const inp = document.getElementById("problem_filter");
-const btn = document.getElementById("problem_filter_btn");
 
 inp.value = getCookie(key);
 
-btn.addEventListener("click", async (e) => {
-    e.preventDefault();
+inp.addEventListener("change", async (e) => {
+    console.log("change")
     setCookie(key, encodeURIComponent(inp.value.trim()) )
 })
 
