@@ -1,3 +1,4 @@
+from urllib.parse import unquote
 import httpx, os, uuid
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, Form
@@ -10,6 +11,7 @@ from ..utils.utils import PSS_HOST
 from ..dal import get_db  # Функція для отримання сесії БД
 from sqlalchemy.orm import Session
 
+PROBLEM_FILTER_KEY = "problemset_problem_filter";
 
 # шаблони Jinja2
 templates = Jinja2Templates(directory="app/templates")
@@ -30,11 +32,22 @@ async def get_problem_list(
     user: User=Depends(get_current_tutor)
 ):
     """ 
-    Усі задачі поточного юзера (викладача).
+    Усі задачі.
     """
-    problems: list[Problem] = sorted(
-        db.query(Problem).filter(Problem.author == user.username).all(), 
-        key=lambda p: p.attr)
+    # filter = unquote(request.cookies.get(PROBLEM_FILTER_KEY, ""))
+    # problems: list[Problem] = db.query(Problem).filter(filter in Problem.attr or filter in Problem.title).all()
+    
+    from sqlalchemy import or_
+
+    filter_str = unquote(request.cookies.get(PROBLEM_FILTER_KEY, "")).strip()
+    probs = db.query(Problem)
+    if filter_str:
+        probs = probs.filter(or_(Problem.attr.contains(filter_str), Problem.title.contains(filter_str)))
+    problems: list[Problem] = probs.all()
+
+    
+    problems.sort(key=lambda p: p.attr)
+    
 
     return templates.TemplateResponse("problem/list.html", {"request": request, "problems": problems})
 
@@ -218,9 +231,11 @@ async def get_problem_headers(
     async with httpx.AsyncClient() as client:
         response = await client.get(api_url, headers=headers)
         if response.is_success:
-            # [{"id", "title", "attr"}]
-            json = response.json()
-            return json
+            # headers: [{"id", "title", "attr"}]
+            headers = response.json()
+            filter = unquote(request.cookies.get(PROBLEM_FILTER_KEY, ""))
+            headers = [h for h in headers if filter in h["title"] or filter in h["attr"]] 
+            return headers
         else:
             raise HTTPException(status_code=404, detail="Problems not found")
 

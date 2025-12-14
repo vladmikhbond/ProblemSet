@@ -19,14 +19,20 @@
             <li><a href="#">Довідка</a></li>
             {% else %}
             <li><a href="/problemset/list">Задачники</a></li>
-            <li><a href="/problem/list">Мої Задачі</a></li>
-            <li><a href="/solving" >Вирішувати</a></li>
+            <li><a href="/problem/list">Задачі</a></li>
+            <li><a href="/solving" >Вирішення</a></li>
             <li><a href="#">Довідка</a></li>
             {% endif %}
         </ul>
-        </nav>
 
+        <div class="fieldset--small">
+            <input name="problem_filter"  id="problem_filter">        
+            <button id="problem_filter_btn">Problem</button>
+        </div>
+
+        </nav>
         {% block content %}{% endblock %}
     </main>
+    <script src="/static/js/layout.js" type="text/javascript" charset="utf-8"></script>
 </body>
 </html>

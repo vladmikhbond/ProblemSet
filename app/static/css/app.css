@@ -10,3 +10,23 @@ footer.grid a[role="button"] {
 .my-error {
     color: red;
 }
+
+.fieldset--small { 
+  display:inline-flex; 
+  gap:6px; 
+  align-items:center; 
+  margin-top:16px; 
+}
+#problem_filter { 
+  width:120px; 
+  height: fit-content;
+  font-size:0.85rem; 
+  padding:4px 6px; 
+}
+#problem_filter_btn { 
+  width:100px; 
+  height: fit-content;
+  font-size:0.85rem; 
+  padding:4px 8px; 
+  margin-bottom: 18px;
+}
