@@ -1,4 +1,9 @@
 // ---------------------------- фільтр задач -----------------------------
+// В шаблоні:
+// <input name="problem_filter" style="width: 120px" id="problem_filter" title="Фільтр задач"> 
+// В роутері
+// PROBLEM_FILTER_KEY = "problemset_problem_filter";
+// filter = unquote(request.cookies.get(PROBLEM_FILTER_KEY, "")).strip()
 
 const key = "problemset_problem_filter";
 const inp = document.getElementById("problem_filter");
@@ -10,7 +15,7 @@ inp.addEventListener("change", async (e) => {
     setCookie(key, encodeURIComponent(inp.value.trim()) )
 })
 
-// Встановлення-видалення кукі
+// Встановлення або видалення кукі
 function setCookie(key, value) {
     if (value) {
         const maxAge = 60 * 60 * 24 * 365; // seconds

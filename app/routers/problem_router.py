@@ -4,12 +4,12 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, Form
 from fastapi.responses import PlainTextResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
+from sqlalchemy.orm import Session, or_
 
 from .login_router import get_current_tutor
 from ..models.pss_models import Problem, User
 from ..utils.utils import PSS_HOST
 from ..dal import get_db  # Функція для отримання сесії БД
-from sqlalchemy.orm import Session
 
 PROBLEM_FILTER_KEY = "problemset_problem_filter";
 
@@ -17,11 +17,6 @@ PROBLEM_FILTER_KEY = "problemset_problem_filter";
 templates = Jinja2Templates(directory="app/templates")
 
 router = APIRouter()
-
-# логування
-import logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 # ----------------------------------- list
 
@@ -32,23 +27,15 @@ async def get_problem_list(
     user: User=Depends(get_current_tutor)
 ):
     """ 
-    Усі задачі.
+    Профільтровані задачі.
     """
-    # filter = unquote(request.cookies.get(PROBLEM_FILTER_KEY, ""))
-    # problems: list[Problem] = db.query(Problem).filter(filter in Problem.attr or filter in Problem.title).all()
-    
-    from sqlalchemy import or_
-
-    filter_str = unquote(request.cookies.get(PROBLEM_FILTER_KEY, "")).strip()
+    filter = unquote(request.cookies.get(PROBLEM_FILTER_KEY, "")).strip()
     probs = db.query(Problem)
-    if filter_str:
-        probs = probs.filter(or_(Problem.attr.contains(filter_str), Problem.title.contains(filter_str)))
+    if filter:
+        probs = probs.filter(or_(Problem.attr.contains(filter), Problem.title.contains(filter)))
     problems: list[Problem] = probs.all()
 
-    
     problems.sort(key=lambda p: p.attr)
-    
-
     return templates.TemplateResponse("problem/list.html", {"request": request, "problems": problems})
 
 # ---------------------- new
@@ -70,7 +57,7 @@ async def get_problem_new(
     )
     return templates.TemplateResponse("problem/edit.html", {"request": request, "problem": problem})
 
-# ---------------------- edit 
+# ----------------------- edit 
 
 @router.get("/problem/edit/{id}")
 async def get_problem_edit(
@@ -104,8 +91,8 @@ async def post_problem_edit(
     user: User=Depends(get_current_tutor)
 ):
     """ 
-     Редагування задачі.
-     Оновити екземпляр задачі даними з форми. Перевірити код.
+    Редагування задачі.
+    Оновити екземпляр задачі даними з форми і перевірити авторське рішення.
     """
     problem = db.get(Problem, id)
     is_new = len(id) > 32 and not problem
@@ -135,7 +122,6 @@ async def post_problem_edit(
             return templates.TemplateResponse("problem/edit.html", {"request": request, "problem": problem, "error": check_message})
     except Exception as e:
         err_mes = f"Помилка при перевірці рішення задачі: {e}"
-        logger.error(err_mes)
         return templates.TemplateResponse("problem/edit.html", {"request": request, "problem": problem, "error": err_mes})
     
     # save changes in DB
@@ -145,9 +131,7 @@ async def post_problem_edit(
     
     return RedirectResponse(url="/problem/list", status_code=302)
 
-
-
-# ------- copy 
+# ---------------------- copy 
 
 @router.get("/problem/copy/{id}")
 async def get_problem_copy(
@@ -172,8 +156,6 @@ async def get_problem_copy(
     return templates.TemplateResponse("problem/edit.html", 
             {"request": request, "problem": new_problem})
 
-
-from sqlalchemy.orm import make_transient
 
 def copy_instance(obj):
     cls = obj.__class__
@@ -208,9 +190,6 @@ async def post_problem_del(
     db: Session = Depends(get_db),
     user: User=Depends(get_current_tutor)
 ):
-    """ 
-    Видалення задачі.
-    """
     problem = db.get(Problem, id)
     db.delete(problem)
     db.commit()
@@ -218,7 +197,7 @@ async def post_problem_del(
 
 
 
-# --------------- List of problem headers (id, title, attr). AJAX
+# --------------- List of problem headers. AJAX
 
 @router.get("/problem/lang/{lang}")
 async def get_problem_headers(
