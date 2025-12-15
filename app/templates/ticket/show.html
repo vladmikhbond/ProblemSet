@@ -1,0 +1,39 @@
+{% extends "layout.html" %}
+
+{% block title %}{% endblock %}
+
+{% block content %}
+<style>
+  .dt {
+    margin-top: 10px;
+    font-size: smaller;
+    font-style: italic;
+  }
+
+  .wrong, .ok {
+    font-family: Consolas, 'Courier New', monospace;
+  }
+
+  .ok {
+    background-color:palegreen;
+  }
+</style>
+
+  <div class="container">
+    <h5 class="title">Користувач {{ticket.username}}. Задача "{{ticket.problem.title}}"</h5>
+    <h6>Початок о {{records[0]["when"]}}</h6>
+  
+    {% for record in records[1:]|reverse %}
+      {% set class_ = "ok" if record["check"].startswith('OK') else "wrong"  %}
+      {% set n_rows = (record["code"] | length - (record["code"] | replace('\n', '') | length)) + 1 %} 
+
+      <div>
+        <div class="dt">{{record['when']}}</div>
+        <textarea rows="{{n_rows}}" class="{{class_}}">{{record['code']}}</textarea>
+        <div style="font-size: smaller;">{{record['check']}}</div>
+      </div>
+    {% endfor %}
+    
+  </div>
+
+{% endblock %}

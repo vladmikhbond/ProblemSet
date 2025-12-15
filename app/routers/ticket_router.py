@@ -36,8 +36,8 @@ async def get_solving_ticket(
     matches = re.findall(RE_TEMPLATE, ticket.records, flags=re.S)
     records = [{"when": m[2], "code":m[0].strip(), "check":m[1].strip()} for m in matches]
 
-    return templates.TemplateResponse("problemset/ticket_show.html", 
-            {"request": request, "ticket": ticket, "records": records})
+    return templates.TemplateResponse("ticket/show.html", 
+            {"request": request, "ticket": ticket,  "records": records})
 
 # ------- del 
 
