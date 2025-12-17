@@ -1,16 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Login</title>
-  <!-- Підключення Pico.css -->
-  <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@latest/css/pico.min.css">
-</head>
-<body>
-  <main class="container">
-    <form method="post" action="{{ url_for('login') }}">
-      <h1>PSS Login</h1>
+{% extends "layout.html" %}
 
+{% block title %}{% endblock %}
+
+{% block content %}
+    <form method="post">
+      
       <label for="username">
         Username
         <input type="text" id="username" name="username"
@@ -30,6 +24,4 @@
         <p style="color: var(--del-color);">{{ error }}</p>
       {% endif %}
     </form>
-  </main>
-</body>
-</html>
+{% endblock %}
