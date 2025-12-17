@@ -38,12 +38,12 @@
 
     </form>
 
-    <!-- ---------------------- problem headers --------------------- -->
+    <!-- ---------------------- problem list --------------------- -->
     
     <div id="problem_headers">
       {% for problem in problems %}
         <div id="{{problem.id}}" onclick="toggle('{{problem.id}}')" 
-             style="font-weight: 400;">{{problem.title}} - {{problem.attr}}</div>
+             style="font-weight: 400;" title="{{problem.cond}}"  >{{problem.attr}} - {{problem.title}}</div>
       {% endfor %}
     </div>
     

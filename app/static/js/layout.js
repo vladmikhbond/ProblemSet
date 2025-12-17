@@ -11,8 +11,8 @@ const inp = document.getElementById("problem_filter");
 inp.value = getCookie(key);
 
 inp.addEventListener("change", async (e) => {
-    console.log("change")
     setCookie(key, encodeURIComponent(inp.value.trim()) )
+    location.reload();
 })
 
 // Встановлення або видалення кукі

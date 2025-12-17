@@ -19,6 +19,20 @@ templates = Jinja2Templates(directory="app/templates")
 
 router = APIRouter()
 
+# ----------------------------------- auxiliary tools
+#  
+def filtered_problems(request: Request, db: Session) -> list[Problem]:
+    """ 
+    Профільтровані і впорядклвані задачі.
+    """
+    filter = unquote(request.cookies.get(PROBLEM_FILTER_KEY, "")).strip()
+    probs = db.query(Problem)
+    if filter:
+        probs = probs.filter(or_(Problem.attr.contains(filter), Problem.title.contains(filter))
+                             ).order_by(Problem.attr, Problem.title)
+    return probs.all()
+
+
 # ----------------------------------- list
 
 @router.get("/problem/list")
@@ -27,16 +41,7 @@ async def get_problem_list(
     db: Session = Depends(get_db),
     user: User=Depends(get_current_tutor)
 ):
-    """ 
-    Профільтровані задачі.
-    """
-    filter = unquote(request.cookies.get(PROBLEM_FILTER_KEY, "")).strip()
-    probs = db.query(Problem)
-    if filter:
-        probs = probs.filter(or_(Problem.attr.contains(filter), Problem.title.contains(filter)))
-    problems: list[Problem] = probs.all()
-
-    problems.sort(key=lambda p: p.attr)
+    problems = filtered_problems(request, db)
     return templates.TemplateResponse("problem/list.html", {"request": request, "problems": problems})
 
 # ---------------------- new

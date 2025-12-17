@@ -6,6 +6,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
 from .login_router import get_current_tutor
+from .problem_router import filtered_problems
 from ..models.pss_models import Problem, ProblemSet, Ticket, User
 from ..dal import get_db  # Функція для отримання сесії БД
 from sqlalchemy.orm import Session
@@ -44,9 +45,10 @@ async def get_problemset_new(
     problemset = ProblemSet(
         title = "",                
         problem_ids = "",                    
-        open_time = now_str,  
+        open_time = now_str,
+        stud_filter = "",
     )
-    problems = db.query(Problem).all()
+    problems = filtered_problems(request, db)
     return templates.TemplateResponse("problemset/edit.html", {"request": request, "problemset": problemset, "problems": problems})
 
 
@@ -64,7 +66,7 @@ async def post_problemset_new(
 
     time = datetime.strptime(open_time, "%Y-%m-%dT%H:%M")
     time = time.replace(tzinfo=ZoneInfo("Europe/Kyiv")).astimezone(ZoneInfo("UTC"))
-    problems = db.query(Problem).all()
+    problems = problems = filtered_problems(request, db)
 
     problemset = ProblemSet(
         title = title,
@@ -99,7 +101,7 @@ async def get_problemset_edit(
     """
     problemset = db.get(ProblemSet, id)
     problem_headers = []
-    problems = db.query(Problem).all()
+    problems = filtered_problems(request, db)
 
     if not problemset:
         return RedirectResponse(url="/problemset/list", status_code=302)
@@ -122,7 +124,7 @@ async def post_problemset_edit(
     db: Session = Depends(get_db),
     user: User=Depends(get_current_tutor)
 ):
-    problems = db.query(Problem).all()
+    problems = filtered_problems(request, db)
     problemset = db.get(ProblemSet, id)
     if not problemset:
         return RedirectResponse(url="/problemset/list", status_code=302)
