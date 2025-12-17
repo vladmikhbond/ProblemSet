@@ -34,6 +34,7 @@ async def get_problemset_list(
 @router.get("/problemset/new")
 async def get_problemset_new(
     request: Request,
+    db: Session = Depends(get_db),
     user: User=Depends(get_current_tutor)
 ):
     """ 
@@ -45,7 +46,8 @@ async def get_problemset_new(
         problem_ids = "",                    
         open_time = now_str,  
     )
-    return templates.TemplateResponse("problemset/new.html", {"request": request, "problemset": problemset})
+    problems = db.query(Problem).all()
+    return templates.TemplateResponse("problemset/edit.html", {"request": request, "problemset": problemset, "problems": problems})
 
 
 @router.post("/problemset/new")
@@ -60,14 +62,15 @@ async def post_problemset_new(
     user: User=Depends(get_current_tutor)
 ):
 
-    dt = datetime.strptime(open_time, "%Y-%m-%dT%H:%M")
-    dt = dt.replace(tzinfo=ZoneInfo("Europe/Kyiv")).astimezone(ZoneInfo("UTC"))
+    time = datetime.strptime(open_time, "%Y-%m-%dT%H:%M")
+    time = time.replace(tzinfo=ZoneInfo("Europe/Kyiv")).astimezone(ZoneInfo("UTC"))
+    problems = db.query(Problem).all()
 
     problemset = ProblemSet(
         title = title,
         username = user.username,
         problem_ids = problem_ids,                    
-        open_time = dt,
+        open_time = time,
         open_minutes = open_minutes,
         stud_filter = stud_filter
     )
@@ -78,7 +81,7 @@ async def post_problemset_new(
         db.rollback()
         err_mes = f"Error during a problem request: {e}"
         print(err_mes)
-        return templates.TemplateResponse("problemset/new.html", {"request": request, "problemset": problemset})
+        return templates.TemplateResponse("problemset/edit.html", {"request": request, "problemset": problemset, "problems": problems})
     return RedirectResponse(url="/problemset/list", status_code=302)
 
 
@@ -96,6 +99,7 @@ async def get_problemset_edit(
     """
     problemset = db.get(ProblemSet, id)
     problem_headers = []
+    problems = db.query(Problem).all()
 
     if not problemset:
         return RedirectResponse(url="/problemset/list", status_code=302)
@@ -103,7 +107,7 @@ async def get_problemset_edit(
     dt_str = problemset.open_time.astimezone(ZoneInfo("Europe/Kyiv")).strftime("%Y-%m-%dT%H:%M")
     problemset.open_time = dt_str
     return templates.TemplateResponse("problemset/edit.html", 
-            {"request": request, "problemset": problemset, "problem_headers": problem_headers})
+            {"request": request, "problemset": problemset, "problems": problems})
 
 
 @router.post("/problemset/edit/{id}")
@@ -118,17 +122,17 @@ async def post_problemset_edit(
     db: Session = Depends(get_db),
     user: User=Depends(get_current_tutor)
 ):
-    
+    problems = db.query(Problem).all()
     problemset = db.get(ProblemSet, id)
     if not problemset:
         return RedirectResponse(url="/problemset/list", status_code=302)
     problemset.username = username  
     problemset.problem_ids = problem_ids
 
-    dt = datetime.strptime(open_time, "%Y-%m-%dT%H:%M")
-    dt = dt.replace(tzinfo=ZoneInfo("Europe/Kyiv")).astimezone(ZoneInfo("UTC"))
+    time = datetime.strptime(open_time, "%Y-%m-%dT%H:%M")
+    time = time.replace(tzinfo=ZoneInfo("Europe/Kyiv")).astimezone(ZoneInfo("UTC"))
 
-    problemset.open_time = dt
+    problemset.open_time = time
     problemset.open_minutes = open_minutes
     problemset.stud_filter = stud_filter
     try:                       
@@ -137,7 +141,7 @@ async def post_problemset_edit(
         db.rollback()
         err_mes = f"Error during a problemset edit: {e}"
         print(err_mes)
-        return templates.TemplateResponse("problemset/edit.html", {"request": request, "problemset": problemset})
+        return templates.TemplateResponse("problemset/edit.html", {"request": request, "problemset": problemset, "problems": problems})
     
     return RedirectResponse(url="/problemset/list", status_code=302)
 

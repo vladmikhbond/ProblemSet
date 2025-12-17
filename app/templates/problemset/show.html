@@ -14,7 +14,7 @@
 <section class="section">
   <div class="container">
 
-    <h3 class="title">{{ problemset.title }}</h3>
+    <h3 class="title">Вирішення задач з "{{ problemset.title }}"</h3>
     {% for problem in dict.values() %}
       <h6>Problem "{{problem.title}}"</h6>
       {% for ticket in problem.tickets %}
