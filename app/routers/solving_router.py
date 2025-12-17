@@ -5,13 +5,14 @@ from zoneinfo import ZoneInfo
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
+from sqlalchemy import and_
 
 from .login_router import get_current_tutor
 from ..models.schemas import ProblemHeaderSchema, ProblemSchema, AnswerSchema
 from ..utils.utils import PSS_HOST
 from sqlalchemy.orm import Session
 from ..dal import get_db  # Функція для отримання сесії БД
-from ..models.pss_models import ProblemSet, Ticket, User
+from ..models.pss_models import Problem, ProblemSet, Ticket, User
 
 # шаблони Jinja2
 templates = Jinja2Templates(directory="app/templates")
@@ -74,9 +75,9 @@ async def get_solveing(
     return templates.TemplateResponse("solving/list.html", {"request": request, "psets": psets})
 
 
-@router.get("/solving/problem/{prob_id}/{pset_title}")  
+@router.get("/solving/problem/{problem_id}/{pset_title}")  
 async def get_solveing_problem(
-    prob_id: str,
+    problem_id: str,
     pset_title: str,
     request: Request,
     db: Session = Depends(get_db),
@@ -85,32 +86,20 @@ async def get_solveing_problem(
     """
     Відкриває вікно для вирішення задачі.
     Створює тікет і зберігає його в базі даних, якщо це вже не зроблене раніше.
-    """
-    api_url = f"{PSS_HOST}/api/problems/{prob_id}"
+    """  
+    problem = db.get(Problem, problem_id)
 
-    token = request.cookies["access_token"]
-    headers = {"Authorization": f"Bearer {token}"}
+    # get user's ticket
+    ticket = db.query(Ticket) \
+        .filter(and_(Ticket.username == user.username, Ticket.problem_id == problem_id)) \
+        .first()
 
-    # redirect to login page
-    if token == "":
-        return templates.TemplateResponse("login.html", {"request": request, "error": "No token"})
-
-    try:
-        async with httpx.AsyncClient() as client:
-            response = await client.get(api_url, headers=headers)
-        json_obj = response.json()
-    except Exception as e:
-        err_mes = f"Error during a problem request: {e}"
-        logger(err_mes)
-        return RedirectResponse(url="/open_problems", status_code=302)
-    
-    ticket = db.query(Ticket).filter(Ticket.username == user.username and Ticket.problem_id == prob_id).first()
     # create a new ticket
     if ticket is None:
         problemset:ProblemSet = db.query(ProblemSet).get(pset_title)
         ticket = Ticket(
             username=user.username, 
-            problem_id=prob_id, 
+            problem_id=problem_id, 
             records="",
             comment="",
             expire_time=problemset.exspire_time(),            
@@ -124,16 +113,17 @@ async def get_solveing_problem(
             db.rollback()
             err_mes = f"Error during a ticket creating: {e}"
             logger(err_mes)
-    
-    # open a problem window
-    problem = ProblemSchema(**json_obj)
+    # show last solving
+    else:
+        records = ticket.get_records()
+        if len(records) > 1:
+            problem.view = records[len(records)-1]["code"]
 
+    # open a problem window
     dict = {"py": "python", "js": "javascript", "cs": "csharp"}
     problem.lang = dict[problem.lang] 
 
-    return templates.TemplateResponse(
-        "solving/problem.html",
-        {"request": request, "problem": problem})
+    return templates.TemplateResponse("solving/problem.html", {"request": request, "problem": problem})
 
 #-------------- check (AJAX)
 
@@ -147,15 +137,19 @@ async def post_check(
     Відправляє рішення задачі на перевірку до PSS і повертає відповідь від PSS.
     Додає в тіскет рішення і відповідь. 
     """
+    
     # get a ticket
-    ticket = db.query(Ticket).filter(Ticket.username == user.username and Ticket.problem_id == answer.id).first()
+    ticket = db.query(Ticket) \
+        .filter(and_(Ticket.username == user.username, Ticket.problem_id == answer.problem_id)) \
+        .first()
+                              
     if ticket is None:
         raise RuntimeError("не знайдений тікет")
     if ticket.expire_time < datetime.now():
         return "Your time is over."
 
     api_url = f"{PSS_HOST}/api/check"
-    data = {"id": answer.id, "solving": answer.solving}
+    data = {"id": answer.problem_id, "solving": answer.solving}
 
     try:
         async with httpx.AsyncClient() as client:
