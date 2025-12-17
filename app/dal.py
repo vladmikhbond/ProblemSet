@@ -14,7 +14,7 @@ engine = create_engine(
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 # Dependency для роутерів
-def get_db():
+def get_pss_db():
     db: Session = SessionLocal()
     try:
         yield db

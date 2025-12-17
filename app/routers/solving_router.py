@@ -1,17 +1,14 @@
 import httpx, re
 from datetime import datetime, timedelta
-from zoneinfo import ZoneInfo
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
-from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy import and_
-
-from .login_router import get_current_user
-from ..models.schemas import ProblemHeaderSchema, ProblemSchema, AnswerSchema
-from ..utils.utils import PSS_HOST
 from sqlalchemy.orm import Session
-from ..dal import get_db  # Функція для отримання сесії БД
+
+from .login_router import get_current_user, PSS_HOST
+from ..models.schemas import ProblemHeaderSchema, AnswerSchema
+from ..dal import get_pss_db  # Функція для отримання сесії БД
 from ..models.pss_models import Problem, ProblemSet, Ticket, User
 
 # шаблони Jinja2
@@ -28,7 +25,7 @@ logger = logging.getLogger(__name__)
 @router.get("/solving")
 async def get_solveing(
     request: Request,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_pss_db),
     user: User=Depends(get_current_user)
 ):
     """
@@ -80,7 +77,7 @@ async def get_solveing_problem(
     problem_id: str,
     pset_title: str,
     request: Request,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_pss_db),
     user: User=Depends(get_current_user)
 ):
     """
@@ -130,7 +127,7 @@ async def get_solveing_problem(
 @router.post("/check")
 async def post_check(
     answer: AnswerSchema, 
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_pss_db),
     user: User=Depends(get_current_user)
 ) -> str:
     """

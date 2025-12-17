@@ -7,10 +7,9 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
 
-from .login_router import get_current_user
+from .login_router import get_current_user, PSS_HOST
 from ..models.pss_models import Problem, User
-from ..utils.utils import PSS_HOST
-from ..dal import get_db  # Функція для отримання сесії БД
+from ..dal import get_pss_db  # Функція для отримання сесії БД
 
 PROBLEM_FILTER_KEY = "problemset_problem_filter";
 
@@ -38,7 +37,7 @@ def filtered_problems(request: Request, db: Session) -> list[Problem]:
 @router.get("/problem/list")
 async def get_problem_list(
     request: Request, 
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_pss_db),
     user: User=Depends(get_current_user)
 ):
     problems = filtered_problems(request, db)
@@ -49,7 +48,7 @@ async def get_problem_list(
 @router.get("/problem/new")
 async def get_problem_new( 
     request: Request, 
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_pss_db),
     user: User=Depends(get_current_user)
 ):
     """ 
@@ -69,7 +68,7 @@ async def get_problem_new(
 async def get_problem_edit(
     id: str, 
     request: Request, 
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_pss_db),
     user: User=Depends(get_current_user)
 ):
     """ 
@@ -93,7 +92,7 @@ async def post_problem_edit(
     hint: str = Form(""),
     code: str = Form(...),
     author: str = Form(...),
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_pss_db),
     user: User=Depends(get_current_user)
 ):
     """ 
@@ -143,7 +142,7 @@ async def post_problem_edit(
 async def get_problem_copy(
     id: str, 
     request: Request, 
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_pss_db),
     user: User=Depends(get_current_user)
 ):
     """ 
@@ -178,7 +177,7 @@ def copy_instance(obj):
 async def get_problem_del(
     id: str, 
     request: Request, 
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_pss_db),
     user: User=Depends(get_current_user)
 ):
     """ 
@@ -193,7 +192,7 @@ async def get_problem_del(
 @router.post("/problem/del/{id}")
 async def post_problem_del(
     id: str,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_pss_db),
     user: User=Depends(get_current_user)
 ):
     problem = db.get(Problem, id)

@@ -8,7 +8,7 @@ from fastapi.templating import Jinja2Templates
 from .login_router import get_current_user
 from .problem_router import filtered_problems
 from ..models.pss_models import Problem, ProblemSet, Ticket, User
-from ..dal import get_db  # Функція для отримання сесії БД
+from ..dal import get_pss_db  # Функція для отримання сесії БД
 from sqlalchemy.orm import Session
 
 # шаблони Jinja2
@@ -19,7 +19,7 @@ router = APIRouter()
 @router.get("/problemset/list")
 async def get_problemset_list(
     request: Request, 
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_pss_db),
     user: User=Depends(get_current_user)
 ):
     """ 
@@ -35,7 +35,7 @@ async def get_problemset_list(
 @router.get("/problemset/new")
 async def get_problemset_new(
     request: Request,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_pss_db),
     user: User=Depends(get_current_user)
 ):
     """ 
@@ -60,7 +60,7 @@ async def post_problemset_new(
     open_time: str = Form(...),
     open_minutes: int = Form(0),
     stud_filter: str = Form(""),
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_pss_db),
     user: User=Depends(get_current_user)
 ):
 
@@ -93,7 +93,7 @@ async def post_problemset_new(
 async def get_problemset_edit(
     id: str, 
     request: Request, 
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_pss_db),
     user: User=Depends(get_current_user)
 ):
     """ 
@@ -121,7 +121,7 @@ async def post_problemset_edit(
     open_time: str = Form(...),
     open_minutes: int = Form(0),
     stud_filter: str = Form(""),
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_pss_db),
     user: User=Depends(get_current_user)
 ):
     problems = filtered_problems(request, db)
@@ -153,7 +153,7 @@ async def post_problemset_edit(
 async def get_problemset_del(
     id: str, 
     request: Request, 
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_pss_db),
     user: User=Depends(get_current_user)
 ):
     """ 
@@ -168,7 +168,7 @@ async def get_problemset_del(
 @router.post("/problemset/del/{id}")
 async def post_problemset_del(
     id: str,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_pss_db),
     user: User=Depends(get_current_user)
 ):
     """ 
@@ -185,7 +185,7 @@ async def post_problemset_del(
 async def problemset_show(
     id: str, 
     request: Request, 
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_pss_db),
     user: User=Depends(get_current_user)
 ):
     """ 
