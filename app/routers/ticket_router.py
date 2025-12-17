@@ -5,7 +5,7 @@ from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
-from .login_router import get_current_tutor
+from .login_router import get_current_user
 from ..dal import get_db  # Функція для отримання сесії БД
 from ..models.pss_models import Ticket, User
 
@@ -26,18 +26,14 @@ async def get_solving_ticket(
     id: str, 
     request: Request, 
     db: Session = Depends(get_db),
-    user: User=Depends(get_current_tutor)
+    user: User=Depends(get_current_user)
 ):
     """ 
     Показ вирішень з одного тікету.
     """
-    REGEX = r"~0~(.*?)~1~(.*?)~2~(.*?)~3~"
     ticket = db.get(Ticket, id)
-    matches = re.findall(REGEX, ticket.records, flags=re.S)
-    records = [{"when": m[2], "code":m[0].strip(), "check":m[1].strip()} for m in matches]
-
     return templates.TemplateResponse("ticket/show.html", 
-            {"request": request, "ticket": ticket,  "records": records})
+            {"request": request, "ticket": ticket,  "records": ticket.get_records()})
 
 # ------- del 
 
@@ -47,7 +43,7 @@ async def get_ticket_del(
     pset_title: str, 
     request: Request, 
     db: Session = Depends(get_db),
-    user: User=Depends(get_current_tutor)
+    user: User=Depends(get_current_user)
 ):
     """ 
     Видалення тікету.
@@ -64,7 +60,7 @@ async def post_ticket_del(
     id: str,
     pset_title: str, 
     db: Session = Depends(get_db),
-    user: User=Depends(get_current_tutor)
+    user: User=Depends(get_current_user)
 ):
     """ 
     Видалення тікету.

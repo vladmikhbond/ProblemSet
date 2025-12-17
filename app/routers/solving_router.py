@@ -7,7 +7,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy import and_
 
-from .login_router import get_current_tutor
+from .login_router import get_current_user
 from ..models.schemas import ProblemHeaderSchema, ProblemSchema, AnswerSchema
 from ..utils.utils import PSS_HOST
 from sqlalchemy.orm import Session
@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 async def get_solveing(
     request: Request,
     db: Session = Depends(get_db),
-    user: User=Depends(get_current_tutor)
+    user: User=Depends(get_current_user)
 ):
     """
     Показує сторінку з задачами, розподіленими по задачникам.
@@ -81,7 +81,7 @@ async def get_solveing_problem(
     pset_title: str,
     request: Request,
     db: Session = Depends(get_db),
-    user: User=Depends(get_current_tutor)
+    user: User=Depends(get_current_user)
 ):
     """
     Відкриває вікно для вирішення задачі.
@@ -131,7 +131,7 @@ async def get_solveing_problem(
 async def post_check(
     answer: AnswerSchema, 
     db: Session = Depends(get_db),
-    user: User=Depends(get_current_tutor)
+    user: User=Depends(get_current_user)
 ) -> str:
     """
     Відправляє рішення задачі на перевірку до PSS і повертає відповідь від PSS.

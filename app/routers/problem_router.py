@@ -7,7 +7,7 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
 
-from .login_router import get_current_tutor
+from .login_router import get_current_user
 from ..models.pss_models import Problem, User
 from ..utils.utils import PSS_HOST
 from ..dal import get_db  # Функція для отримання сесії БД
@@ -39,7 +39,7 @@ def filtered_problems(request: Request, db: Session) -> list[Problem]:
 async def get_problem_list(
     request: Request, 
     db: Session = Depends(get_db),
-    user: User=Depends(get_current_tutor)
+    user: User=Depends(get_current_user)
 ):
     problems = filtered_problems(request, db)
     return templates.TemplateResponse("problem/list.html", {"request": request, "problems": problems})
@@ -50,7 +50,7 @@ async def get_problem_list(
 async def get_problem_new( 
     request: Request, 
     db: Session = Depends(get_db),
-    user: User=Depends(get_current_tutor)
+    user: User=Depends(get_current_user)
 ):
     """ 
     Створення нової задачі.
@@ -70,7 +70,7 @@ async def get_problem_edit(
     id: str, 
     request: Request, 
     db: Session = Depends(get_db),
-    user: User=Depends(get_current_tutor)
+    user: User=Depends(get_current_user)
 ):
     """ 
     Редагування задачі.
@@ -94,7 +94,7 @@ async def post_problem_edit(
     code: str = Form(...),
     author: str = Form(...),
     db: Session = Depends(get_db),
-    user: User=Depends(get_current_tutor)
+    user: User=Depends(get_current_user)
 ):
     """ 
     Редагування задачі.
@@ -144,7 +144,7 @@ async def get_problem_copy(
     id: str, 
     request: Request, 
     db: Session = Depends(get_db),
-    user: User=Depends(get_current_tutor)
+    user: User=Depends(get_current_user)
 ):
     """ 
     Копіювання задачі.
@@ -179,7 +179,7 @@ async def get_problem_del(
     id: str, 
     request: Request, 
     db: Session = Depends(get_db),
-    user: User=Depends(get_current_tutor)
+    user: User=Depends(get_current_user)
 ):
     """ 
     Видалення задачі.
@@ -194,7 +194,7 @@ async def get_problem_del(
 async def post_problem_del(
     id: str,
     db: Session = Depends(get_db),
-    user: User=Depends(get_current_tutor)
+    user: User=Depends(get_current_user)
 ):
     problem = db.get(Problem, id)
     db.delete(problem)

@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, Response, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
-from .login_router import get_current_tutor
+from .login_router import get_current_user
 from .problem_router import filtered_problems
 from ..models.pss_models import Problem, ProblemSet, Ticket, User
 from ..dal import get_db  # Функція для отримання сесії БД
@@ -20,7 +20,7 @@ router = APIRouter()
 async def get_problemset_list(
     request: Request, 
     db: Session = Depends(get_db),
-    user: User=Depends(get_current_tutor)
+    user: User=Depends(get_current_user)
 ):
     """ 
     Усі задачники поточного юзера (викладача).
@@ -36,7 +36,7 @@ async def get_problemset_list(
 async def get_problemset_new(
     request: Request,
     db: Session = Depends(get_db),
-    user: User=Depends(get_current_tutor)
+    user: User=Depends(get_current_user)
 ):
     """ 
     Створення нового задачника поточного юзера (викладача). 
@@ -61,7 +61,7 @@ async def post_problemset_new(
     open_minutes: int = Form(0),
     stud_filter: str = Form(""),
     db: Session = Depends(get_db),
-    user: User=Depends(get_current_tutor)
+    user: User=Depends(get_current_user)
 ):
 
     time = datetime.strptime(open_time, "%Y-%m-%dT%H:%M")
@@ -94,7 +94,7 @@ async def get_problemset_edit(
     id: str, 
     request: Request, 
     db: Session = Depends(get_db),
-    user: User=Depends(get_current_tutor)
+    user: User=Depends(get_current_user)
 ):
     """ 
     Редагування обраного задачника поточного юзера (викладача).
@@ -122,7 +122,7 @@ async def post_problemset_edit(
     open_minutes: int = Form(0),
     stud_filter: str = Form(""),
     db: Session = Depends(get_db),
-    user: User=Depends(get_current_tutor)
+    user: User=Depends(get_current_user)
 ):
     problems = filtered_problems(request, db)
     problemset = db.get(ProblemSet, id)
@@ -154,7 +154,7 @@ async def get_problemset_del(
     id: str, 
     request: Request, 
     db: Session = Depends(get_db),
-    user: User=Depends(get_current_tutor)
+    user: User=Depends(get_current_user)
 ):
     """ 
     Видалення задачника.
@@ -169,7 +169,7 @@ async def get_problemset_del(
 async def post_problemset_del(
     id: str,
     db: Session = Depends(get_db),
-    user: User=Depends(get_current_tutor)
+    user: User=Depends(get_current_user)
 ):
     """ 
     Видалення задачника.
@@ -186,7 +186,7 @@ async def problemset_show(
     id: str, 
     request: Request, 
     db: Session = Depends(get_db),
-    user: User=Depends(get_current_tutor)
+    user: User=Depends(get_current_user)
 ):
     """ 
     Показ вирішень з одного задачника.
