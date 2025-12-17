@@ -8,7 +8,7 @@
     color: green;
   }
 .wrong {
-    color: blue;
+    color: red;
   }
 </style>
 <section class="section">
@@ -17,13 +17,20 @@
     <h3 class="title">Вирішення задач з "{{ problemset.title }}"</h3>
     {% for problem in dict.values() %}
       <h6>Problem "{{problem.title}}"</h6>
+      <table>
       {% for ticket in problem.tickets %}
-        {% set color = "green" if ticket.state == 1 else "red" %} 
-        <span>
-          <a href="/ticket/show/{{ticket.id}}" style="color: {{color}};">{{ticket.username}}</a>
-          <a href="/ticket/del/{{ticket.id}}/{{problemset.title}}" style="margin-left: 50px; color:red;"> x </a> 
-        </span>
+        {% set cls = "ok" if ticket.state == 1 else "wrong" %} 
+        <tr>
+          <td>
+            <a href="/ticket/show/{{ticket.id}}" class="{{cls}}">{{ticket.username}}</a>
+          </td>
+          <td>
+            <a href="/ticket/del/{{ticket.id}}/{{problemset.title}}"> del </a>
+          </td>
+           
+        </tr>
       {% endfor %}
+      </table>
     {% endfor %}
 
   </div>
