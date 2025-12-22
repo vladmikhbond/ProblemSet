@@ -16,6 +16,8 @@ templates = Jinja2Templates(directory="app/templates")
 
 router = APIRouter()
 
+# ------- list 
+
 @router.get("/problemset/list")
 async def get_problemset_list(
     request: Request, 
@@ -49,7 +51,8 @@ async def get_problemset_new(
         stud_filter = "",
     )
     problems = filtered_problems(request, db)
-    return templates.TemplateResponse("problemset/edit.html", {"request": request, "problemset": problemset, "problems": problems})
+    return templates.TemplateResponse("problemset/edit.html", 
+            {"request": request, "problemset": problemset, "problems": problems})
 
 
 @router.post("/problemset/new")
@@ -83,7 +86,9 @@ async def post_problemset_new(
         db.rollback()
         err_mes = f"Error during a problem request: {e}"
         print(err_mes)
-        return templates.TemplateResponse("problemset/edit.html", {"request": request, "problemset": problemset, "problems": problems})
+        return templates.TemplateResponse("problemset/edit.html", 
+                {"request": request, "problemset": problemset, "problems": problems})
+    
     return RedirectResponse(url="/problemset/list", status_code=302)
 
 
@@ -143,7 +148,8 @@ async def post_problemset_edit(
         db.rollback()
         err_mes = f"Error during a problemset edit: {e}"
         print(err_mes)
-        return templates.TemplateResponse("problemset/edit.html", {"request": request, "problemset": problemset, "problems": problems})
+        return templates.TemplateResponse("problemset/edit.html", 
+                {"request": request, "problemset": problemset, "problems": problems})
     
     return RedirectResponse(url="/problemset/list", status_code=302)
 

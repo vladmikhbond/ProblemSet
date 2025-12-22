@@ -118,10 +118,14 @@ async def post_problem_edit(
 
     # check author's solving
 
-    data = {"source": problem.code, "lang": problem.lang}
+    ### data = {"source": problem.code, "lang": problem.lang}
+    data = {"code": problem.code, "timeout": "5000"}
+    api_url = "http://romantic_fermat:7010/verify"
     try:
         async with httpx.AsyncClient() as client:
-            response = await client.post(f"{PSS_HOST}/api/proof", json=data)
+            # response = await client.post(f"{PSS_HOST}/api/proof", json=data)
+            response = await client.post(api_url, json=data)
+
         check_message = response.json()
         if not check_message.startswith("OK"):
             return templates.TemplateResponse("problem/edit.html", {"request": request, "problem": problem, "error": check_message})
@@ -204,22 +208,13 @@ async def post_problem_del(
 
 # --------------- List of problem headers. AJAX
 
-@router.get("/problem/lang/{lang}")
-async def get_problem_headers(
-    request: Request,
-    lang: str,
-):
-    token = request.cookies["access_token"]
-    headers = {"Authorization": f"Bearer {token}"}
-    api_url = f"{PSS_HOST}/api/problems/lang/{lang}"
-    async with httpx.AsyncClient() as client:
-        response = await client.get(api_url, headers=headers)
-        if response.is_success:
-            # headers: [{"id", "title", "attr"}]
-            headers = response.json()
-            filter = unquote(request.cookies.get(PROBLEM_FILTER_KEY, ""))
-            headers = [h for h in headers if filter in h["title"] or filter in h["attr"]] 
-            return headers
-        else:
-            raise HTTPException(status_code=404, detail="Problems not found")
-
+# @router.get("/problem/lang/{lang}")
+# async def get_problem_headers(
+#     request: Request,
+#     db: Session = Depends(get_pss_db),
+# ):
+#     problems = filtered_problems(request, db)
+#     # headers: [{"id", "title", "attr"}]
+#     headers = [{"id": p.id, "title": p.title, "attr": p.attr} for p in problems]
+#     return headers
+    

@@ -126,18 +126,19 @@ async def get_solveing_problem(
 
 @router.post("/check")
 async def post_check(
-    answer: AnswerSchema, 
+    problem_id: str,
+    solving: str,
     db: Session = Depends(get_pss_db),
     user: User=Depends(get_current_user)
 ) -> str:
     """
-    Відправляє рішення задачі на перевірку до PSS і повертає відповідь від PSS.
+    Відправляє рішення задачі на перевірку до judje і повертає відповідь .
     Додає в тіскет рішення і відповідь. 
     """
     
     # get a ticket
     ticket = db.query(Ticket) \
-        .filter(and_(Ticket.username == user.username, Ticket.problem_id == answer.problem_id)) \
+        .filter(and_(Ticket.username == user.username, Ticket.problem_id == problem_id)) \
         .first()
                               
     if ticket is None:
@@ -145,9 +146,14 @@ async def post_check(
     if ticket.expire_time < datetime.now():
         return "Your time is over."
 
-    api_url = f"{PSS_HOST}/api/check"
-    data = {"id": answer.problem_id, "solving": answer.solving}
+    
+    # data = {"id": problem_id, "solving": solving}
+    
+    #TODO: get code of the problem, replace author solving, define api_url depending of lang
 
+    data = {"code": "using System;\nclass P{static void Main(){Console.Write(\"Hi\");}}", "timeout": 2000}
+
+    api_url = "http://judge_cs_cont:7010/verify"
     try:
         async with httpx.AsyncClient() as client:
             response = await client.post(api_url, json=data)
@@ -158,8 +164,45 @@ async def post_check(
         return err_message
   
     # write solving to the ticket
-    ticket.do_record(answer.solving, check_message)
+    ticket.do_record(solving, check_message)
     db.commit()
     return check_message
 
 
+# @router.post("/check")
+# async def post_check(
+#     answer: AnswerSchema, 
+#     db: Session = Depends(get_pss_db),
+#     user: User=Depends(get_current_user)
+# ) -> str:
+#     """
+#     Відправляє рішення задачі на перевірку до PSS і повертає відповідь від PSS.
+#     Додає в тіскет рішення і відповідь. 
+#     """
+    
+#     # get a ticket
+#     ticket = db.query(Ticket) \
+#         .filter(and_(Ticket.username == user.username, Ticket.problem_id == answer.problem_id)) \
+#         .first()
+                              
+#     if ticket is None:
+#         raise RuntimeError("не знайдений тікет")
+#     if ticket.expire_time < datetime.now():
+#         return "Your time is over."
+
+#     api_url = f"{PSS_HOST}/api/check"
+#     data = {"id": answer.problem_id, "solving": answer.solving}
+
+#     try:
+#         async with httpx.AsyncClient() as client:
+#             response = await client.post(api_url, json=data)
+#         check_message: str = response.json()
+#     except Exception as e:
+#         err_message = f"Error during a check solving: {e}"
+#         print(err_message)
+#         return err_message
+  
+#     # write solving to the ticket
+#     ticket.do_record(answer.solving, check_message)
+#     db.commit()
+#     return check_message

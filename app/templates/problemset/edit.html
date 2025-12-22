@@ -8,9 +8,11 @@
 <h2>Задачник</h2>
 <form method="post" >
   <input type="hidden" name="username" value="{{ problemset.username }}">
+  
   <label>
     Title
-    <input type="text" name="title" value="{{ problemset.title }}" required>
+    {% set read_only = "" if request.url.path.endswith("new") else "readonly" %}
+    <input type="text" name="title" value="{{ problemset.title }}" required {{read_only}}>
   </label>
 
   <label>

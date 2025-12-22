@@ -16,6 +16,8 @@ ALGORITHM = os.getenv("ALGORITHM")
 TOKEN_LIFETIME = int(os.getenv("TOKEN_LIFETIME"))
 PSS_HOST = os.getenv("PSS_HOST")
 
+TOKEN_URL = "http://tutor_cont:7003/token/"
+
 # шаблони Jinja2
 templates = Jinja2Templates(directory="app/templates")
 
@@ -34,24 +36,21 @@ async def login(
     username: str = Form(...),
     password: str = Form(...),
 ):
-    url = f"{PSS_HOST}/token"
-    data = {"username": username, "password": password}
-
     client = httpx.AsyncClient()
     try:
-        pss_response = await client.post(url, data=data)
+        client_response = await client.post(
+                TOKEN_URL, data={"username": username, "password": password})
     except httpx.RequestError as e:
-        raise HTTPException(500, f"{e}\nА чи працює pss_cont на :7000 у мережі докера mynet?")
+        raise HTTPException(500, e)
     finally:
         await client.aclose()
 
-    if pss_response.is_success:
-        answer_json = pss_response.json()
-        token = answer_json["access_token"]
+    if client_response.is_success:
+        token = client_response.json()
     else: 
         return templates.TemplateResponse("login.html", {
             "request": request, 
-            "error": f"Invalid credentials. Response status_code: {pss_response.status_code}"
+            "error": f"Invalid credentials. Response status_code: {client_response.status_code}"
         })
 
     redirect = RedirectResponse("/problemset/list", status_code=302)

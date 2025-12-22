@@ -1,4 +1,6 @@
 TODO
+replace pss with judge in problems/new problems/edit & solvings
+
 if prob is solved show solvig in prob window
 
 
