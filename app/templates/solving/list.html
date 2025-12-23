@@ -16,11 +16,10 @@
       </header>
 
       <ul>
-        {% for problem in pset.headers %}
+        {% for problem in pset.problems %}
           <li>
             <a href="/solving/problem/{{ problem.id }}/{{ pset.title }}">
               <span>{{ problem.title }} <small>/{{ problem.attr }}</small></span><br>
-
             </a>
           </li>
         {% endfor %}

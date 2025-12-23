@@ -47,28 +47,14 @@ async def get_solveing(
     headers = {"Authorization": f"Bearer {token}"}
     psets = []
     for problemset in open_problemsets:
-        pheaders = []
-        # TODO
-        # for id in problemset.problem_ids.split():
-        #     api_url = f"{PSS_HOST}/api/problems/{id}"
-        #     async with httpx.AsyncClient() as client:
-        #         response = await client.get(api_url, headers=headers)
-        #         if response.is_success:
-        #             json = response.json()                    
-
-        #             problem_header = ProblemHeaderSchema(
-        #                 id=json["id"], 
-        #                 title=json["title"], 
-        #                 attr=json["attr"])
-        #             pheaders.append(problem_header)
-
-        rest_time: timedelta = problemset.open_time - \
-            datetime.now() + timedelta(minutes=problemset.open_minutes)
+        lst = problemset.problem_ids.split()
+        problems = db.query(Problem).filter(Problem.id.in_(lst)).all()
+        rest_time: timedelta = problemset.open_time - datetime.now() + timedelta(minutes=problemset.open_minutes)
         psets.append({
             "title": problemset.title,         #TODO  encode
             "username": problemset.username,
             "t": rest_time,
-            "headers": pheaders})
+            "problems": problems})
 
     return templates.TemplateResponse("solving/list.html", {"request": request, "psets": psets})
 
