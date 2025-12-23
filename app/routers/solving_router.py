@@ -21,9 +21,10 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# ------------------------------ list
 
 @router.get("/solving")
-async def get_solveing(
+async def get_solving_list(
     request: Request,
     db: Session = Depends(get_pss_db),
     user: User=Depends(get_current_user)
@@ -44,11 +45,10 @@ async def get_solveing(
             "error": "No token"
         })
 
-    headers = {"Authorization": f"Bearer {token}"}
     psets = []
     for problemset in open_problemsets:
-        lst = problemset.problem_ids.split()
-        problems = db.query(Problem).filter(Problem.id.in_(lst)).all()
+        ids = problemset.problem_ids.split()
+        problems = db.query(Problem).filter(Problem.id.in_(ids)).all()
         rest_time: timedelta = problemset.open_time - datetime.now() + timedelta(minutes=problemset.open_minutes)
         psets.append({
             "title": problemset.title,         #TODO  encode
@@ -58,9 +58,10 @@ async def get_solveing(
 
     return templates.TemplateResponse("solving/list.html", {"request": request, "psets": psets})
 
+# ---------------------------- open 
 
 @router.get("/solving/problem/{problem_id}/{pset_title}")  
-async def get_solveing_problem(
+async def get_soleing_problem(
     problem_id: str,
     pset_title: str,
     request: Request,
@@ -114,16 +115,19 @@ async def get_solveing_problem(
 
 @router.post("/check")
 async def post_check(
-    problem_id: str,
-    solving: str,
+    answer: AnswerSchema,
     db: Session = Depends(get_pss_db),
     user: User=Depends(get_current_user)
 ) -> str:
     """
     Відправляє рішення задачі на перевірку до judje і повертає відповідь .
     Додає в тіскет рішення і відповідь. 
+    Приймає JSON у тілі у форматі AnswerSchema.
     """
-    
+
+    problem_id = answer.problem_id
+    solving = answer.solving
+
     # get a ticket
     ticket = db.query(Ticket) \
         .filter(and_(Ticket.username == user.username, Ticket.problem_id == problem_id)) \
@@ -150,9 +154,7 @@ async def post_check(
             response = await client.post(url, json=payload)
         check_message = response.text
     except Exception as e:
-            err_message = f"Error during a check solving: {e}"
-            print(err_message)
-            return err_message
+        return f"Error during a check solving: {e}"
   
     # Write solving to the ticket
     ticket.do_record(solving, check_message)
