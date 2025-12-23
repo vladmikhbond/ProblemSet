@@ -210,16 +210,3 @@ async def post_problem_del(
     db.delete(problem)
     db.commit()
     return RedirectResponse(url="/problem/list", status_code=302)
-
-
-# --------------- List of problem headers. AJAX
-
-# @router.get("/problem/lang/{lang}")
-# async def get_problem_headers(
-#     request: Request,
-#     db: Session = Depends(get_pss_db),
-# ):
-#     problems = filtered_problems(request, db)
-#     # headers: [{"id", "title", "attr"}]
-#     headers = [{"id": p.id, "title": p.title, "attr": p.attr} for p in problems]
-#     return headers

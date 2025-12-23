@@ -7,7 +7,7 @@ from sqlalchemy import and_
 from sqlalchemy.orm import Session
 
 from .login_router import get_current_user, JUDGE
-from ..models.schemas import ProblemHeaderSchema, AnswerSchema
+from ..models.schemas import AnswerSchema
 from ..dal import get_pss_db  # Функція для отримання сесії БД
 from ..models.pss_models import Problem, ProblemSet, Ticket, User
 
@@ -169,51 +169,3 @@ def regex_helper(lang:str):
         return r"#BEGIN.*#END"
     else:
         return None
-
-
-
-
-
-
-
-
-
-
-
-# @router.post("/check")
-# async def post_check(
-#     answer: AnswerSchema, 
-#     db: Session = Depends(get_pss_db),
-#     user: User=Depends(get_current_user)
-# ) -> str:
-#     """
-#     Відправляє рішення задачі на перевірку до PSS і повертає відповідь від PSS.
-#     Додає в тіскет рішення і відповідь. 
-#     """
-    
-#     # get a ticket
-#     ticket = db.query(Ticket) \
-#         .filter(and_(Ticket.username == user.username, Ticket.problem_id == answer.problem_id)) \
-#         .first()
-                              
-#     if ticket is None:
-#         raise RuntimeError("не знайдений тікет")
-#     if ticket.expire_time < datetime.now():
-#         return "Your time is over."
-
-#     api_url = f"{PSS_HOST}/api/check"
-#     data = {"id": answer.problem_id, "solving": answer.solving}
-
-#     try:
-#         async with httpx.AsyncClient() as client:
-#             response = await client.post(api_url, json=data)
-#         check_message: str = response.json()
-#     except Exception as e:
-#         err_message = f"Error during a check solving: {e}"
-#         print(err_message)
-#         return err_message
-  
-#     # write solving to the ticket
-#     ticket.do_record(answer.solving, check_message)
-#     db.commit()
-#     return check_message
