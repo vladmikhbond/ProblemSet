@@ -1,5 +1,8 @@
 from urllib.parse import unquote
-import httpx, os, uuid
+import httpx
+import os
+import uuid
+
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, Form
 from fastapi.responses import PlainTextResponse, RedirectResponse
@@ -7,11 +10,11 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
 
-from .login_router import get_current_user, PSS_HOST
+from .login_router import get_current_user, JUDGE
 from ..models.pss_models import Problem, User
 from ..dal import get_pss_db  # Функція для отримання сесії БД
 
-PROBLEM_FILTER_KEY = "problemset_problem_filter";
+PROBLEM_FILTER_KEY = "problemset_problem_filter"
 
 # шаблони Jinja2
 templates = Jinja2Templates(directory="app/templates")
@@ -19,7 +22,9 @@ templates = Jinja2Templates(directory="app/templates")
 router = APIRouter()
 
 # ----------------------------------- auxiliary tools
-#  
+#
+
+
 def filtered_problems(request: Request, db: Session) -> list[Problem]:
     """ 
     Профільтровані і впорядклвані задачі.
@@ -36,40 +41,42 @@ def filtered_problems(request: Request, db: Session) -> list[Problem]:
 
 @router.get("/problem/list")
 async def get_problem_list(
-    request: Request, 
+    request: Request,
     db: Session = Depends(get_pss_db),
-    user: User=Depends(get_current_user)
+    user: User = Depends(get_current_user)
 ):
     problems = filtered_problems(request, db)
     return templates.TemplateResponse("problem/list.html", {"request": request, "problems": problems})
 
 # ---------------------- new
 
+
 @router.get("/problem/new")
-async def get_problem_new( 
-    request: Request, 
+async def get_problem_new(
+    request: Request,
     db: Session = Depends(get_pss_db),
-    user: User=Depends(get_current_user)
+    user: User = Depends(get_current_user)
 ):
     """ 
     Створення нової задачі.
     """
     problem = Problem(
-        id = str(uuid.uuid4()),
+        id=str(uuid.uuid4()),
         author=user.username,
         timestamp=datetime.now(),
-        title="", attr="", lang="js", cond="", view="", hint="", code="", 
+        title="", attr="", lang="js", cond="", view="", hint="", code="",
     )
     return templates.TemplateResponse("problem/edit.html", {"request": request, "problem": problem})
 
-# ----------------------- edit 
+# ----------------------- edit
+
 
 @router.get("/problem/edit/{id}")
 async def get_problem_edit(
-    id: str, 
-    request: Request, 
+    id: str,
+    request: Request,
     db: Session = Depends(get_pss_db),
-    user: User=Depends(get_current_user)
+    user: User = Depends(get_current_user)
 ):
     """ 
     Редагування задачі.
@@ -93,7 +100,7 @@ async def post_problem_edit(
     code: str = Form(...),
     author: str = Form(...),
     db: Session = Depends(get_pss_db),
-    user: User=Depends(get_current_user)
+    user: User = Depends(get_current_user)
 ):
     """ 
     Редагування задачі.
@@ -104,7 +111,7 @@ async def post_problem_edit(
     # нова задача
     if is_new:
         problem = Problem(
-            id = str(uuid.uuid4()),
+            id=str(uuid.uuid4()),
         )
     problem.title = title
     problem.attr = attr
@@ -113,41 +120,40 @@ async def post_problem_edit(
     problem.view = view
     problem.hint = hint
     problem.code = code
-    problem.author = author    
+    problem.author = author
     problem.timestamp = datetime.now()
 
     # check author's solving
-
-    ### data = {"source": problem.code, "lang": problem.lang}
-    data = {"code": problem.code, "timeout": "5000"}
-    api_url = "http://romantic_fermat:7010/verify"
+    
+    payload = {"code": problem.code, "timeout": 2000}
+    url = JUDGE[problem.lang]
     try:
         async with httpx.AsyncClient() as client:
-            # response = await client.post(f"{PSS_HOST}/api/proof", json=data)
-            response = await client.post(api_url, json=data)
+            response = await client.post(url, json=payload)
 
-        check_message = response.json()
+        check_message = response.text
         if not check_message.startswith("OK"):
             return templates.TemplateResponse("problem/edit.html", {"request": request, "problem": problem, "error": check_message})
     except Exception as e:
         err_mes = f"Помилка при перевірці рішення задачі: {e}"
         return templates.TemplateResponse("problem/edit.html", {"request": request, "problem": problem, "error": err_mes})
-    
+
     # save changes in DB
     if is_new:
         db.add(problem)
     db.commit()
-    
+
     return RedirectResponse(url="/problem/list", status_code=302)
 
-# ---------------------- copy 
+# ---------------------- copy
+
 
 @router.get("/problem/copy/{id}")
 async def get_problem_copy(
-    id: str, 
-    request: Request, 
+    id: str,
+    request: Request,
     db: Session = Depends(get_pss_db),
-    user: User=Depends(get_current_user)
+    user: User = Depends(get_current_user)
 ):
     """ 
     Копіювання задачі.
@@ -155,34 +161,35 @@ async def get_problem_copy(
     old_problem = db.get(Problem, id)
     if not old_problem:
         return PlainTextResponse("Не знайдений оригінал задачі.")
-        
+
     new_problem = copy_instance(old_problem)
-    new_problem.id = str(uuid.uuid4()) 
+    new_problem.id = str(uuid.uuid4())
     new_problem.title += " - Copy"
-    db.add(new_problem)                              
+    db.add(new_problem)
     db.commit()
 
-    return templates.TemplateResponse("problem/edit.html", 
-            {"request": request, "problem": new_problem})
+    return templates.TemplateResponse("problem/edit.html",
+                                      {"request": request, "problem": new_problem})
 
 
 def copy_instance(obj):
     cls = obj.__class__
     new_obj = cls(**{
         key: value for key, value in obj.__dict__.items()
-        if not key.startswith('_') and key != 'id'  # Пропускаємо SQLAlchemy службові поля і PK
+        # Пропускаємо SQLAlchemy службові поля і PK
+        if not key.startswith('_') and key != 'id'
     })
     return new_obj
 
 
-# ------- del 
+# ------- del
 
 @router.get("/problem/del/{id}")
 async def get_problem_del(
-    id: str, 
-    request: Request, 
+    id: str,
+    request: Request,
     db: Session = Depends(get_pss_db),
-    user: User=Depends(get_current_user)
+    user: User = Depends(get_current_user)
 ):
     """ 
     Видалення задачі.
@@ -197,13 +204,12 @@ async def get_problem_del(
 async def post_problem_del(
     id: str,
     db: Session = Depends(get_pss_db),
-    user: User=Depends(get_current_user)
+    user: User = Depends(get_current_user)
 ):
     problem = db.get(Problem, id)
     db.delete(problem)
     db.commit()
     return RedirectResponse(url="/problem/list", status_code=302)
-
 
 
 # --------------- List of problem headers. AJAX
@@ -217,4 +223,3 @@ async def post_problem_del(
 #     # headers: [{"id", "title", "attr"}]
 #     headers = [{"id": p.id, "title": p.title, "attr": p.attr} for p in problems]
 #     return headers
-    

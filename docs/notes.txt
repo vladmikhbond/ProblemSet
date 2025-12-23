@@ -1,5 +1,5 @@
-TODO
-replace pss with judge in problems/new problems/edit & solvings
+TODO:
+replace pss with judge in  solving_router, line 50
 
 if prob is solved show solvig in prob window
 
@@ -17,3 +17,12 @@ cd c:\git\dock\ProblemSet
 docker build -t pset_img .
 docker run -d --env-file env --network mynet -p 7001:7001 -v C:\Git\PY\DBconverter:/data   --name pset_cont  pset_img
 ---
+
+
+
+    # import requests
+    # payload = {"code": problem.code, "timeout": 2000}
+    # url = JUDGE[problem.lang]
+    # response = requests.post(url, json=payload)
+    # check_message = response.text   
+    # print(response.status_code)

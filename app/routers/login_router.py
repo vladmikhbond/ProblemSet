@@ -18,6 +18,11 @@ PSS_HOST = os.getenv("PSS_HOST")
 
 TOKEN_URL = "http://tutor_cont:7003/token/"
 
+JUDGE = {"cs": "http://judge_cs_cont:7010/verify",
+         "py": "http://judge_py_cont:7011/verify",
+         "js": "http://judge_js_cont:7012/verify"}
+
+
 # шаблони Jinja2
 templates = Jinja2Templates(directory="app/templates")
 
