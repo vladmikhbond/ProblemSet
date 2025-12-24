@@ -14,9 +14,7 @@ from ..models.pss_models import User
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM")
 TOKEN_LIFETIME = int(os.getenv("TOKEN_LIFETIME"))
-PSS_HOST = os.getenv("PSS_HOST")
-
-TOKEN_URL = "http://tutor_cont:7003/token/"
+TOKEN_URL = os.getenv("TOKEN_URL")
 
 JUDGE = {"cs": "http://judge_cs_cont:7010/verify",
          "py": "http://judge_py_cont:7011/verify",
@@ -32,7 +30,7 @@ router = APIRouter()
 
 @router.get("/")
 async def get_login(request: Request):
-    return templates.TemplateResponse("login.html", {"request": request})
+    return templates.TemplateResponse("login/login.html", {"request": request})
 
 
 @router.post("/")
@@ -72,13 +70,13 @@ async def login(
     return redirect    
 
 @router.get("/logout")
-async def logout(response: Response):
+async def logout(request: Request, response: Response):
     response.delete_cookie(
         key="access_token"
     )
-    return {"message": "Session ended"}   
+    return templates.TemplateResponse("login/login.html", {"request": request})   
 
-# =================================================================
+# ---------------------------- aux
 
 # описуємо джерело токена (cookie)
 cookie_scheme = APIKeyCookie(name="access_token")

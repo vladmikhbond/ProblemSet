@@ -7,7 +7,7 @@ from fastapi.staticfiles import StaticFiles
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
-for var in ("SECRET_KEY", "ALGORITHM", "TOKEN_LIFETIME", "PSS_HOST"):
+for var in ("SECRET_KEY", "ALGORITHM", "TOKEN_LIFETIME", "TOKEN_URL"):
     if os.getenv(var) is None:
         raise RuntimeError(f"Environment variable {var} is not set.")
     

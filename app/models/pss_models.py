@@ -1,7 +1,7 @@
 import re
 from datetime import datetime, timedelta
 from typing import List
-from sqlalchemy import ForeignKey, String, DateTime, Integer, Text
+from sqlalchemy import ForeignKey, String, DateTime, Integer, Text, LargeBinary
 from sqlalchemy.orm import Mapped, mapped_column, relationship, DeclarativeBase
 
 
@@ -25,15 +25,15 @@ class Problem(Base):
     # nav
     tickets: Mapped[list["Ticket"]] = relationship(back_populates="problem", cascade="all, delete-orphan")
 
-# class User(Base):
-#     username: Mapped[str] = mapped_column(String, primary_key=True)
-#     hashed_password: Mapped[bytes] = mapped_column(LargeBinary)
-#     role: Mapped[str] = mapped_column(String)     # 'student', 'tutor', 'admin'
 
-class User:
-    def __init__(self, *, username, role):
-        self.username = username
-        self.role = role
+class User(Base):
+    __tablename__ = "users"
+
+    username: Mapped[str] = mapped_column(String, primary_key=True)
+    
+    hashed_password: Mapped[bytes] = mapped_column(LargeBinary)
+    role: Mapped[str] = mapped_column(String)     # 'student', 'tutor', 'admin'
+
 
 class ProblemSet(Base):
     __tablename__ = "problemsets"
