@@ -76,6 +76,8 @@ async def logout(request: Request):
     resp.delete_cookie("access_token", path="/")
     return resp
 
+# -------------------------- help
+
 @router.get("/login/help")
 async def logout(request: Request, response: Response):
     
