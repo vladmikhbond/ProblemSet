@@ -16,19 +16,20 @@
         </ul>
         <ul>
             {% if user and user.role == "student" %}
-            <li><a href="/solving" >Вирішення</a></li>
+            <li><a href="/solving" >Solving</a></li>
             <li><a href="#">Довідка</a></li>
             {% else %}
-            <li><a href="/problemset/list">Задачники</a></li>
-            <li><a href="/problem/list">Задачі</a></li>
-            <li><a href="/solving" >Вирішення</a></li>
-            <li><a href="/login/help">Довідка</a></li>
-            <li><a href="/login/logout" >Вихід</a></li>
+            <li><a href="/problemset/list">Workbooks</a></li>
+            <li><a href="/problem/list">Problems</a></li>
+            <li><a href="/solving" >Solving</a></li>
+            <li><a href="/login/logout" >Logout</a></li>
+            <li><a href="/login/help">?</a></li>
+            
             {% endif %}
         </ul>
         <label>
-        Filter
-        <input name="problem_filter" style="width: 120px" id="problem_filter" title="Фільтр задач"> 
+       
+        <input style="width: 200px; height: 18px;" id="problem_filter" title="Фільтр задач"> 
         </label> 
         </nav>
 

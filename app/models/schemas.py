@@ -6,4 +6,3 @@ class AnswerSchema(BaseModel):
 
     class Config:
         from_attributes=True
-

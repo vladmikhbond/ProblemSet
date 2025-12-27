@@ -14,7 +14,8 @@
     {% for problem in problems %}
     <tr>
       <td>{{ problem.attr }}</td>
-      <td>{{ problem.title }}</td>
+      {% set elipsys = "" if problem.title|length <= 30 else "..."%}
+      <td title="{{ problem.title }}">{{ problem.title[0:30]}} {{elipsys}}</td>
       <td>
           <a href="/problem/copy/{{problem.id}}">copy</a> | 
           <a href="/problem/edit/{{problem.id}}">edit</a> | 
