@@ -1,6 +1,6 @@
 TODO:
 
-if prob is solved show solvig in prob window
+help
 
 
 

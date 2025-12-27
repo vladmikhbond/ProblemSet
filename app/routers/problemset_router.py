@@ -43,16 +43,18 @@ async def get_problemset_new(
     """ 
     Створення нового задачника поточного юзера (викладача). 
     """
-    now_str = datetime.now(ZoneInfo("Europe/Kyiv")).strftime("%Y-%m-%dT%H:%M")
     problemset = ProblemSet(
         title = "",                
         problem_ids = "",                    
-        open_time = now_str,
+        open_time = datetime.now(),
+        open_minutes=20,
         stud_filter = "",
     )
+    kyiv_time = problemset.open_time.astimezone(ZoneInfo("Europe/Kyiv")).strftime("%Y-%m-%d %H:%M")
+
     problems = filtered_problems(request, db)
     return templates.TemplateResponse("problemset/edit.html", 
-            {"request": request, "problemset": problemset, "problems": problems})
+            {"request": request, "problemset": problemset, "problems": problems, "kyiv_time": kyiv_time})
 
 
 @router.post("/problemset/new")
@@ -60,22 +62,23 @@ async def post_problemset_new(
     request: Request,
     title: str = Form(...),
     problem_ids: str = Form(...),
-    open_time: str = Form(...),
+    kyiv_time: str = Form(...),
     open_minutes: int = Form(0),
     stud_filter: str = Form(""),
     db: Session = Depends(get_pss_db),
     user: User=Depends(get_current_user)
 ):
+        
+    utc_time = datetime.strptime(kyiv_time, "%Y-%m-%dT%H:%M") \
+          .replace(tzinfo=ZoneInfo("Europe/Kyiv")).astimezone(ZoneInfo("UTC"))
 
-    time = datetime.strptime(open_time, "%Y-%m-%dT%H:%M")
-    time = time.replace(tzinfo=ZoneInfo("Europe/Kyiv")).astimezone(ZoneInfo("UTC"))
     problems = problems = filtered_problems(request, db)
 
     problemset = ProblemSet(
         title = title,
         username = user.username,
         problem_ids = problem_ids,                    
-        open_time = time,
+        open_time = utc_time,
         open_minutes = open_minutes,
         stud_filter = stud_filter
     )
@@ -85,9 +88,8 @@ async def post_problemset_new(
     except Exception as e:
         db.rollback()
         err_mes = f"Error during a problem request: {e}"
-        print(err_mes)
         return templates.TemplateResponse("problemset/edit.html", 
-                {"request": request, "problemset": problemset, "problems": problems})
+                {"request": request, "problemset": problemset, "problems": problems, "kyiv_time": kyiv_time, "err_mes": err_mes})
     
     return RedirectResponse(url="/problemset/list", status_code=302)
 
@@ -105,16 +107,15 @@ async def get_problemset_edit(
     Редагування обраного задачника поточного юзера (викладача).
     """
     problemset = db.get(ProblemSet, id)
-    problem_headers = []
     problems = filtered_problems(request, db)
 
     if not problemset:
         return RedirectResponse(url="/problemset/list", status_code=302)
     
-    dt_str = problemset.open_time.astimezone(ZoneInfo("Europe/Kyiv")).strftime("%Y-%m-%dT%H:%M")
-    problemset.open_time = dt_str
+    kyiv_time = problemset.open_time.astimezone(ZoneInfo("Europe/Kyiv")).strftime("%Y-%m-%d %H:%M")
+
     return templates.TemplateResponse("problemset/edit.html", 
-            {"request": request, "problemset": problemset, "problems": problems})
+            {"request": request, "problemset": problemset, "problems": problems, "kyiv_time": kyiv_time})
 
 
 @router.post("/problemset/edit/{id}")
@@ -123,7 +124,7 @@ async def post_problemset_edit(
     request: Request,
     username: str = Form(...),  # from hidden input
     problem_ids: str = Form(...),
-    open_time: str = Form(...),
+    kyiv_time: str = Form(...),
     open_minutes: int = Form(0),
     stud_filter: str = Form(""),
     db: Session = Depends(get_pss_db),
@@ -136,10 +137,10 @@ async def post_problemset_edit(
     problemset.username = username  
     problemset.problem_ids = problem_ids
 
-    time = datetime.strptime(open_time, "%Y-%m-%dT%H:%M")
-    time = time.replace(tzinfo=ZoneInfo("Europe/Kyiv")).astimezone(ZoneInfo("UTC"))
+    utc_time = datetime.strptime(kyiv_time, "%Y-%m-%dT%H:%M") \
+              .replace(tzinfo=ZoneInfo("Europe/Kyiv")).astimezone(ZoneInfo("UTC"))
+    problemset.open_time = utc_time
 
-    problemset.open_time = time
     problemset.open_minutes = open_minutes
     problemset.stud_filter = stud_filter
     try:                       
@@ -149,7 +150,7 @@ async def post_problemset_edit(
         err_mes = f"Error during a problemset edit: {e}"
         print(err_mes)
         return templates.TemplateResponse("problemset/edit.html", 
-                {"request": request, "problemset": problemset, "problems": problems})
+                {"request": request, "problemset": problemset, "problems": problems, "kyiv_time": kyiv_time})
     
     return RedirectResponse(url="/problemset/list", status_code=302)
 

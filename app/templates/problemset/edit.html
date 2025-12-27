@@ -1,27 +1,28 @@
 {% extends "layout.html" %}
 
-{% block title %}}
+{% block title %}
 {% endblock %}
 
 {% block content %}
 
 <h2>Задачник</h2>
-<form method="post" >
+<div style="color: red;">{{err_mes}}</div>
+<form method="post">
   <input type="hidden" name="username" value="{{ problemset.username }}">
   
   <label>
     Title
     {% set read_only = "" if request.url.path.endswith("new") else "readonly" %}
-    <input type="text" name="title" value="{{ problemset.title }}" required {{read_only}}>
+    <input type="text" name="title" value="{{ problemset.title }}" placeholder="unique name" {{read_only}}>
   </label>
 
   <label>
-    Problem IDs (через пробіли)
+    Problem IDs (at least one required)
     <textarea id="problem_ids" name="problem_ids" style="width: 100%" readonly>{{ problemset.problem_ids }}</textarea>
   </label>     
   <label>
     Open Time
-    <input type="datetime-local" name="open_time" value="{{ problemset.open_time|replace(' ', 'T') }}">
+    <input type="datetime-local" name="kyiv_time" value="{{ kyiv_time}}">
   </label>
 
   <label>

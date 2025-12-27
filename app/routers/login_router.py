@@ -51,9 +51,9 @@ async def login(
     if client_response.is_success:
         token = client_response.json()
     else: 
-        return templates.TemplateResponse("login.html", {
+        return templates.TemplateResponse("login/login.html", {
             "request": request, 
-            "error": f"Invalid credentials. Response status_code: {client_response.status_code}"
+            "error": "Invalid credentials."
         })
 
     redirect = RedirectResponse("/problemset/list", status_code=302)
@@ -68,13 +68,18 @@ async def login(
         max_age=TOKEN_LIFETIME * 60,  # in seconds 
     )
     return redirect    
+  
 
-@router.get("/logout")
+@router.get("/login/logout")
+async def logout(request: Request):
+    resp = templates.TemplateResponse("login/login.html", {"request": request})
+    resp.delete_cookie("access_token", path="/")
+    return resp
+
+@router.get("/login/help")
 async def logout(request: Request, response: Response):
-    response.delete_cookie(
-        key="access_token"
-    )
-    return templates.TemplateResponse("login/login.html", {"request": request})   
+    
+    return templates.TemplateResponse("login/help.html", {"request": request})  
 
 # ---------------------------- aux
 

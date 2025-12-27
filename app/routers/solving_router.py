@@ -154,7 +154,7 @@ async def post_check(
             response = await client.post(url, json=payload)
         check_message = response.text
     except Exception as e:
-        return f"Error during a check solving: {e}"
+        return f"Error. Is url '{url}' responding?"
   
     # Write solving to the ticket
     ticket.do_record(solving, check_message)
