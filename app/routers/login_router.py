@@ -72,7 +72,7 @@ async def login(
 
 @router.get("/login/logout")
 async def logout(request: Request):
-    resp = templates.TemplateResponse("login/login.html", {"request": request})
+    resp = RedirectResponse("/", status_code=302)
     resp.delete_cookie("access_token", path="/")
     return resp
 
