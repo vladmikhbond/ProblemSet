@@ -4,8 +4,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from .routers import login_router, problemset_router, solving_router, problem_router, ticket_router
 from fastapi.staticfiles import StaticFiles
 
-# параметр для запуску з проксі-сервером
-app = FastAPI(root_path="/pset")
+app = FastAPI()
 
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
