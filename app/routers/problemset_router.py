@@ -6,7 +6,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
 from .login_router import get_current_user
-from .problem_router import filtered_problems
+from .problem_router import get_filtered_problems
 from ..models.pss_models import Problem, ProblemSet, Ticket, User
 from ..dal import get_pss_db  # Функція для отримання сесії БД
 from sqlalchemy.orm import Session
@@ -57,14 +57,15 @@ async def get_problemset_new(
     Створення нового задачника поточного юзера (викладача). 
     """
     problemset = ProblemSet(
-        title = "",                
+        title = "",
+        username = user.username,      
         problem_ids = "",                    
         open_time = time_to_str(datetime.now()),  
         open_minutes=20,
         stud_filter = "",
     )
 
-    problems = filtered_problems(request, db)
+    problems = get_filtered_problems(request, db)
     return templates.TemplateResponse("problemset/edit.html", 
             {"request": request, "problemset": problemset, "problems": problems})
 
@@ -73,20 +74,24 @@ async def get_problemset_new(
 async def post_problemset_new(
     request: Request,
     title: str = Form(...),
-    problem_ids: str = Form(...),
+    # problem_ids: str = Form(...),
     open_time: str = Form(...),
     open_minutes: int = Form(0),
     stud_filter: str = Form(""),
     db: Session = Depends(get_pss_db),
     user: User=Depends(get_current_user)
 ):
-        
-    problems = problems = filtered_problems(request, db)
+    # читає з форми список обраних задач
+    form = await request.form()
+    prob_lst = form.getlist('prob')       #  "['id1', 'id2', 'id3']"
+    prob_ids = '\n'.join(prob_lst)
+
+    problems = get_filtered_problems(request, db)
 
     problemset = ProblemSet(
         title = title,
         username = user.username,
-        problem_ids = problem_ids,                    
+        problem_ids = prob_ids,                    
         open_time = str_to_time(open_time),
         open_minutes = open_minutes,
         stud_filter = stud_filter
@@ -120,10 +125,14 @@ async def get_problemset_edit(
             raise HTTPException(401)
 
     problemset.open_time = time_to_str(problemset.open_time)
-    problems = filtered_problems(request, db)
+    problems = get_filtered_problems(request, db)
 
-    if not problemset:
-        return RedirectResponse(url="/problemset/list", status_code=302)
+    arr = []
+    for p in problems:
+        p.checked = p.id in problemset.ids_list
+        if p.checked:
+            arr.append(p.inline) 
+    problemset.problem_ids = "\n".join(arr)
 
     return templates.TemplateResponse("problemset/edit.html", 
             {"request": request, "problemset": problemset, "problems": problems})
@@ -133,20 +142,20 @@ async def get_problemset_edit(
 async def post_problemset_edit(
     id: str,
     request: Request,
-    username: str = Form(...),  # from hidden input
-    problem_ids: str = Form(...),
     open_time: str = Form(...),
     open_minutes: int = Form(0),
     stud_filter: str = Form(""),
     db: Session = Depends(get_pss_db),
     user: User=Depends(get_current_user)
 ):
-    problems = filtered_problems(request, db)
-    problemset = db.get(ProblemSet, id)
-    if not problemset:
-        return RedirectResponse(url="/problemset/list", status_code=302)
-    problemset.username = username  
-    problemset.problem_ids = problem_ids
+    # читає з форми список обраних задач
+    form = await request.form()
+    prob_lst = form.getlist('prob')       #  "['id1', 'id2', 'id3']"
+    prob_ids = '\n'.join(prob_lst)    
+
+    # оновлює задачник
+    problemset = db.get(ProblemSet, id) 
+    problemset.problem_ids = prob_ids
     problemset.open_time = str_to_time(open_time)
     problemset.open_minutes = open_minutes
     problemset.stud_filter = stud_filter
@@ -156,6 +165,7 @@ async def post_problemset_edit(
         db.rollback()
         err_mes = f"Error during a problemset edit: {e}"
         print(err_mes)
+        problems = get_filtered_problems(request, db)
         return templates.TemplateResponse("problemset/edit.html", 
                 {"request": request, "problemset": problemset, "problems": problems})
     

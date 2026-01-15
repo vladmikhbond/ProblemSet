@@ -25,6 +25,12 @@ class Problem(Base):
     # nav
     tickets: Mapped[list["Ticket"]] = relationship(back_populates="problem", cascade="all, delete-orphan")
 
+    @property
+    def inline(self):
+        """attr, title in one line"""
+        return f"{self.attr}/{self.title}"[:80]
+
+    
 
 class User(Base):
     __tablename__ = "users"
@@ -55,6 +61,11 @@ class ProblemSet(Base):
     def exspire_time(self):
         return self.open_time + timedelta(minutes=self.open_minutes)
     
+    @property
+    def ids_list(self) -> List[str]:
+        """return list of problem ids"""
+        return self.problem_ids.split()
+
 
 class Ticket(Base):
     __tablename__ = "tickets"

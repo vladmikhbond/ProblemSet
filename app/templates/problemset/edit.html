@@ -7,19 +7,13 @@
 
 <h2>Задачник</h2>
 <div style="color: red;">{{err_mes}}</div>
-<form method="post">
-  <input type="hidden" name="username" value="{{ problemset.username }}">
-  
+<form method="post"> 
   <label>
     Title
     {% set read_only = "" if request.url.path.endswith("new") else "readonly" %}
-    <input type="text" name="title" value="{{ problemset.title }}" placeholder="unique name" {{read_only}}>
+    <input type="text" name="title" value="{{ problemset.title }}" placeholder="unique name" {{read_only}} required>
   </label>
 
-  <label>
-    Problem IDs (at least one required)
-    <textarea id="problem_ids" name="problem_ids" style="width: 100%" readonly>{{ problemset.problem_ids }}</textarea>
-  </label>     
   <label>
     Open Time
     <input type="datetime-local" name="open_time" value="{{ problemset.open_time }}">
@@ -31,24 +25,36 @@
   </label>
 
   <label>
-    User Sample
+    Username Sample
     <input type="text" name="stud_filter" value="{{ problemset.stud_filter }}">
   </label>
+
+  <label>
+    Problems
+    <textarea id="problem_ids" style="width: 100%" readonly>{{ problemset.problem_ids }}</textarea>
+  </label>     
+
+  <footer class="grid">
+    <button type="submit" >Зберігти</button>
+    <a href="/problemset/list" role="button" class="secondary">Скасувати</a>
+  </footer> 
+
+  <ul>
+      {% for problem in problems %}
+      <li style="list-style-type: none" title="{{problem.cond}}">
+        <input type="checkbox"  name="prob" value="{{problem.id}}" onchange="reset_problem_ids(event)" 
+        {% if problem.checked %}checked{% endif %} >
+        {{problem.inline}}
+      </li>    
+      {% endfor %}
+  </ul>
 
   <footer class="grid">
     <button type="submit" >Зберігти</button>
     <a href="/problemset/list" role="button" class="secondary">Скасувати</a>
   </footer>      
+  
 </form>
-
-<!-- ---------------------- problem list --------------------- -->
-
-<div id="problem_headers">
-  {% for problem in problems %}
-    <div id="{{problem.id}}" onclick="toggle('{{problem.id}}')" 
-          style="font-weight: 400;" title="{{problem.cond}}"  >{{problem.attr}} - {{problem.title}}</div>
-  {% endfor %}
-</div>
 
 {% endblock %}
 

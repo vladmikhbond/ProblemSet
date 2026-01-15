@@ -25,7 +25,7 @@ router = APIRouter()
 #
 
 
-def filtered_problems(request: Request, db: Session) -> list[Problem]:
+def get_filtered_problems(request: Request, db: Session) -> list[Problem]:
     """ 
     Профільтровані і впорядклвані задачі.
     """
@@ -45,7 +45,7 @@ async def get_problem_list(
     db: Session = Depends(get_pss_db),
     user: User = Depends(get_current_user)
 ):
-    problems = filtered_problems(request, db)
+    problems = get_filtered_problems(request, db)
     return templates.TemplateResponse("problem/list.html", {"request": request, "problems": problems})
 
 # ---------------------- new
