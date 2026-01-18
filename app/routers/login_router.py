@@ -9,7 +9,7 @@ from fastapi import APIRouter, HTTPException, Request, Form, Response, Security
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 
-from ..models.pss_models import User
+from ..models.models import User
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM")

@@ -1,6 +1,6 @@
 import re
 from datetime import datetime, timedelta
-from typing import List
+from typing import List, TypedDict
 from sqlalchemy import ForeignKey, String, DateTime, Integer, Text, LargeBinary
 from sqlalchemy.orm import Mapped, mapped_column, relationship, DeclarativeBase
 
@@ -61,13 +61,22 @@ class ProblemSet(Base):
     def exspire_time(self):
         return self.open_time + timedelta(minutes=self.open_minutes)
     
-    @property
-    def ids_list(self) -> List[str]:
+    def get_problem_ids(self) -> List[str]:
         """return list of problem ids"""
-        return self.problem_ids.split()
+        return self.problem_ids.split("\n")
+
+    def set_problem_ids(self, lst: List[str] ):
+        """return list of problem ids"""
+        self.problem_ids = "\n".join(lst)
 
 
 class Ticket(Base):
+
+    class TicketRecord(TypedDict):
+        when: str
+        code: str
+        check: str
+
     __tablename__ = "tickets"
  
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
@@ -82,13 +91,13 @@ class Ticket(Base):
     problem: Mapped["Problem"] = relationship(back_populates="tickets")
 
 
-    def do_record(self, solving, check_message):  
+    def add_record(self, solving, check_message):  
         RECORD_FORMAT = "~0~{0}\n~1~{1}\n~2~{2:%Y-%m-%d %H:%M:%S}\n~3~\n"
         self.records += RECORD_FORMAT.format(solving, check_message, datetime.now())
         if check_message.startswith("OK") and self.state == 0:
             self.state = 1
     
-    def get_records(self) -> List[dict[str, str]]:
+    def get_records(self) -> List[TicketRecord]:
         """ 
         Показ вирішень з тікету.
         """

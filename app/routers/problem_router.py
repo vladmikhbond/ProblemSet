@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import or_
 
 from .login_router import get_current_user, JUDGE
-from ..models.pss_models import Problem, User
+from ..models.models import Problem, User
 from ..dal import get_pss_db  # Функція для отримання сесії БД
 
 PROBLEM_FILTER_KEY = "problemset_problem_filter"

@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from .login_router import get_current_user
 from ..dal import get_pss_db  # Функція для отримання сесії БД
-from ..models.pss_models import Ticket, User
+from ..models.models import Ticket, User
 
 # шаблони Jinja2
 templates = Jinja2Templates(directory="app/templates")

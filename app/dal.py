@@ -1,7 +1,7 @@
 from datetime import datetime
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
-from .models.pss_models import Ticket
+from .models.models import Ticket
 
 # --------------------------- PSS.db ------------------------
 engine = create_engine(

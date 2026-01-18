@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from .login_router import get_current_user, JUDGE
 from ..models.schemas import AnswerSchema
 from ..dal import get_pss_db  # Функція для отримання сесії БД
-from ..models.pss_models import Problem, ProblemSet, Ticket, User
+from ..models.models import Problem, ProblemSet, Ticket, User
 
 # шаблони Jinja2
 templates = Jinja2Templates(directory="app/templates")
@@ -47,7 +47,7 @@ async def get_solving_list(
 
     psets = []
     for problemset in open_problemsets:
-        ids = problemset.problem_ids.split()
+        ids = problemset.get_problem_ids()
         problems = db.query(Problem).filter(Problem.id.in_(ids)).all()
         rest_time: timedelta = problemset.open_time - datetime.now() + timedelta(minutes=problemset.open_minutes)
         psets.append({
@@ -89,7 +89,7 @@ async def get_soleing_problem(
             comment="",
             expire_time=problemset.exspire_time(),            
         )
-        ticket.do_record("Вперше побачив задачу.", "User saw the task for the first time.");
+        ticket.add_record("Вперше побачив задачу.", "User saw the task for the first time.");
 
         try:
             db.add(ticket)
@@ -157,7 +157,7 @@ async def post_check(
         return f"Error. Is url '{url}' responding?"
   
     # Write solving to the ticket
-    ticket.do_record(solving, check_message)
+    ticket.add_record(solving, check_message)
     db.commit()
     return check_message
 

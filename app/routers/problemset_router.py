@@ -7,7 +7,7 @@ from fastapi.templating import Jinja2Templates
 
 from .login_router import get_current_user
 from .problem_router import get_filtered_problems
-from ..models.pss_models import Problem, ProblemSet, Ticket, User
+from ..models.models import Problem, ProblemSet, Ticket, User
 from ..dal import get_pss_db  # Функція для отримання сесії БД
 from sqlalchemy.orm import Session
 
@@ -129,10 +129,10 @@ async def get_problemset_edit(
 
     arr = []
     for p in problems:
-        p.checked = p.id in problemset.ids_list
+        p.checked = p.id in problemset.get_problem_ids()
         if p.checked:
             arr.append(p.inline) 
-    problemset.problem_ids = "\n".join(arr)
+    problemset.set_problem_ids(arr)
 
     return templates.TemplateResponse("problemset/edit.html", 
             {"request": request, "problemset": problemset, "problems": problems})
@@ -150,12 +150,11 @@ async def post_problemset_edit(
 ):
     # читає з форми список обраних задач
     form = await request.form()
-    prob_lst = form.getlist('prob')       #  "['id1', 'id2', 'id3']"
-    prob_ids = '\n'.join(prob_lst)    
+    prob_ids = form.getlist('prob')       #  "['id1', 'id2', 'id3']"   
 
     # оновлює задачник
     problemset = db.get(ProblemSet, id) 
-    problemset.problem_ids = prob_ids
+    problemset.set_problem_ids(prob_ids)
     problemset.open_time = str_to_time(open_time)
     problemset.open_minutes = open_minutes
     problemset.stud_filter = stud_filter
@@ -216,7 +215,7 @@ async def problemset_show(
     Показ вирішень з одного задачника.
     """
     problemset = db.get(ProblemSet, id)
-    problem_ids = problemset.problem_ids.split()
+    problem_ids = problemset.get_problem_ids()
     dict = {}
     for problem_id in problem_ids:
         problem = db.get(Problem, problem_id)
