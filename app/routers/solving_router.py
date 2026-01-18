@@ -87,7 +87,7 @@ async def get_soleing_problem(
             problem_id=problem_id, 
             records="",
             comment="",
-            expire_time=problemset.close_time(),            
+            expire_time=problemset.close_time,            
         )
         ticket.add_record("Вперше побачив задачу.", "User saw the task for the first time.");
 
