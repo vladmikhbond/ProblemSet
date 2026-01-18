@@ -30,8 +30,6 @@ class Problem(Base):
         """attr, title in one line"""
         return f"{self.attr}/{self.title}"[:80]
 
-    
-
 class User(Base):
     __tablename__ = "users"
 
@@ -52,6 +50,7 @@ class ProblemSet(Base):
     open_minutes: Mapped[int] = mapped_column(Integer, default=0)
     stud_filter: Mapped[str] = mapped_column(String, default='')
 
+# --------------- problem_ids methods
     
     def get_problem_ids(self) -> List[str]:
         """return list of problem ids"""
@@ -61,18 +60,20 @@ class ProblemSet(Base):
         """return list of problem ids"""
         self.problem_ids = "\n".join(lst)
 
+# --------------- time props
+
     @property
     def close_time(self) -> datetime: 
         return self.open_time + timedelta(minutes=self.open_minutes)
     
     @property
     def rest_time(self) -> timedelta:
-        return self.open_time - datetime.now() + timedelta(minutes=self.open_minutes)
-    
+        """Return remaining open time, or zero if already closed."""
+        remaining = self.open_time - datetime.now() + timedelta(minutes=self.open_minutes)
+        return max(remaining, timedelta(0))
+
     @property
     def is_open(self) -> bool: 
-        #     if self.open_time is None or self.open_minutes is None:
-        #         return False
         return self.open_time < datetime.now() < self.close_time;
 
 class Ticket(Base):
@@ -95,6 +96,7 @@ class Ticket(Base):
     #  nav
     problem: Mapped["Problem"] = relationship(back_populates="tickets")
 
+# --------------- record methods
 
     def add_record(self, solving, check_message):  
         RECORD_FORMAT = "~0~{0}\n~1~{1}\n~2~{2:%Y-%m-%d %H:%M:%S}\n~3~\n"
