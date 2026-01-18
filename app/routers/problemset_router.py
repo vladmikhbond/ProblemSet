@@ -43,6 +43,9 @@ async def get_problemset_list(
     all_problemsets: list[ProblemSet] = db.query(ProblemSet).all()
 
     problemsets = [p for p in all_problemsets if p.username == user.username ] 
+    for p in problemsets:
+        p.open_time_as_str = p.open_time.strftime('%d/%m/%y %H:%M')
+
     return templates.TemplateResponse("problemset/list.html", {"request": request, "problemsets": problemsets})
 
 # ------- new 

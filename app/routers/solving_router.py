@@ -34,7 +34,7 @@ async def get_solving_list(
     Враховуються лише відкриті та доступні поточному юзеру задачники.
     """
     problemsets: list[ProblemSet] = db.query(ProblemSet).all()
-    open_problemsets = [ps for ps in problemsets if ps.is_open() and re.match(ps.stud_filter, user.username)]
+    open_problemsets = [ps for ps in problemsets if ps.is_open and re.match(ps.stud_filter, user.username)]
 
     token = request.cookies["access_token"]
 
@@ -49,11 +49,11 @@ async def get_solving_list(
     for problemset in open_problemsets:
         ids = problemset.get_problem_ids()
         problems = db.query(Problem).filter(Problem.id.in_(ids)).all()
-        rest_time: timedelta = problemset.open_time - datetime.now() + timedelta(minutes=problemset.open_minutes)
+    
         psets.append({
             "title": problemset.title,         #TODO  encode
             "username": problemset.username,
-            "t": rest_time,
+            "rest": problemset.rest_time,
             "problems": problems})
 
     return templates.TemplateResponse("solving/list.html", {"request": request, "psets": psets})
@@ -87,7 +87,7 @@ async def get_soleing_problem(
             problem_id=problem_id, 
             records="",
             comment="",
-            expire_time=problemset.exspire_time(),            
+            expire_time=problemset.close_time(),            
         )
         ticket.add_record("Вперше побачив задачу.", "User saw the task for the first time.");
 

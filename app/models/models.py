@@ -52,14 +52,6 @@ class ProblemSet(Base):
     open_minutes: Mapped[int] = mapped_column(Integer, default=0)
     stud_filter: Mapped[str] = mapped_column(String, default='')
 
-    def is_open(self) -> bool:
-        if self.open_time is None or self.open_minutes is None:
-            return False
-        limit: datetime = self.open_time + timedelta(minutes=self.open_minutes)
-        return limit > datetime.now()
-    
-    def exspire_time(self):
-        return self.open_time + timedelta(minutes=self.open_minutes)
     
     def get_problem_ids(self) -> List[str]:
         """return list of problem ids"""
@@ -69,6 +61,19 @@ class ProblemSet(Base):
         """return list of problem ids"""
         self.problem_ids = "\n".join(lst)
 
+    @property
+    def close_time(self) -> datetime: 
+        return self.open_time + timedelta(minutes=self.open_minutes)
+    
+    @property
+    def rest_time(self) -> timedelta:
+        return self.open_time - datetime.now() + timedelta(minutes=self.open_minutes)
+    
+    @property
+    def is_open(self) -> bool: 
+        #     if self.open_time is None or self.open_minutes is None:
+        #         return False
+        return self.open_time < datetime.now() < self.close_time;
 
 class Ticket(Base):
 

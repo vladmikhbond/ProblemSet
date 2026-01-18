@@ -9,10 +9,25 @@
     </div>
     {% if problemsets and problemsets|length %}
     <table>
+        <thead>
+        <tr>
+          <td>Title</a> </td>
+          <td>Open Time</td>
+          <td>Duration'</td>
+          <td>Rest'</td>
+          <td>User Sample</td>
+          <td></td>
+        </tr>
+      </thead>
       <tbody>
         {% for problemset in problemsets %}
+        {% set color = "red" if problemset.is_open else "black" %}
         <tr>
-          <td><a href="/problemset/show/{{problemset.title}}">{{ problemset.title }}</a></td> 
+          <td><a href="/problemset/show/{{problemset.title}}" style="color: {{color}};">{{ problemset.title }}</a></td> 
+          <td>{{problemset.open_time_as_str }}</td>
+          <td>{{problemset.open_minutes }}</td>
+          <td>{{problemset.rest_time}}</td>
+          <td>{{problemset.stud_filter }}</td>
           <td>
               <a href="/problemset/edit/{{problemset.title}}">edit</a> | 
               <a href="/problemset/del/{{problemset.title}}">del</a>
