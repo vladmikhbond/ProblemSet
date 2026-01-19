@@ -1,15 +1,16 @@
 import re
 from typing import List
 from urllib.parse import unquote
-from ..models.models import User, Problem
+from ..models.models import Problem
 
-# ------------------------------------ PROBLEM_FILTER
+# -------------------- FILTERS
 
 PROBLEM_FILTER_KEY = "problemset_problem_filter"
+USER_FILTER_KEY = "problemset_user_filter"
 
 def get_filtered_problems(db, request):
     """
-    Повертає відфільтровані задачі.
+    Повертає відфільтровані задачі з бази даних.
     """
     problems = db.query(Problem).all()
     filter = unquote(request.cookies.get(PROBLEM_FILTER_KEY, "")).strip()
@@ -20,18 +21,12 @@ def get_filtered_problems(db, request):
     problems.sort(key=lambda p: p.attr+" "+p.title)
     return problems
 
-# ------------------------------------ USER_FILTER
 
-USER_FILTER_KEY = "problemset_user_filter"
-
-
-# ------------------------------------ common 
-
-def get_filtered_lines(lines: List[str], filtr_key, request):
+def get_filtered_lines(lines: List[str], filter_key, request):
     """
     Повертає відфільтровані рядки.
     """
-    filter = unquote(request.cookies.get(filtr_key, ""))     
+    filter = unquote(request.cookies.get(filter_key, ""))     
     if filter:
         lines = [line for line in lines if re.search(filter, line, re.RegexFlag.U) is not None] 
     return lines

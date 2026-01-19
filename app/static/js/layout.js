@@ -1,3 +1,7 @@
+const as_student = document.getElementById("as_student");
+let url = location.origin.replace("7001","7004/solving", )
+as_student.href = url
+
 // ---------------------------- фільтр задач -----------------------------
 
 const PROBLEM_FILTER_KEY = "problemset_problem_filter"
@@ -24,9 +28,9 @@ user_filter.addEventListener("change", async (e) => {
 
 // Встановлення або видалення кукі
 function setCookie(key, value) {
-if (value) {
-    const maxAge = 60 * 60 * 24 * 365; // seconds
-document.cookie = `${key}=${value}; max-age=${maxAge}; path=/; SameSite=Lax;`;
+    if (value) {
+        const maxAge = 60 * 60 * 24 * 365; // seconds
+        document.cookie = `${key}=${value}; max-age=${maxAge}; path=/; SameSite=Lax;`;
     } else {
         document.cookie = `${key}=; max-age=0; path=/`;
     }
