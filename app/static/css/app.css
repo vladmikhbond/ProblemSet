@@ -3,6 +3,13 @@ html {
   font-size: 100%;
 }
 
+/* filter */
+.filter {
+  height: 16px !important; 
+  margin-right: 4px;
+  max-width: 130px !important; 
+}
+
 /* однакова висота кнопок схвалення і відмови на формах */
 footer.grid button,
 footer.grid a[role="button"] {

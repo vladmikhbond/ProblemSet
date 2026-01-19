@@ -1,25 +1,32 @@
 // ---------------------------- фільтр задач -----------------------------
-// В шаблоні:
-// <input name="problem_filter" style="width: 120px" id="problem_filter" title="Фільтр задач"> 
-// В роутері
-// PROBLEM_FILTER_KEY = "problemset_problem_filter";
-// filter = unquote(request.cookies.get(PROBLEM_FILTER_KEY, "")).strip()
 
-const key = "problemset_problem_filter";
-const inp = document.getElementById("problem_filter");
+const PROBLEM_FILTER_KEY = "problemset_problem_filter"
+const problem_filter = document.getElementById("user_filter");
+problem_filter.value = getCookie(PROBLEM_FILTER_KEY);
 
-inp.value = getCookie(key);
-
-inp.addEventListener("change", async (e) => {
-    setCookie(key, encodeURIComponent(inp.value.trim()) )
+problem_filter.addEventListener("change", async (e) => {
+    setCookie(PROBLEM_FILTER_KEY, encodeURIComponent(problem_filter.value.trim()) )
     location.reload();
 })
 
+// ---------------------------- фільтр юзерів -----------------------------
+
+const USER_FILTER_KEY = "problemset_user_filter";
+const user_filter = document.getElementById("user_filter");
+user_filter.value = getCookie(USER_FILTER_KEY);
+
+user_filter.addEventListener("change", async (e) => {
+    setCookie(USER_FILTER_KEY, encodeURIComponent(user_filter.value.trim()) )
+    location.reload();
+})
+
+// ------------------------------------------------------
+
 // Встановлення або видалення кукі
 function setCookie(key, value) {
-    if (value) {
-        const maxAge = 60 * 60 * 24 * 365; // seconds
-        document.cookie = `${key}=${value}; max-age=${maxAge}; path=/; SameSite=Lax;`;
+if (value) {
+    const maxAge = 60 * 60 * 24 * 365; // seconds
+document.cookie = `${key}=${value}; max-age=${maxAge}; path=/; SameSite=Lax;`;
     } else {
         document.cookie = `${key}=; max-age=0; path=/`;
     }

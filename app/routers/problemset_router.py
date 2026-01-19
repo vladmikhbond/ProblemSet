@@ -5,6 +5,8 @@ from fastapi import APIRouter, Depends, HTTPException, Request, Response, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
+from app.routers.utils import get_filtered_lines, USER_FILTER_KEY
+
 from .login_router import get_current_user
 from .problem_router import get_filtered_problems
 from ..models.models import Problem, ProblemSet, Ticket, User
@@ -220,9 +222,16 @@ async def problemset_show(
     problemset = db.get(ProblemSet, id)
     problem_ids = problemset.get_problem_ids()
     dict = {}
+    
     for problem_id in problem_ids:
         problem = db.get(Problem, problem_id)
         dict[problem_id] = problem
+        # filter
+        usernames = [t.username for t in problem.tickets]
+        usernames = [un for un in get_filtered_lines(usernames, USER_FILTER_KEY, request)]
+        problem.tickets = [t for t in problem.tickets if t.username in usernames]
+        # sort
+        problem.tickets.sort(key = lambda t: t.when_success())
 
     return templates.TemplateResponse("problemset/show.html", {"request": request, "problemset": problemset, "dict": dict})
 

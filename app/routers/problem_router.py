@@ -10,32 +10,16 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
 
+from app.routers.utils import PROBLEM_FILTER_KEY, get_filtered_problems
+
 from .login_router import get_current_user, JUDGE
 from ..models.models import Problem, User
 from ..dal import get_pss_db  # Функція для отримання сесії БД
-
-PROBLEM_FILTER_KEY = "problemset_problem_filter"
 
 # шаблони Jinja2
 templates = Jinja2Templates(directory="app/templates")
 
 router = APIRouter()
-
-# ----------------------------------- auxiliary tools
-#
-
-
-def get_filtered_problems(request: Request, db: Session) -> list[Problem]:
-    """ 
-    Профільтровані і впорядклвані задачі.
-    """
-    filter = unquote(request.cookies.get(PROBLEM_FILTER_KEY, "")).strip()
-    probs = db.query(Problem)
-    if filter:
-        probs = probs.filter(or_(Problem.attr.contains(filter), Problem.title.contains(filter))
-                             ).order_by(Problem.attr, Problem.title)
-    return probs.all()
-
 
 # ----------------------------------- list
 

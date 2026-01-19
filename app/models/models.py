@@ -111,3 +111,11 @@ class Ticket(Base):
         REGEX = r"~0~(.*?)~1~(.*?)~2~(.*?)~3~"
         matches = re.findall(REGEX, self.records, flags=re.S)
         return [{"when": m[2], "code":m[0].strip(), "check":m[1].strip()} for m in matches]
+
+    def when_success(self) -> datetime :
+        success_records = [r for r in self.get_records() if r["check"].startswith("OK") ]
+        if len(success_records) == 0:
+            return datetime.min
+        when = success_records[0]["when"].strip()
+        return datetime.fromisoformat(when)
+       
