@@ -10,7 +10,7 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
 
-from app.routers.utils import PROBLEM_FILTER_KEY, get_filtered_problems
+from .utils import get_filtered_problems
 
 from .login_router import get_current_user, JUDGE
 from ..models.models import Problem, User
@@ -29,7 +29,7 @@ async def get_problem_list(
     db: Session = Depends(get_pss_db),
     user: User = Depends(get_current_user)
 ):
-    problems = get_filtered_problems(request, db)
+    problems = get_filtered_problems(db, request)
     return templates.TemplateResponse("problem/list.html", {"request": request, "problems": problems})
 
 # ---------------------- new

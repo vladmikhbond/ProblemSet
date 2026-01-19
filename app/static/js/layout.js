@@ -1,7 +1,7 @@
 // ---------------------------- фільтр задач -----------------------------
 
 const PROBLEM_FILTER_KEY = "problemset_problem_filter"
-const problem_filter = document.getElementById("user_filter");
+const problem_filter = document.getElementById("problem_filter");
 problem_filter.value = getCookie(PROBLEM_FILTER_KEY);
 
 problem_filter.addEventListener("change", async (e) => {
