@@ -51,7 +51,8 @@ async def get_solving_list(
         problems = db.query(Problem).filter(Problem.id.in_(ids)).all()
     
         psets.append({
-            "title": problemset.title,         #TODO  encode
+            "id": problemset.id,
+            "title": problemset.title,
             "username": problemset.username,
             "rest": problemset.rest_time,
             "problems": problems})
@@ -60,10 +61,10 @@ async def get_solving_list(
 
 # ---------------------------- open 
 
-@router.get("/solving/problem/{problem_id}/{pset_title}")  
-async def get_soleing_problem(
+@router.get("/solving/problem/{problem_id}/{pset_id}")  
+async def get_solving_problem(
     problem_id: str,
-    pset_title: str,
+    pset_id: str,
     request: Request,
     db: Session = Depends(get_pss_db),
     user: User=Depends(get_current_user)
@@ -81,7 +82,7 @@ async def get_soleing_problem(
 
     # create a new ticket
     if ticket is None:
-        problemset:ProblemSet = db.query(ProblemSet).get(pset_title)
+        problemset:ProblemSet = db.get(ProblemSet, pset_id) 
         ticket = Ticket(
             username=user.username, 
             problem_id=problem_id, 

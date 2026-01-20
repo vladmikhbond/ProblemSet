@@ -16,9 +16,9 @@ def get_filtered_problems(db, request):
     filter = unquote(request.cookies.get(PROBLEM_FILTER_KEY, "")).strip()
      
     if filter:
-        problems = [p for p in problems if re.search(filter, p.attr, re.RegexFlag.U) is not None] 
+        problems = [p for p in problems if re.search(filter, p.inline, re.RegexFlag.U) is not None] 
 
-    problems.sort(key=lambda p: p.attr+" "+p.title)
+    problems.sort(key=lambda p: p.inline)
     return problems
 
 

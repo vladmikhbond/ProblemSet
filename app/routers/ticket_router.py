@@ -55,10 +55,10 @@ async def get_ticket_del(
             {"request": request, "ticket": ticket, "pset_title": pset_title})
 
 
-@router.post("/ticket/del/{id}/{pset_title}")
+@router.post("/ticket/del/{id}/{pset_id}")
 async def post_ticket_del(
     id: str,
-    pset_title: str, 
+    pset_id: str, 
     db: Session = Depends(get_pss_db),
     user: User=Depends(get_current_user)
 ):
@@ -68,5 +68,5 @@ async def post_ticket_del(
     ticket = db.get(Ticket, id)
     db.delete(ticket)
     db.commit()
-    return RedirectResponse(url=f"/problemset/show/{pset_title}", status_code=302)
+    return RedirectResponse(url=f"/problemset/show/{pset_id}", status_code=302)
 

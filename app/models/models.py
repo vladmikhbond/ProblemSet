@@ -42,8 +42,9 @@ class User(Base):
 class ProblemSet(Base):
     __tablename__ = "problemsets"
 
-    title: Mapped[str] = mapped_column(String, primary_key=True)
+    id: Mapped[str] = mapped_column(primary_key=True)
 
+    title: Mapped[str] = mapped_column(String)
     username: Mapped[str] = mapped_column(String)
     problem_ids: Mapped[str] = mapped_column(Text)
     open_time: Mapped[datetime] = mapped_column(DateTime)

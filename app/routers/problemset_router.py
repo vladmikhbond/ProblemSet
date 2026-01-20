@@ -1,5 +1,6 @@
 import re
 from datetime import datetime
+import uuid
 from zoneinfo import ZoneInfo
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -70,7 +71,7 @@ async def get_problemset_new(
         stud_filter = "",
     )
 
-    problems = get_filtered_problems(request, db)
+    problems = get_filtered_problems(db, request)
     return templates.TemplateResponse("problemset/edit.html", 
             {"request": request, "problemset": problemset, "problems": problems})
 
@@ -79,7 +80,6 @@ async def get_problemset_new(
 async def post_problemset_new(
     request: Request,
     title: str = Form(...),
-    # problem_ids: str = Form(...),
     open_time: str = Form(...),
     open_minutes: int = Form(0),
     stud_filter: str = Form(""),
@@ -91,9 +91,10 @@ async def post_problemset_new(
     prob_lst = form.getlist('prob')       #  "['id1', 'id2', 'id3']"
     prob_ids = '\n'.join(prob_lst)
 
-    problems = get_filtered_problems(request, db)
+    problems = get_filtered_problems(db, request)
 
     problemset = ProblemSet(
+        id = str(uuid.uuid4()),
         title = title,
         username = user.username,
         problem_ids = prob_ids,                    
@@ -127,10 +128,10 @@ async def get_problemset_edit(
     """
     problemset = db.get(ProblemSet, id)
     if user.username != problemset.username:
-            raise HTTPException(401)
+            raise HTTPException(403)
 
     problemset.open_time = time_to_str(problemset.open_time)
-    problems = get_filtered_problems(request, db)
+    problems = get_filtered_problems(db, request)
 
     arr = []
     for p in problems:
@@ -145,8 +146,9 @@ async def get_problemset_edit(
 
 @router.post("/problemset/edit/{id}")
 async def post_problemset_edit(
-    id: str,
     request: Request,
+    id: str,
+    title: str = Form("noname"),
     open_time: str = Form(...),
     open_minutes: int = Form(0),
     stud_filter: str = Form(""),
@@ -158,7 +160,9 @@ async def post_problemset_edit(
     prob_ids = form.getlist('prob')       #  "['id1', 'id2', 'id3']"   
 
     # оновлює задачник
-    problemset = db.get(ProblemSet, id) 
+    problemset = db.get(ProblemSet, id)
+
+    problemset.title = title 
     problemset.set_problem_ids(prob_ids)
     problemset.open_time = str_to_time(open_time)
     problemset.open_minutes = open_minutes
@@ -169,7 +173,7 @@ async def post_problemset_edit(
         db.rollback()
         err_mes = f"Error during a problemset edit: {e}"
         print(err_mes)
-        problems = get_filtered_problems(request, db)
+        problems = get_filtered_problems(db, request)
         return templates.TemplateResponse("problemset/edit.html", 
                 {"request": request, "problemset": problemset, "problems": problems})
     
