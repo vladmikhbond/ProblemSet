@@ -67,8 +67,14 @@ async def get_problem_edit(
     """
     problem = db.get(Problem, id)
     if not problem:
-        return RedirectResponse(url="/problem/list", status_code=302)
-    return templates.TemplateResponse("problem/edit.html", {"request": request, "problem": problem})
+        raise HTTPException(status_code=404, detail="Problem not found")
+    if problem.author != user.username:
+        raise HTTPException(status_code=403, detail="Access forbidden: not the author")
+    
+    return templates.TemplateResponse(
+        "problem/edit.html", 
+        {"request": request, "problem": problem}
+    )
 
 
 @router.post("/problem/edit/{id}")
@@ -180,8 +186,14 @@ async def get_problem_del(
     """
     problem = db.get(Problem, id)
     if not problem:
-        return RedirectResponse(url="/problemset/list", status_code=302)
-    return templates.TemplateResponse("problem/del.html", {"request": request, "problem": problem})
+        raise HTTPException(status_code=404, detail="Problem not found")
+    if problem.author != user.username:
+        raise HTTPException(status_code=403, detail="Access forbidden: not the author")
+    
+    return templates.TemplateResponse(
+        "problem/del.html", 
+        {"request": request, "problem": problem}
+    )
 
 
 @router.post("/problem/del/{id}")
