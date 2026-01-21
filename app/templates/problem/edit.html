@@ -19,17 +19,15 @@
   {% endfor %}
 
   <label>
-      lang
-      <select name="lang">
-        <option value="js" {% if problem.lang == 'js' %}selected{% endif %}>js</option>
-        <option value="py" {% if problem.lang == 'py' %}selected{% endif %}>py</option>
-        <option value="cs" {% if problem.lang == 'cs' %}selected{% endif %}>cs</option>
-      </select>
-      
-    </label>
+    lang
+    <select name="lang">
+      <option value="js" {% if problem.lang == 'js' %}selected{% endif %}>js</option>
+      <option value="py" {% if problem.lang == 'py' %}selected{% endif %}>py</option>
+      <option value="cs" {% if problem.lang == 'cs' %}selected{% endif %}>cs</option>
+    </select> 
+  </label>
 
-
-  {% for k in ['cond','view','hint','code'] %}
+  {% for k in ['cond','view','code'] %}
     {% set n_rows = problem[k] | length - (problem[k] | replace('\n', '') | length) %} 
     <label>
       {{k}}
