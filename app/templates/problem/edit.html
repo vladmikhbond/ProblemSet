@@ -11,13 +11,24 @@
 {% endif %}
 
 <form method="post" action="/problem/edit/{{problem.id}}">
-
-  {% for k in ['title','attr','lang','author'] %}
+  {% for k in ['title','attr','author'] %}
     <label>
       {{k}}
       <input type="text" name="{{k}}" value="{{ problem[k] }}">
     </label>
   {% endfor %}
+
+  <label>
+      lang
+      <select name="lang">
+        <option value="js" {% if problem.lang == 'js' %}selected{% endif %}>js</option>
+        <option value="py" {% if problem.lang == 'py' %}selected{% endif %}>py</option>
+        <option value="cs" {% if problem.lang == 'cs' %}selected{% endif %}>cs</option>
+      </select>
+      
+    </label>
+
+
   {% for k in ['cond','view','hint','code'] %}
     {% set n_rows = problem[k] | length - (problem[k] | replace('\n', '') | length) %} 
     <label>

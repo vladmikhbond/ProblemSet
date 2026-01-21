@@ -65,16 +65,22 @@ class ProblemSet(Base):
 
     @property
     def close_time(self) -> datetime: 
+        if self.open_minutes == 0:
+            return datetime.max
         return self.open_time + timedelta(minutes=self.open_minutes)
-    
+
     @property
     def rest_time(self) -> timedelta:
         """Return remaining open time, or zero if already closed."""
+        if self.open_minutes == 0:
+            return timedelta.max
         remaining = self.open_time - datetime.now() + timedelta(minutes=self.open_minutes)
         return max(remaining, timedelta(0))
 
     @property
     def is_open(self) -> bool: 
+        if self.open_minutes == 0:
+            return True
         return self.open_time < datetime.now() < self.close_time;
 
 class Ticket(Base):
