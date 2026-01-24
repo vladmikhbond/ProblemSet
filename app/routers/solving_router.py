@@ -6,7 +6,7 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy import and_
 from sqlalchemy.orm import Session
 
-from .login_router import get_current_user, JUDGE
+from .login_router import get_current_tutor, JUDGE
 from ..models.schemas import AnswerSchema
 from ..dal import get_pss_db  # Функція для отримання сесії БД
 from ..models.models import Problem, ProblemSet, Ticket, User
@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 async def get_solving_list(
     request: Request,
     db: Session = Depends(get_pss_db),
-    user: User=Depends(get_current_user)
+    user: User=Depends(get_current_tutor)
 ):
     """
     Показує сторінку з задачами, розподіленими по задачникам.
@@ -67,7 +67,7 @@ async def get_solving_problem(
     pset_id: str,
     request: Request,
     db: Session = Depends(get_pss_db),
-    user: User=Depends(get_current_user)
+    user: User=Depends(get_current_tutor)
 ):
     """
     Відкриває вікно для вирішення задачі.
@@ -118,7 +118,7 @@ async def get_solving_problem(
 async def post_check(
     answer: AnswerSchema,
     db: Session = Depends(get_pss_db),
-    user: User=Depends(get_current_user)
+    user: User=Depends(get_current_tutor)
 ) -> str:
     """
     Відправляє рішення задачі на перевірку до judje і повертає відповідь .

@@ -55,6 +55,8 @@ class ProblemSet(Base):
     
     def get_problem_ids(self) -> List[str]:
         """return list of problem ids"""
+        if not self.problem_ids:
+            return []
         return self.problem_ids.split("\n")
 
     def set_problem_ids(self, lst: List[str] ):

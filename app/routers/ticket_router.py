@@ -5,7 +5,7 @@ from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
-from .login_router import get_current_user
+from .login_router import get_current_tutor
 from ..dal import get_pss_db  # Функція для отримання сесії БД
 from ..models.models import Ticket, User
 
@@ -26,7 +26,7 @@ async def get_solving_ticket(
     id: str, 
     request: Request, 
     db: Session = Depends(get_pss_db),
-    user: User=Depends(get_current_user)
+    user: User=Depends(get_current_tutor)
 ):
     """ 
     Показ вирішень з одного тікету.
@@ -43,7 +43,7 @@ async def get_ticket_del(
     pset_title: str, 
     request: Request, 
     db: Session = Depends(get_pss_db),
-    user: User=Depends(get_current_user)
+    user: User=Depends(get_current_tutor)
 ):
     """ 
     Видалення тікету.
@@ -60,7 +60,7 @@ async def post_ticket_del(
     id: str,
     pset_id: str, 
     db: Session = Depends(get_pss_db),
-    user: User=Depends(get_current_user)
+    user: User=Depends(get_current_tutor)
 ):
     """ 
     Видалення тікету.

@@ -95,8 +95,12 @@ def get_current_user(token: str = Security(cookie_scheme)) -> User:
         raise HTTPException(status_code=401, detail="Token expired")
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=401, detail="Invalid token")
-    # user must be tutor
     role = payload.get("role")
-    if role != "tutor":
-        raise HTTPException(status_code=403, detail="Permission denied: tutors only.")
     return User(username=payload.get("sub"), role=role)
+
+
+def get_current_tutor(token: str = Security(cookie_scheme)) -> User:
+    user = get_current_user(token)
+    if user.role != "tutor":
+        raise HTTPException(status_code=403, detail="Permission denied: tutors only.")
+    return user

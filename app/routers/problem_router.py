@@ -12,7 +12,7 @@ from sqlalchemy import or_
 
 from .utils import get_filtered_problems
 
-from .login_router import get_current_user, JUDGE
+from .login_router import get_current_tutor, JUDGE
 from ..models.models import Problem, User
 from ..dal import get_pss_db  # Функція для отримання сесії БД
 
@@ -27,7 +27,7 @@ router = APIRouter()
 async def get_problem_list(
     request: Request,
     db: Session = Depends(get_pss_db),
-    user: User = Depends(get_current_user)
+    user: User = Depends(get_current_tutor)
 ):
     problems = get_filtered_problems(db, request)
     return templates.TemplateResponse("problem/list.html", {"request": request, "problems": problems})
@@ -39,7 +39,7 @@ async def get_problem_list(
 async def get_problem_new(
     request: Request,
     db: Session = Depends(get_pss_db),
-    user: User = Depends(get_current_user)
+    user: User = Depends(get_current_tutor)
 ):
     """ 
     Створення нової задачі.
@@ -60,7 +60,7 @@ async def get_problem_edit(
     id: str,
     request: Request,
     db: Session = Depends(get_pss_db),
-    user: User = Depends(get_current_user)
+    user: User = Depends(get_current_tutor)
 ):
     """ 
     Редагування задачі.
@@ -90,7 +90,7 @@ async def post_problem_edit(
     code: str = Form(...),
     author: str = Form(...),
     db: Session = Depends(get_pss_db),
-    user: User = Depends(get_current_user)
+    user: User = Depends(get_current_tutor)
 ):
     """ 
     Редагування задачі.
@@ -143,7 +143,7 @@ async def get_problem_copy(
     id: str,
     request: Request,
     db: Session = Depends(get_pss_db),
-    user: User = Depends(get_current_user)
+    user: User = Depends(get_current_tutor)
 ):
     """ 
     Копіювання задачі.
@@ -179,7 +179,7 @@ async def get_problem_del(
     id: str,
     request: Request,
     db: Session = Depends(get_pss_db),
-    user: User = Depends(get_current_user)
+    user: User = Depends(get_current_tutor)
 ):
     """ 
     Видалення задачі.
@@ -200,7 +200,7 @@ async def get_problem_del(
 async def post_problem_del(
     id: str,
     db: Session = Depends(get_pss_db),
-    user: User = Depends(get_current_user)
+    user: User = Depends(get_current_tutor)
 ):
     problem = db.get(Problem, id)
     db.delete(problem)
