@@ -11,6 +11,7 @@
 <body>
     <main class="container">
         <nav>
+        {% if request.state.user.role == "tutor"%}
         <ul>
             <li style="color: darkred"><strong>Problem Set</strong></li>
         </ul>
@@ -18,23 +19,30 @@
             <li><a href="/problemset/list">Workbooks</a></li>
             <li><a href="/problem/list">Problems</a></li>
             <li><a href="/solving" >Solving</a></li>
-            <li><a id="as_student" >As Student</a></li>
             <li><a href="/login/logout" >Logout</a></li>
             <li><a href="/login/help">❓</a></li>
         </ul>
+         
         {# ----------- filters ---------- #}         
         <fieldset role="group" style="width: 390px; margin-top: 20px;">
             <input id="problem_filter" title="Фільтр задач"  class="filter" placeholder="Problems">        
             <input id="user_filter"     title="Фільтр юзерів" class="filter" placeholder="Users"> 
         </fieldset>
+        {% else %}
+            <li><a id="to_student">Home</a></li>
+        {% endif %}
         </nav>
+             
+
 
         {% block content %}
         {% endblock %}
     </main>
 
-    {% block script %}
-    {% endblock %}
+    {% block script %}{% endblock %}
+
+    <script>
+    </script>
     <script src="/static/js/layout.js" type="text/javascript" charset="utf-8"></script>
 </body>
 </html>

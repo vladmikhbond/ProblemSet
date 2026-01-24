@@ -88,6 +88,7 @@ async def logout(request: Request, response: Response):
 # описуємо джерело токена (cookie)
 cookie_scheme = APIKeyCookie(name="access_token")
 
+
 def get_current_user(token: str = Security(cookie_scheme)) -> User:
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])

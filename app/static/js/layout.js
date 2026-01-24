@@ -1,6 +1,5 @@
-const as_student = document.getElementById("as_student");
-let url = location.origin.replace("7001","7004/solving", )
-as_student.href = url
+// повернення до студентського додатку
+document.getElementById("to_student").href = location.origin.replace("7001","7004/disc/list", )
 
 // ---------------------------- фільтр задач -----------------------------
 
