@@ -20,5 +20,4 @@ coverage.xml
 *.cover
 
 # Environment variables
-.devcontainer/
 *.tar
