@@ -31,6 +31,8 @@ def str_to_time(s: str) -> datetime:
         .replace(tzinfo=ZoneInfo(ZONE)) \
         .astimezone(ZoneInfo("UTC"))
 
+def delta_to_str(td):
+    return f"{td.days} d {td.seconds//3600} h {(td.seconds//60)%60} m"
 
 # ------- list 
 
@@ -46,14 +48,14 @@ async def get_problemset_list(
     all_problemsets: list[ProblemSet] = db.query(ProblemSet).all()
 
     problemsets = [p for p in all_problemsets if p.username == user.username ] 
-    for p in problemsets:  
-        
-        if p.open_minutes == 0:
-            p.open_time_as_str = "-"
-            p.rest_time_as_str = "-"
+    for p in problemsets: 
+        p.open_time_as_str = time_to_str(p.open_time)
+        if p.open_minutes:
+            p.open_minutes_as_str = f"{p.open_minutes} m"
+            p.rest_time_as_str = delta_to_str(p.rest_time)
         else: 
-            p.open_time_as_str = p.open_time.strftime('%d/%m/%y %H:%M')
-            p.rest_time_as_str = (datetime.min + p.rest_time).strftime('%d/%m/%y %H:%M')
+            p.open_minutes_as_str = "-"
+            p.rest_time_as_str = "-"
 
     return templates.TemplateResponse("problemset/list.html", {"request": request, "problemsets": problemsets})
 
