@@ -20,6 +20,5 @@ coverage.xml
 *.cover
 
 # Environment variables
-.env.local
-.env.*
+devcontainer/
 *.tar
