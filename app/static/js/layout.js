@@ -1,8 +1,10 @@
 // повернення до студентського додатку
-document.getElementById("to_student").href = location.origin
-    .replace("7001","7004/disc/list")
-    .replace("7071","7074/disc/list")
-    
+toStudent = document.getElementById("to_student");
+if (toStudent) {
+    toStudent.href = location.origin
+        .replace("7001","7004/disc/list")
+        .replace("7071","7074/disc/list")
+}
 
 // ---------------------------- фільтр задач -----------------------------
 

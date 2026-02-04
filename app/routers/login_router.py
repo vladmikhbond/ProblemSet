@@ -69,9 +69,10 @@ async def login(
     )
     return redirect    
   
+# -------------------------- logout
 
 @router.get("/login/logout")
-async def logout(request: Request):
+async def get_logout(request: Request):
     resp = RedirectResponse("/", status_code=302)
     resp.delete_cookie("access_token", path="/")
     return resp
