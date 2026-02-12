@@ -87,7 +87,6 @@ async def get_solving_problem(
             username=user.username, 
             problem_id=problem_id, 
             records="",
-            comment="",
             expire_time=problemset.close_time,            
         )
         ticket.add_record("Вперше побачив задачу.", "User saw the task for the first time.");
@@ -125,13 +124,9 @@ async def post_check(
     Додає в тіскет рішення і відповідь. 
     Приймає JSON у тілі у форматі AnswerSchema.
     """
-
-    problem_id = answer.problem_id
-    solving = answer.solving
-
     # get a ticket
     ticket = db.query(Ticket) \
-        .filter(and_(Ticket.username == user.username, Ticket.problem_id == problem_id)) \
+        .filter(and_(Ticket.username == user.username, Ticket.problem_id == answer.problem_id)) \
         .first()
                               
     if ticket is None:
@@ -145,10 +140,10 @@ async def post_check(
     regex = regex_helper(problem.lang);
     if regex == None:
        return "Wrong Language" 
-    newCode = re.sub(regex, solving, problem.code, count=1, flags=re.DOTALL)
+    user_code = re.sub(regex, answer.solving, problem.code, count=1, flags=re.DOTALL)
 
     # Check user's solving
-    payload = {"code": newCode, "timeout": 2000}
+    payload = {"code": user_code, "timeout": 2000}
     url = JUDGE[problem.lang]
     try:
         async with httpx.AsyncClient() as client:
@@ -158,7 +153,9 @@ async def post_check(
         return f"Error. Is url '{url}' responding?"
   
     # Write solving to the ticket
-    ticket.add_record(solving, check_message)
+    ticket.add_record(answer.solving, check_message)
+    ticket.track = answer.track
+     
     db.commit()
     return check_message
 

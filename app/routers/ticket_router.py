@@ -19,7 +19,7 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-
+# ------- show
 
 @router.get("/ticket/show/{id}")
 async def get_solving_ticket(
@@ -32,8 +32,9 @@ async def get_solving_ticket(
     Показ вирішень з одного тікету.
     """
     ticket = db.get(Ticket, id)
+    records = ticket.get_records()
     return templates.TemplateResponse("ticket/show.html", 
-            {"request": request, "ticket": ticket,  "records": ticket.get_records()})
+            {"request": request, "ticket": ticket,  "records": records})
 
 # ------- del 
 

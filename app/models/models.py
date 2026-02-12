@@ -99,7 +99,7 @@ class Ticket(Base):
     username: Mapped[str] = mapped_column(String)
     problem_id: Mapped[str] = mapped_column(String, ForeignKey("problems.id", ondelete="CASCADE")) 
     records: Mapped[str] = mapped_column(Text, default="")
-    comment: Mapped[str] = mapped_column(String)
+    track: Mapped[str] = mapped_column(Text, default="")
     expire_time: Mapped[datetime] = mapped_column(DateTime)
     state: Mapped[int] = mapped_column(Integer, default=0) # 1 - problem is solved
     #  nav
