@@ -5,7 +5,7 @@ const message = document.getElementById("message");
 
 // Відстеження треку рішення
 class SolveTracer {
-    constructor(sep='\x00', check_sep = "(ツ)") {
+    constructor(sep='\u0001', check_sep = "(ツ)") {
         this.sep = sep;
         this.check_sep  = check_sep 
         this.prevSolving = "";

@@ -21,21 +21,34 @@
 
   <div class="container">
     <h5 class="title">Користувач {{ticket.username}}. Задача "{{ticket.problem.title}}"</h5>
-    <h6>Початок о {{records[0]["when"]}}</h6>
+    <h6>Початок о {{record.when}}</h6>
   
-    {% for record in records[1:]|reverse %}
-      {% set class_ = "ok" if record["check"].startswith('OK') else "wrong"  %}
-      {% set n_rows = (record["code"] | length - (record["code"] | replace('\n', '') | length)) + 1 %} 
+    {% set class_ = "ok" if record["check"].startswith('OK') else "wrong"  %}
+    {% set n_rows = (record["code"] | length - (record["code"] | replace('\n', '') | length)) + 1 %} 
 
-      <div>
-        <div class="dt">{{record['when']}}</div>
-        <textarea rows="{{n_rows}}" class="{{class_}}">{{record['code']}}</textarea>
-        <div style="font-size: smaller;">{{record['check']}}</div>
-      </div>
-    {% endfor %}
+    <div>
+      <div class="dt">{{record['when']}}</div>
+      <textarea rows="{{n_rows}}" class="{{class_}}">{{record['code']}}</textarea>
+      <div style="font-size: smaller;">{{record['check']}}</div>
+    </div>
 
-    <textarea rows="5" style="color: gray;"">{{ticket.track}}</textarea>
-    
+    <textarea id="trackArea" rows="5" style="color: gray;"">{{ticket.track}}</textarea>
+    <input type="range" id="timeRange" min="0" max="100" />
   </div>
+{% endblock %}
 
+{% block script %}
+<script>
+   const track64 = {{ track64 | tojson }};
+
+   function decodeBase64Utf8(base64) {
+       const bytes = Uint8Array.from(atob(base64), c => c.charCodeAt(0));
+       return new TextDecoder("utf-8").decode(bytes);
+   }
+
+   const track = decodeBase64Utf8(track64);
+
+   console.log(track);
+</script>
+<script src="/static/js/ticket_show.js" type="text/javascript" charset="utf-8"></script>
 {% endblock %}
