@@ -30,27 +30,6 @@ class SolveTracer {
         return `${l}|${mid}|${r}`;
     }
 
-    static unfold(track, sep='\x00') {
-        if (!track) 
-            return [];
-        let result = [];
-        let chain = track.split(sep);
-        let screen = "";
-        for (let link of chain) {
-            if (link) {
-                let iL = link.indexOf('|');
-                let iR = link.lastIndexOf('|');
-                let l = +link.slice(0, iL);
-                let r = +link.slice(iR);
-                let mid = link.slice(iL+1, iR);
-                let left = screen.slice(0, l);
-                let right = r ? screen.slice(-r) : "";
-                screen = left + mid + right;               
-            } 
-            result.push(screen);
-        }
-        return result;
-    }
 }
 
 const tracer = new SolveTracer();
