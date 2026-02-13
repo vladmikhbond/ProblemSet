@@ -3,17 +3,19 @@ const checkImage = document.getElementById("checkImage");
 const problemId = document.getElementById("problemId");
 const message = document.getElementById("message");
 
+// константи LINK_SEP і CHECK_SEP у файлі trace_const.js
+
+const TRACE_MSEC = 3000;
+
 // Відстеження треку рішення
 class SolveTracer {
-    constructor(sep='\u0001', check_sep = "(ツ)") {
-        this.sep = sep;
-        this.check_sep  = check_sep 
+    constructor() {
         this.prevSolving = "";
         this.track = "";
     }
 
     add(solving) {
-        this.track += this.sep + this.diff(solving);
+        this.track += LINK_SEP + this.diff(solving);
         this.prevSolving = solving;
     }
 
@@ -35,9 +37,12 @@ class SolveTracer {
 const tracer = new SolveTracer();
 
 tracer.add(editor.getValue());
+
 setInterval(() => {
     tracer.add(editor.getValue());
-}, 5000)
+}, TRACE_MSEC)
+
+
 
 // Перевірка рішення
 checkButton.addEventListener("click", async () => {
@@ -59,16 +64,15 @@ checkButton.addEventListener("click", async () => {
         }
 
         // display check answer
-        const check_mes = await response.json();           
-        let ok = check_mes.slice(0, 4).indexOf("OK") != -1;
+        let check_mes = await response.json();           
+        const ok = check_mes.slice(0, 4).indexOf("OK") != -1;
         message.style.color = ok ? "green" : "red";
         message.innerHTML = check_mes;
         checkImage.style.display = ok ? "inline" : "none";
-        // add to trace
-        if (check_mes.length > 30) {
-            check_mes = check_mes.slice(0, 30) + "..." 
-        }
-        tracer.add(data.solving + this.check_sep + check_mes)
+
+        // extraordinary tracing
+        check_mes = check_mes.length > 30 ? check_mes.slice(0, 30) + "..." : check_mes
+        tracer.add(data.solving + CHECK_SEP + check_mes)
 
     } catch (err) {
         console.error("Request failed:", err);

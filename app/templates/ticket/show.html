@@ -28,27 +28,20 @@
 
     <div>
       <div class="dt">{{record['when']}}</div>
-      <textarea rows="{{n_rows}}" class="{{class_}}">{{record['code']}}</textarea>
-      <div style="font-size: smaller;">{{record['check']}}</div>
+      <input type="range" id="timeRange" min="0" max="1" step="1" />
+      <textarea id="codeArea" rows="{{n_rows}}" class="{{class_}}">{{record['code']}}</textarea>
+      <div id="checkDiv" style="font-size: smaller;">{{record['check']}}</div>
     </div>
 
-    <textarea id="trackArea" rows="5" style="color: gray;"">{{ticket.track}}</textarea>
-    <input type="range" id="timeRange" min="0" max="100" />
+
+
   </div>
 {% endblock %}
 
 {% block script %}
 <script>
-   const track64 = {{ track64 | tojson }};
-
-   function decodeBase64Utf8(base64) {
-       const bytes = Uint8Array.from(atob(base64), c => c.charCodeAt(0));
-       return new TextDecoder("utf-8").decode(bytes);
-   }
-
-   const track = decodeBase64Utf8(track64);
-
-   console.log(track);
+  const track_in_base64 = {{ track64 | tojson }};
 </script>
+<script src="/static/js/trace_const.js" type="text/javascript" charset="utf-8"></script>
 <script src="/static/js/ticket_show.js" type="text/javascript" charset="utf-8"></script>
 {% endblock %}
