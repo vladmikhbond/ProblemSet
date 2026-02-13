@@ -5,9 +5,10 @@ const message = document.getElementById("message");
 
 // константи LINK_SEP і CHECK_SEP у файлі trace_const.js
 
-const TRACE_MSEC = 3000;
+const TRACE_INTERVAL = 3000;
 
-// Відстеження треку рішення
+// Відстежувач треку рішення
+//
 class SolveTracer {
     constructor() {
         this.prevSolving = "";
@@ -40,11 +41,12 @@ tracer.add(editor.getValue());
 
 setInterval(() => {
     tracer.add(editor.getValue());
-}, TRACE_MSEC)
+}, TRACE_INTERVAL);
 
 
 
 // Перевірка рішення
+//
 checkButton.addEventListener("click", async () => {
     const data = {
         problem_id: problemId.value,

@@ -3,8 +3,8 @@ const timeRange = document.getElementById("timeRange");
 const checkDiv = document.getElementById("checkDiv");
 
 // константи LINK_SEP і CHECK_SEP у файлі trace_const.js
+// константа track_in_base64 на веб сторінці
 
-// decode track from track_in_base64
 const bytes = Uint8Array.from(atob(track_in_base64), c => c.charCodeAt(0));
 const track =  new TextDecoder("utf-8").decode(bytes);
 
@@ -21,36 +21,41 @@ timeRange.addEventListener("change", (e) => {
     checkDiv.innerHTML = checks[timeRange.value];
 })
 
+// Розгортає трек у масив знімків.
+//
 function unfold(track) {
     if (!track) 
         return [];
-    let result = [];
 
+    let shots = [];
+    track = track.slice(1);  // remove 1-st selector
     const chain = track.split(LINK_SEP);
 
-    let screen = "";
+    let shot = "";
     const regex = /(\d+)\|(.*)\|(\d+)/s
 
     for (let link of chain) {
         if (link) {
-            const m = regex.exec(link);
-            if (!m) {
+            const match = regex.exec(link);
+            if (!match) {
                 throw Error("ERROR: wrong format of trace");
             } 
-            const l = +m[1];
-            const r = +m[3];
-            const left = screen.slice(0, l);
-            const right = r ? screen.slice(-r) : "";
-            screen = left + m[2] + right               
+            const l = +match[1];
+            const r = +match[3];
+            const left = shot.slice(0, l);
+            const right = r ? shot.slice(-r) : "";
+            shot = left + match[2] + right               
         } 
-        result.push(screen);
+        shots.push(shot);
     }
-    return result;
+    return shots;
 }
 
-function separate(screens) {
+// Розділяє кожен знімок на код і повідомлення перевірки.
+//
+function separate(shots) {
     let codes = [], checks = [];
-    for (let screen of screens) {
+    for (let screen of shots) {
         if (screen.indexOf(CHECK_SEP) != -1) {
             let [co, ch] = screen.split(CHECK_SEP);
             codes.push(co);
