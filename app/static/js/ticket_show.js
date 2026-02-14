@@ -1,4 +1,4 @@
-const codeArea = document.getElementById("codeArea");
+// const codeArea = document.getElementById("codeArea");
 const timeRange = document.getElementById("timeRange");
 const checkDiv = document.getElementById("checkDiv");
 const stepTime = document.getElementById("stepTime");

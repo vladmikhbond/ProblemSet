@@ -4,14 +4,33 @@
 
 {% block content %}
 <style>
+  .wrapper {
+    position: relative;      /* база координат */
+    /* display: inline-block;   розмір = розмір textarea */
+  }
+
+  #codeArea {
+    position: relative;
+    z-index: 1;
+    /* resize:both; */
+  }
+
+  #canvas1 {
+    position: absolute;
+    border: thin solid red;
+    top: 0;
+    left: 0;
+    z-index: 2;              /* вище за textarea */
+    pointer-events: none;    /* щоб кліки проходили до textarea */
+  }
+
+</style>
+
+<style>
   .dt {
     margin-top: 10px;
     font-size: smaller;
     font-style: italic;
-  }
-
-  .wrong, .ok {
-    font-family: Consolas, 'Courier New', monospace;
   }
 
   .ok {
@@ -28,7 +47,10 @@
 
     <div>
       <div class="dt">{{record.when}} <span id="stepTime"></span></div>
-      <textarea id="codeArea" rows="{{n_rows}}" class="{{class_}}">{{record.code}}</textarea>
+      <div class="wrapper">
+        <textarea id="codeArea" rows="{{n_rows}}" class="{{class_}}">{{record.code}}</textarea>
+        <canvas id="canvas1"></canvas>
+      </div>
       <input type="range" id="timeRange" min="0" max="1" step="1" />
       <div id="checkDiv" style="font-size: smaller;">{{record.check}}</div>
     </div>
@@ -37,6 +59,32 @@
 {% endblock %}
 
 {% block script %}
+<script>
+  const codeArea = document.getElementById('codeArea');
+  const canvas1 = document.getElementById('canvas1');
+
+  new ResizeObserver(syncSize).observe(codeArea);
+
+  function syncSize() {
+    const rect = codeArea.getBoundingClientRect();
+
+    // Встановлюємо реальний розмір canvas
+    canvas1.width = codeArea.offsetWidth;
+    canvas1.height = codeArea.offsetHeight;
+
+    // І CSS-розмір (щоб повністю співпадав)
+    canvas1.style.width = codeArea.offsetWidth + 'px';
+    canvas1.style.height = codeArea.offsetHeight + 'px';
+  }
+
+  syncSize();
+  // window.addEventListener('resize', syncSize);
+
+  let ctx = canvas1.getContext("2d");
+  ctx.fillRect(10, 10, 100, 100);
+</script>
+
+
 <script>
   const track_in_base64 = {{ track64 | tojson }};
   const start_time = {{ record.when | tojson }};
