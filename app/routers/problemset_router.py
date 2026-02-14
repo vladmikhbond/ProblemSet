@@ -1,38 +1,21 @@
-import re
 from datetime import datetime
 import uuid
-from zoneinfo import ZoneInfo
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
+from sqlalchemy.orm import Session
 
-from app.routers.utils import get_filtered_lines, USER_FILTER_KEY
-
+from .utils import delta_to_str, get_filtered_lines, USER_FILTER_KEY, str_to_time, time_to_str
 from .login_router import get_current_tutor
 from .problem_router import get_filtered_problems
-from ..models.models import Problem, ProblemSet, Ticket, User
+from ..models.models import Problem, ProblemSet, User
 from ..dal import get_pss_db  # Функція для отримання сесії БД
-from sqlalchemy.orm import Session
+
 
 # шаблони Jinja2
 templates = Jinja2Templates(directory="app/templates")
 
 router = APIRouter()
-#--------------------------------- time <--> str ------------------------  
-
-FMT = "%Y-%m-%dT%H:%M"
-ZONE = "Europe/Kyiv"
-
-def time_to_str(dt: datetime) -> str:
-    return dt.astimezone(ZoneInfo(ZONE)).strftime(FMT)
-
-def str_to_time(s: str) -> datetime:
-    return datetime.strptime(s, FMT) \
-        .replace(tzinfo=ZoneInfo(ZONE)) \
-        .astimezone(ZoneInfo("UTC"))
-
-def delta_to_str(td):
-    return f"{td.days} d {td.seconds//3600} h {(td.seconds//60)%60} m"
 
 # ------- list 
 

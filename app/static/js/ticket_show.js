@@ -1,6 +1,8 @@
 const codeArea = document.getElementById("codeArea");
 const timeRange = document.getElementById("timeRange");
 const checkDiv = document.getElementById("checkDiv");
+const stepTime = document.getElementById("stepTime");
+
 
 // константи LINK_SEP і CHECK_SEP у файлі trace_const.js
 // константа track_in_base64 на веб сторінці
@@ -15,10 +17,21 @@ checks.push(checkDiv.innerHTML);
 
 timeRange.max = codes.length - 1;
 timeRange.value = timeRange.max;
+timeRange.focus();
+
+// const isoString = start_time.trim().replace(" ", "T");
+// const date = new Date(isoString);
+
 
 timeRange.addEventListener("change", (e) => {
-    codeArea.value = codes[timeRange.value];
-    checkDiv.innerHTML = checks[timeRange.value];
+    let i = timeRange.value;
+    codeArea.value = codes[i];
+    checkDiv.innerHTML = checks[i];
+    codeArea.className = checks[i].indexOf('OK') != -1 ? "ok" : "wrong";
+    
+    let s = i * 3 % 60, m = i * 3 / 60 | 0;
+    stepTime.innerHTML = `+${m}' ${s}"`;
+
 })
 
 // Розгортає трек у масив знімків.

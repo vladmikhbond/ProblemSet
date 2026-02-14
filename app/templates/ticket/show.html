@@ -23,17 +23,15 @@
     <h5 class="title">Користувач {{ticket.username}}. Задача "{{ticket.problem.title}}"</h5>
     <h6>Початок о {{record.when}}</h6>
   
-    {% set class_ = "ok" if record["check"].startswith('OK') else "wrong"  %}
-    {% set n_rows = (record["code"] | length - (record["code"] | replace('\n', '') | length)) + 1 %} 
+    {% set class_ = "ok" if record.check.startswith('OK') else "wrong"  %}
+    {% set n_rows = (record.code | length - (record.code | replace('\n', '') | length)) + 1 %} 
 
     <div>
-      <div class="dt">{{record['when']}}</div>
+      <div class="dt">{{record.when}} <span id="stepTime"></span></div>
+      <textarea id="codeArea" rows="{{n_rows}}" class="{{class_}}">{{record.code}}</textarea>
       <input type="range" id="timeRange" min="0" max="1" step="1" />
-      <textarea id="codeArea" rows="{{n_rows}}" class="{{class_}}">{{record['code']}}</textarea>
-      <div id="checkDiv" style="font-size: smaller;">{{record['check']}}</div>
+      <div id="checkDiv" style="font-size: smaller;">{{record.check}}</div>
     </div>
-
-
 
   </div>
 {% endblock %}
@@ -41,6 +39,7 @@
 {% block script %}
 <script>
   const track_in_base64 = {{ track64 | tojson }};
+  const start_time = {{ record.when | tojson }};
 </script>
 <script src="/static/js/trace_const.js" type="text/javascript" charset="utf-8"></script>
 <script src="/static/js/ticket_show.js" type="text/javascript" charset="utf-8"></script>
