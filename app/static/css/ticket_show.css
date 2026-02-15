@@ -1,0 +1,26 @@
+.wrapper {
+  position: relative;      /* база координат */
+}
+
+#codeArea {
+  position: relative;
+  z-index: 1;
+}
+
+#canvas1 {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;              /* вище за textarea */
+  pointer-events: none;    /* щоб кліки проходили до textarea */
+}
+
+.dt {
+  margin-top: 10px;
+  font-size: smaller;
+  font-style: italic;
+}
+
+.ok {
+  background-color:palegreen;
+}

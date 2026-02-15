@@ -38,9 +38,33 @@ new ResizeObserver(syncSize).observe(codeArea);
 syncSize();
 window.addEventListener('resize', syncSize);
 
+setTimeout(diagram, 0);
+
 // малює діаграму на канвасі
-  let ctx = canvas1.getContext("2d");
-  ctx.fillRect(10, 10, 100, 100);
+function diagram() {
+  const n = codes.length, cH = canvas1.height, cW = canvas1.width;
+  const w = cW / n;
+  const maxCodeLength = Math.max(...codes.map(x => x.length));
+  const dy = cH / maxCodeLength;
+
+  const ctx = canvas1.getContext("2d");
+  ctx.fillStyle = "#ff000040"; 
+  ctx.strokeStyle = "#ff0000ff"; 
+  ctx.lineWidth = 0.5;
+
+  for (let i = 0; i < n; i++) {
+    const x = w * i, y = cH - dy * codes[i].length + 5;
+    const h = i > 0 ? (codes[i].length - codes[i-1].length) * dy : 0;
+    if (h) {
+       ctx.fillRect(x, y, w, h);
+    } else {
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x + w, y);
+        ctx.stroke();
+    }
+  }
+}
 
 // Розгортає трек у масив знімків.
 //
@@ -65,7 +89,7 @@ function unfold(track) {
             const r = +match[3];
             const left = shot.slice(0, l);
             const right = r ? shot.slice(-r) : "";
-            shot = left + match[2] + right               
+            shot = left + match[2] + right;       
         } 
         shots.push(shot);
     }
@@ -100,6 +124,7 @@ function separate(shots) {
     // CSS-розмір
     canvas1.style.width = codeArea.offsetWidth + 'px';
     canvas1.style.height = codeArea.offsetHeight + 'px';
+    diagram();
   }
 
 

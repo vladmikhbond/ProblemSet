@@ -1,56 +1,30 @@
 {% extends "layout.html" %}
 
-{% block title %}{% endblock %}
+{% block title %}
+   
+{% endblock %}
 
 {% block content %}
-<style>
-  .wrapper {
-    position: relative;      /* база координат */
-  }
 
-  #codeArea {
-    position: relative;
-    z-index: 1;
-  }
+<link rel="stylesheet" href="/static/css/ticket_show.css">
+<div class="container">
+  <h5 class="title">Користувач {{ticket.username}}. Задача "{{ticket.problem.title}}"</h5>
+  <h6>Початок о {{record.when}}</h6>
 
-  #canvas1 {
-    position: absolute;
-    border: thin solid red;
-    top: 0;
-    left: 0;
-    z-index: 2;              /* вище за textarea */
-    pointer-events: none;    /* щоб кліки проходили до textarea */
-  }
+  {% set class_ = "ok" if record.check.startswith('OK') else "wrong"  %}
+  {% set n_rows = (record.code | length - (record.code | replace('\n', '') | length)) + 1 %} 
 
-  .dt {
-    margin-top: 10px;
-    font-size: smaller;
-    font-style: italic;
-  }
-
-  .ok {
-    background-color:palegreen;
-  }
-</style>
-
-  <div class="container">
-    <h5 class="title">Користувач {{ticket.username}}. Задача "{{ticket.problem.title}}"</h5>
-    <h6>Початок о {{record.when}}</h6>
-  
-    {% set class_ = "ok" if record.check.startswith('OK') else "wrong"  %}
-    {% set n_rows = (record.code | length - (record.code | replace('\n', '') | length)) + 1 %} 
-
-    <div>
-      <div class="dt">{{record.when}} <span id="stepTime"></span></div>
-      <div class="wrapper">
-        <textarea id="codeArea" rows="{{n_rows}}" class="{{class_}}">{{record.code}}</textarea>
-        <canvas id="canvas1"></canvas>
-      </div>
-      <input type="range" id="timeRange" min="0" max="1" step="1" />
-      <div id="checkDiv" style="font-size: smaller;">{{record.check}}</div>
+  <div>
+    <div class="dt">{{record.when}} <span id="stepTime"></span></div>
+    <div class="wrapper">
+      <textarea id="codeArea" rows="{{n_rows}}" class="{{class_}}">{{record.code}}</textarea>
+      <canvas id="canvas1"></canvas>
     </div>
-
+    <input type="range" id="timeRange" min="0" max="1" step="1" />
+    <div id="checkDiv" style="font-size: smaller;">{{record.check}}</div>
   </div>
+</div>
+
 {% endblock %}
 
 {% block script %}
