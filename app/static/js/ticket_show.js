@@ -50,7 +50,7 @@ function diagram() {
   const ctx = canvas1.getContext("2d");
   ctx.fillStyle = "#ff000040"; 
   ctx.strokeStyle = "#ff0000ff"; 
-  ctx.lineWidth = 0.5;
+  ctx.lineWidth = 0.25;
 
   for (let i = 0; i < n; i++) {
     const x = w * i, y = cH - dy * codes[i].length + 5;

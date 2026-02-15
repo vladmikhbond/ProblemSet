@@ -1,5 +1,6 @@
+from typing import Any
 import httpx, re
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from fastapi.templating import Jinja2Templates
@@ -34,28 +35,30 @@ async def get_solving_list(
     Враховуються лише відкриті та доступні поточному юзеру задачники.
     """
     problemsets: list[ProblemSet] = db.query(ProblemSet).all()
-    open_problemsets = [ps for ps in problemsets if ps.is_open and re.match(ps.stud_filter, user.username)]
-
-    token = request.cookies["access_token"]
-
-    if token == "":
-        # redirect to login page
-        return templates.TemplateResponse("login.html", {
-            "request": request,
-            "error": "No token"
-        })
+    open_problemsets = [
+        ps for ps in problemsets 
+        if ps.is_open and re.match(ps.stud_filter, user.username)]
 
     psets = []
+
     for problemset in open_problemsets:
         ids = problemset.get_problem_ids()
+        
         problems = db.query(Problem).filter(Problem.id.in_(ids)).all()
-    
+
+        unsolved_problems = [
+            p for p in problems
+            if not any(
+                t.username == user.username and t.state == 1
+                for t in p.tickets
+            )
+        ]
         psets.append({
             "id": problemset.id,
             "title": problemset.title,
             "username": problemset.username,
             "rest": problemset.rest_time,
-            "problems": problems})
+            "problems": unsolved_problems})
 
     return templates.TemplateResponse("solving/list.html", {"request": request, "psets": psets})
 
@@ -140,7 +143,9 @@ async def post_check(
     regex = regex_helper(problem.lang);
     if regex == None:
        return "Wrong Language" 
-    user_code = re.sub(regex, answer.solving, problem.code, count=1, flags=re.DOTALL)
+
+    # "\n" додається із-за C# директиви #line 1.
+    user_code = re.sub(regex, "\n" + answer.solving, problem.code, count=1, flags=re.DOTALL)
 
     # Check user's solving
     payload = {"code": user_code, "timeout": 2000}

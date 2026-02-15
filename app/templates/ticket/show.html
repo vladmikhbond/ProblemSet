@@ -8,8 +8,7 @@
 
 <link rel="stylesheet" href="/static/css/ticket_show.css">
 <div class="container">
-  <h5 class="title">Користувач {{ticket.username}}. Задача "{{ticket.problem.title}}"</h5>
-  <h6>Початок о {{record.when}}</h6>
+  <h5 class="title">Користувач "{{ticket.username}}". Задача "{{ticket.problem.title}}"</h5>
 
   {% set class_ = "ok" if record.check.startswith('OK') else "wrong"  %}
   {% set n_rows = (record.code | length - (record.code | replace('\n', '') | length)) + 1 %} 
