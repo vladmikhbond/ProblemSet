@@ -8,18 +8,22 @@ const canvas1 = document.getElementById('canvas1');
 // константи LINK_SEP і CHECK_SEP у файлі trace_const.js
 // константа track_in_base64 на веб сторінці
 
-// розділяє трек на код и відповідь перевірки
+// декодує трек 
 const bytes = Uint8Array.from(atob(track_in_base64), c => c.charCodeAt(0));
 const track =  new TextDecoder("utf-8").decode(bytes);
+
+// розділяє трек на код и відповідь перевірки
 const screens = unfold(track);
 const [codes, checks] = separate(screens);
+
+// додає в трек останню ланку
 codes.push(codeArea.value);
 checks.push(checkDiv.innerHTML);
+
 // готує слайдер
 timeRange.max = codes.length - 1;
 timeRange.value = timeRange.max;
 timeRange.focus();
-
 
 // Anime
 timeRange.addEventListener("change", (e) => {
