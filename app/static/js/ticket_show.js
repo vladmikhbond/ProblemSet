@@ -83,7 +83,7 @@ timeRange.max = codes.length - 1;
 timeRange.value = timeRange.max;
 timeRange.focus();
 
-// Anime
+// Slide show
 timeRange.addEventListener("change", (e) => {
     let i = timeRange.value;
     // code
@@ -110,13 +110,16 @@ function diagram() {
   const dy = cH / maxCodeLength;
 
   const ctx = canvas1.getContext("2d");
-  ctx.fillStyle = "#ff000040"; 
-  ctx.strokeStyle = "#ff0000ff"; 
-  ctx.lineWidth = 0.25;
+
+
+  ctx.lineWidth = 0.5;
 
   for (let i = 0; i < n; i++) {
+    // diagram
     const x = w * i, y = cH - dy * codes[i].length + 5;
     const h = i > 0 ? (codes[i].length - codes[i-1].length) * dy : 0;
+    ctx.fillStyle = "#0000FF40"; 
+    ctx.strokeStyle = "#0000FFFF"; 
     if (h) {
        ctx.fillRect(x, y, w, h);
     } else {
@@ -125,7 +128,16 @@ function diagram() {
         ctx.lineTo(x + w, y);
         ctx.stroke();
     }
-  }
+    // checks
+    if (checks[i]) {
+        ctx.strokeStyle = checks[i].indexOf("OK") > -1 ? "green" : "red";
+        ctx.beginPath();
+        ctx.moveTo(x + w/2, cH/2);
+        ctx.lineTo(x + w/2, cH);
+        ctx.stroke();
+    }
+  }  
+  
 }
   
 // Синхронізує розміри textarea і canvas
