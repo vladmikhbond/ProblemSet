@@ -5,16 +5,74 @@ const stepTime = document.getElementById("stepTime");
 const codeArea = document.getElementById('codeArea');
 const canvas1 = document.getElementById('canvas1');
 
-// константи LINK_SEP і CHECK_SEP у файлі trace_const.js
+// константи TRACE_INTERVAL, LINK_SEP і CHECK_SEP у файлі trace_const.js
 // константа track_in_base64 на веб сторінці
+
+// Розгортає трек у масив знімків.
+//
+class TrackDecoder {
+
+    constructor(track) {
+        this.track = track;
+    }
+
+    decode() {
+        if (!this.track) 
+            return [];
+
+        let shots = [];
+        const chain = this.track.split(LINK_SEP);
+
+        let shot = "";
+        const regex = /(\d+)\|(.*)\|(\d+)/s
+
+        for (let link of chain) {
+            if (link) {
+                const match = regex.exec(link);
+                if (!match) {
+                    throw Error("ERROR: wrong format of trace");
+                } 
+                const l = +match[1];
+                const r = +match[3];
+                const left = shot.slice(0, l);
+                const right = r ? shot.slice(-r) : "";
+                shot = left + match[2] + right;       
+            } 
+            shots.push(shot);
+        }
+        return shots;
+    }
+
+    decode2() {
+        return TrackDecoder.separate(this.decode());
+    }
+
+    // Розділяє масив знімків на масив кодів і масив повідомлень.
+    static separate(shots) {
+        let codes = [], checks = [];
+        for (let screen of shots) {
+            if (screen.indexOf(CHECK_SEP) != -1) {
+                let [co, ch] = screen.split(CHECK_SEP);
+                codes.push(co);
+                checks.push(ch);
+            } else {
+                codes.push(screen);
+                checks.push("");
+            }
+        }
+        return [codes, checks];
+    }
+}
+
 
 // декодує трек 
 const bytes = Uint8Array.from(atob(track_in_base64), c => c.charCodeAt(0));
 const track =  new TextDecoder("utf-8").decode(bytes);
 
+const tracer = new TrackDecoder(track);
+
 // розділяє трек на код и відповідь перевірки
-const screens = unfold(track);
-const [codes, checks] = separate(screens);
+const [codes, checks] = tracer.decode2();
 
 // додає в трек останню ланку
 codes.push(codeArea.value);
@@ -69,59 +127,10 @@ function diagram() {
     }
   }
 }
-
-// Розгортає трек у масив знімків.
-//
-function unfold(track) {
-    if (!track) 
-        return [];
-
-    let shots = [];
-    track = track.slice(1);  // remove 1-st selector
-    const chain = track.split(LINK_SEP);
-
-    let shot = "";
-    const regex = /(\d+)\|(.*)\|(\d+)/s
-
-    for (let link of chain) {
-        if (link) {
-            const match = regex.exec(link);
-            if (!match) {
-                throw Error("ERROR: wrong format of trace");
-            } 
-            const l = +match[1];
-            const r = +match[3];
-            const left = shot.slice(0, l);
-            const right = r ? shot.slice(-r) : "";
-            shot = left + match[2] + right;       
-        } 
-        shots.push(shot);
-    }
-    return shots;
-}
-
-// Розділяє кожен знімок на код і повідомлення перевірки.
-//
-function separate(shots) {
-    let codes = [], checks = [];
-    for (let screen of shots) {
-        if (screen.indexOf(CHECK_SEP) != -1) {
-            let [co, ch] = screen.split(CHECK_SEP);
-            codes.push(co);
-            checks.push(ch);
-        } else {
-            codes.push(screen);
-            checks.push("");
-        }
-    }
-    return [codes, checks];
-}
-
-
   
-  // Синхронізує розміри textarea і canvas
-  //  
-  function syncSize() {
+// Синхронізує розміри textarea і canvas
+//  
+function syncSize() {
     const rect = codeArea.getBoundingClientRect();
     canvas1.width = codeArea.offsetWidth;
     canvas1.height = codeArea.offsetHeight;
@@ -129,6 +138,6 @@ function separate(shots) {
     canvas1.style.width = codeArea.offsetWidth + 'px';
     canvas1.style.height = codeArea.offsetHeight + 'px';
     diagram();
-  }
+}
 
 
