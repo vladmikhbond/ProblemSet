@@ -153,15 +153,15 @@ async def post_problemset_edit(
     db: Session = Depends(get_pss_db),
     user: User=Depends(get_current_tutor)
 ):
-    # читає з форми список обраних задач
-    form = await request.form()
-    prob_ids = form.getlist('prob')       #  "['id1', 'id2', 'id3']"   
+    # # читає з форми список обраних задач
+    # form = await request.form()
+    # prob_ids = form.getlist('prob')       #  "['id1', 'id2', 'id3']"   
 
     # оновлює задачник
     problemset = db.get(ProblemSet, id)
 
     problemset.title = title 
-    problemset.set_problem_ids(prob_ids)
+    problemset.set_problem_ids(problem_ids)
     problemset.open_time = str_to_time(open_time)
     problemset.open_minutes = open_minutes
     problemset.stud_filter = stud_filter
