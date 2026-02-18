@@ -63,6 +63,7 @@ async def get_problemset_new(
     )
 
     problems = get_filtered_problems(db, request)
+    
     return templates.TemplateResponse("problemset/edit.html", 
             {"request": request, "problemset": problemset, "problems": problems})
 

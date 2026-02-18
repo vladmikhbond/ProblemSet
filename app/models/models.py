@@ -35,6 +35,12 @@ cs/002/60/Ряд Сінуса........................aab65ae1-376b-4f52-b120-551
         return s
 
 class ProblemSet(Base):
+    """
+    format of problem_ids field  (id=line[44:80])
+    "attr/title          -54-2werif-03t34-fgwegvk340-g"   
+    "attr/title          -54-2werif-03t34-fgwegvk340-g"
+    ...
+    """
     __tablename__ = "problemsets"
 
     id: Mapped[str] = mapped_column(primary_key=True)
@@ -55,7 +61,6 @@ class ProblemSet(Base):
         return [line[44:80] for line in self.problem_ids.splitlines()]
 
     def set_problem_ids(self, lst: List[str] ):
-        """return list of problem ids"""
         self.problem_ids = "\n".join(lst)
 
 # --------------- time props
