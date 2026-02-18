@@ -27,17 +27,12 @@ class Problem(Base):
 
     @property
     def inline(self):
-        """attr, title in one line"""
-        return f"{self.attr}/{self.title}"[:80]
-
-class User(Base):
-    __tablename__ = "users"
-
-    username: Mapped[str] = mapped_column(String, primary_key=True)
-    
-    hashed_password: Mapped[bytes] = mapped_column(LargeBinary)
-    role: Mapped[str] = mapped_column(String)     # 'student', 'tutor', 'admin'
-
+        """
+cs/002/60/Ряд Сінуса........................aab65ae1-376b-4f52-b120-5513457dd43f (id = inline[44:80])
+        """
+        s = (self.attr + "/" + self.title)[:40]
+        s += " " * (44 - len(s)) + str(self.id)
+        return s
 
 class ProblemSet(Base):
     __tablename__ = "problemsets"
@@ -53,11 +48,11 @@ class ProblemSet(Base):
 
 # --------------- problem_ids methods
     
-    def get_problem_ids(self) -> List[str]:
+    def get_problem_ids_list(self) -> List[str]:
         """return list of problem ids"""
         if not self.problem_ids:
             return []
-        return self.problem_ids.split("\n")
+        return [line[44:80] for line in self.problem_ids.splitlines()]
 
     def set_problem_ids(self, lst: List[str] ):
         """return list of problem ids"""
@@ -127,4 +122,14 @@ class Ticket(Base):
             return datetime.min
         when = success_records[0]["when"].strip()
         return datetime.fromisoformat(when)
-       
+
+    
+class User(Base):
+    __tablename__ = "users"
+
+    username: Mapped[str] = mapped_column(String, primary_key=True)
+    
+    hashed_password: Mapped[bytes] = mapped_column(LargeBinary)
+    role: Mapped[str] = mapped_column(String)     # 'student', 'tutor', 'admin'
+
+   

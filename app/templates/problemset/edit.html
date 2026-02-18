@@ -32,7 +32,7 @@
 
   <label>
     Problems
-    <textarea id="problem_ids" style="width: 100%" readonly>{{ problemset.problem_ids }}</textarea>
+    <textarea name="problem_ids" id="problem_ids" style="width: 100%" readonly>{{ problemset.problem_ids }}</textarea>
   </label>     
 
   <footer class="grid">
@@ -42,10 +42,10 @@
 
   <ul>
       {% for problem in problems %}
-      <li style="list-style-type: none" title="{{problem.cond}}">
-        <input type="checkbox"  name="prob" value="{{problem.id}}" onchange="reset_problem_ids(event)" 
+      <li style="list-style-type: none" title="{{problem.cond}}" >
+        <input type="checkbox"  name="prob" value="{{problem.id}}" onchange="reset_problem_ids(event)"
         {% if problem.checked %}checked{% endif %} >
-        {{problem.inline}}
+        <span style="white-space: pre;">{{problem.inline}}</span>
       </li>    
       {% endfor %}
   </ul>

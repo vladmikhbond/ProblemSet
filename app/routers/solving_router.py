@@ -42,7 +42,7 @@ async def get_solving_list(
     psets = []
 
     for problemset in open_problemsets:
-        ids = problemset.get_problem_ids()
+        ids = problemset.get_problem_ids_list()
         
         problems = db.query(Problem).filter(Problem.id.in_(ids)).all()
 

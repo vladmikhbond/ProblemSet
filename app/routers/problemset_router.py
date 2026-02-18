@@ -74,13 +74,14 @@ async def post_problemset_new(
     open_time: str = Form(...),
     open_minutes: int = Form(0),
     stud_filter: str = Form(""),
+    problem_ids: str = Form(...),
     db: Session = Depends(get_pss_db),
     user: User=Depends(get_current_tutor)
 ):
-    # читає з форми список обраних задач
-    form = await request.form()
-    prob_lst = form.getlist('prob')       #  "['id1', 'id2', 'id3']"
-    prob_ids = '\n'.join(prob_lst)
+    # # читає з форми список обраних задач
+    # form = await request.form()
+    # prob_lst = form.getlist('prob')       #  "['id1', 'id2', 'id3']"
+    # prob_ids = '\n'.join(prob_lst)
 
     problems = get_filtered_problems(db, request)
 
@@ -88,7 +89,7 @@ async def post_problemset_new(
         id = str(uuid.uuid4()),
         title = title,
         username = user.username,
-        problem_ids = prob_ids,                    
+        problem_ids = problem_ids,                    
         open_time = str_to_time(open_time),
         open_minutes = open_minutes,
         stud_filter = stud_filter
@@ -118,21 +119,26 @@ async def get_problemset_edit(
     Редагування задачника.
     """
     problemset = db.get(ProblemSet, id)
+    
+    # only the owner can edit it
     if user.username != problemset.username:
-            raise HTTPException(403)
+        raise HTTPException(403)
 
     problemset.open_time = time_to_str(problemset.open_time)
-    problems = get_filtered_problems(db, request)
+    filtered_problems = get_filtered_problems(db, request)
 
-    arr = []
-    for p in problems:
-        p.checked = p.id in problemset.get_problem_ids()
-        if p.checked:
-            arr.append(p.inline) 
-    problemset.set_problem_ids(arr)
+    # set checkboxes of the problems
+    problem_ids_list = problemset.get_problem_ids_list()  
+    for p in filtered_problems:
+        p.checked = p.id in problem_ids_list
+
+    # # set selected questions field
+    # sel_problems = db.query(Problem).filter(Problem.id.in_(problem_ids_list))   
+    # arr = [p.inline for p in sel_problems]
+    # problemset.set_problem_ids(arr)
 
     return templates.TemplateResponse("problemset/edit.html", 
-            {"request": request, "problemset": problemset, "problems": problems})
+            {"request": request, "problemset": problemset, "problems": filtered_problems})
 
 
 @router.post("/problemset/edit/{id}")
@@ -143,6 +149,7 @@ async def post_problemset_edit(
     open_time: str = Form(...),
     open_minutes: int = Form(0),
     stud_filter: str = Form(""),
+    problem_ids: str = Form(...),
     db: Session = Depends(get_pss_db),
     user: User=Depends(get_current_tutor)
 ):
@@ -158,6 +165,7 @@ async def post_problemset_edit(
     problemset.open_time = str_to_time(open_time)
     problemset.open_minutes = open_minutes
     problemset.stud_filter = stud_filter
+    problemset.problem_ids = problem_ids
     try:                       
         db.commit()
     except Exception as e:
@@ -215,7 +223,7 @@ async def problemset_show(
     Показ вирішень з одного задачника.
     """
     problemset = db.get(ProblemSet, id)
-    problem_ids = problemset.get_problem_ids()
+    problem_ids = problemset.get_problem_ids_list()
     dict = {}
     
     for problem_id in problem_ids:
