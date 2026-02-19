@@ -32,7 +32,7 @@ async def get_problemset_list(
 
     problemsets = [p for p in all_problemsets if p.username == user.username ] 
     for p in problemsets: 
-        p.open_time_as_str = time_to_str(p.open_time)
+        p.open_time_as_str = time_to_str(p.open_time).replace("T", " ")
         if p.open_minutes:
             p.open_minutes_as_str = f"{p.open_minutes} m"
             p.rest_time_as_str = delta_to_str(p.rest_time)
