@@ -79,11 +79,6 @@ async def post_problemset_new(
     db: Session = Depends(get_pss_db),
     user: User=Depends(get_current_tutor)
 ):
-    # # читає з форми список обраних задач
-    # form = await request.form()
-    # prob_lst = form.getlist('prob')       #  "['id1', 'id2', 'id3']"
-    # prob_ids = '\n'.join(prob_lst)
-
     problems = get_filtered_problems(db, request)
 
     problemset = ProblemSet(
@@ -133,11 +128,6 @@ async def get_problemset_edit(
     for p in filtered_problems:
         p.checked = p.id in problem_ids_list
 
-    # # set selected questions field
-    # sel_problems = db.query(Problem).filter(Problem.id.in_(problem_ids_list))   
-    # arr = [p.inline for p in sel_problems]
-    # problemset.set_problem_ids(arr)
-
     return templates.TemplateResponse("problemset/edit.html", 
             {"request": request, "problemset": problemset, "problems": filtered_problems})
 
@@ -153,10 +143,7 @@ async def post_problemset_edit(
     problem_ids: str = Form(...),
     db: Session = Depends(get_pss_db),
     user: User=Depends(get_current_tutor)
-):
-    # # читає з форми список обраних задач
-    # form = await request.form()
-    # prob_ids = form.getlist('prob')       #  "['id1', 'id2', 'id3']"   
+): 
 
     # оновлює задачник
     problemset = db.get(ProblemSet, id)
