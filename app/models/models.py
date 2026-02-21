@@ -85,6 +85,8 @@ class ProblemSet(Base):
             return True
         return self.open_time < datetime.now() < self.close_time;
 
+
+
 class Ticket(Base):
 
     class TicketRecord(TypedDict):

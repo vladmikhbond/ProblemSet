@@ -39,6 +39,7 @@ async def get_problemset_list(
         else: 
             p.open_minutes_as_str = "-"
             p.rest_time_as_str = "-"
+        p.problems_count = len(p.get_problem_ids_list())
 
     return templates.TemplateResponse("problemset/list.html", {"request": request, "problemsets": problemsets})
 
