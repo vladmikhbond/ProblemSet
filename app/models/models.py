@@ -33,6 +33,7 @@ cs/002/60/Ряд Сінуса........................aab65ae1-376b-4f52-b120-551
         s = (self.attr + "/" + self.title)[:40]
         s += " " * (44 - len(s)) + str(self.id)
         return s
+    
 
 class ProblemSet(Base):
     """
@@ -67,8 +68,6 @@ class ProblemSet(Base):
 
     @property
     def close_time(self) -> datetime: 
-        if self.open_minutes == 0:
-            return datetime.max
         return self.open_time + timedelta(minutes=self.open_minutes)
 
     @property
@@ -81,8 +80,6 @@ class ProblemSet(Base):
 
     @property
     def is_open(self) -> bool: 
-        if self.open_minutes == 0:
-            return True
         return self.open_time < datetime.now() < self.close_time;
 
 
@@ -123,8 +120,9 @@ class Ticket(Base):
         matches = re.findall(REGEX, self.records, flags=re.S)
         return [{"when": m[2], "code":m[0].strip(), "check":m[1].strip()} for m in matches]
 
-    def when_success(self) -> datetime :
-        success_records = [r for r in self.get_records() if r["check"].startswith("OK") ]
+    def when_success(self) -> datetime:
+        records = self.get_records()
+        success_records = [r for r in records if r["check"].startswith("OK") ]
         if len(success_records) == 0:
             return datetime.min
         when = success_records[0]["when"].strip()

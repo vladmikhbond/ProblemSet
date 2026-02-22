@@ -1,4 +1,4 @@
-from typing import Any
+
 import httpx, re
 from datetime import datetime
 
@@ -59,8 +59,11 @@ async def get_solving_list(
             "username": problemset.username,
             "rest": problemset.rest_time,
             "problems": unsolved_problems})
+    # ск задач вирішено
+    problem_count = db.query(Ticket).filter(Ticket.username == user.username).filter(Ticket.state == 1).count()
 
-    return templates.TemplateResponse("solving/list.html", {"request": request, "psets": psets})
+    return templates.TemplateResponse("solving/list.html", 
+            {"request": request, "psets": psets, "problem_count": problem_count})
 
 # ---------------------------- open 
 

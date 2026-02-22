@@ -33,7 +33,7 @@ async def get_problemset_list(
     problemsets = [p for p in all_problemsets if p.username == user.username ] 
     for p in problemsets: 
         p.open_time_as_str = time_to_str(p.open_time).replace("T", " ")
-        if p.open_minutes:
+        if p.is_open:
             p.open_minutes_as_str = f"{p.open_minutes} m"
             p.rest_time_as_str = delta_to_str(p.rest_time)
         else: 
@@ -220,8 +220,11 @@ async def problemset_show(
         dict[problem_id] = problem
         # filter
         usernames = [t.username for t in problem.tickets]
-        usernames = [un for un in get_filtered_lines(usernames, USER_FILTER_KEY, request)]
-        problem.tickets = [t for t in problem.tickets if t.username in usernames]
+        filtered_usernames = get_filtered_lines(usernames, USER_FILTER_KEY, request)
+        tickets = [*filter(lambda t: t.username in filtered_usernames, problem.tickets)]
+        for t in tickets: 
+            t.str = time_to_str(t.when_success()) if t.state == 1 else ""
+        problem.tickets = tickets
         # sort
         problem.tickets.sort(key = lambda t: t.when_success())
 

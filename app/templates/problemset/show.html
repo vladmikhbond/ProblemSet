@@ -14,10 +14,11 @@
 <section class="section">
   <div class="container">
 
-    <h3 class="title">Вирішення задач з "{{ problemset.title }}"</h3>
+    <h3 class="title">Задачник "{{ problemset.title }}"</h3>
     {% for problem in dict.values() %}
-      <h6>Problem "{{problem.title}}"</h6>
-      <table>
+      <h6>Задача <a href="/problem/edit/{{problem.id}}">{{problem.title}}</a></h6>
+
+      <table style="width:auto;">
       {% for ticket in problem.tickets %}
         {% set cls = "ok" if ticket.state == 1 else "wrong" %} 
         <tr>
@@ -25,15 +26,15 @@
             <a href="/ticket/show/{{ticket.id}}" class="{{cls}}">{{ticket.username}}</a>
           </td>
           <td>
-            {{ticket.when_success()}}</a>
+            {{ticket.str }}</a>
           </td>
           <td>
             <a href="/ticket/del/{{ticket.id}}/{{problemset.id}}"> del </a>
           </td>
-           
         </tr>
       {% endfor %}
       </table>
+      
     {% endfor %}
 
   </div>
