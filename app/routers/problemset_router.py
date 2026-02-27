@@ -76,7 +76,7 @@ async def post_problemset_new(
     open_time: str = Form(...),
     open_minutes: int = Form(0),
     stud_filter: str = Form(""),
-    problem_ids: str = Form(...),
+    problem_ids: str = Form(""),
     db: Session = Depends(get_pss_db),
     user: User=Depends(get_current_tutor)
 ):

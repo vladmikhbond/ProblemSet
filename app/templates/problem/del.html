@@ -4,7 +4,7 @@
 
 {% block content %}
 
-<h1>Видалення {{ problem.title }}</h1>
+<h1>Delete {{ problem.title }}</h1>
 <form method="post" action="/problem/del/{{problem.id}}">
 
   {% for k in ['title','attr','lang','author'] %}

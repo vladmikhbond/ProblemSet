@@ -4,9 +4,9 @@
 
 {% block content %}
     
-<h3>Задачі</h3>
+<h3>Problems</h3>
 <div>
-  <a href="/problem/new">Нова Задача</a>
+  <a href="/problem/new">New problem</a>
 </div>
 {% if problems and problems|length %}
 <table>
@@ -15,7 +15,7 @@
     <tr>
       <td>{{ problem.attr }}</td>
       {% set elipsys = "" if problem.title|length <= 30 else "..."%}
-      <td title="{{ problem.title }}">{{ problem.title[0:30]}} {{elipsys}}</td>
+      <td title="{{ problem.cond }}">{{ problem.title[0:30]}} {{elipsys}}</td>
       <td>
           <a href="/problem/copy/{{problem.id}}">copy</a> | 
           <a href="/problem/edit/{{problem.id}}">edit</a> | 
