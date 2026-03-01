@@ -14,12 +14,29 @@ USER_FILTER_KEY = "problemset_user_filter"
 def get_filtered_problems(db, request):
     """
     Повертає відфільтровані задачі з бази даних.
+    Структура виразу фільтрації: [re_фільтру]...[str_фільтру_за_умовою]
     """
     problems = db.query(Problem).all()
     filter = unquote(request.cookies.get(PROBLEM_FILTER_KEY, "")).strip()
-     
+
     if filter:
-        problems = [p for p in problems if re.search(filter, p.inline, re.RegexFlag.U) is not None] 
+        # split filter value
+        arr = filter.split("...")
+        filter_by_cond = ""
+        if len(arr) == 2:
+            filter = arr[0].strip()
+            filter_by_cond = arr[1].strip().lower()
+        
+        # filter
+        try:
+            pattern = re.compile(filter, re.UNICODE)
+            problems = [ p for p in problems if p.attr and pattern.search(p.attr) ]
+        except re.error:
+            # Invalid regex — ignore filter or log error
+            pass 
+        
+        if filter_by_cond:
+            problems = [p for p in problems if filter_by_cond in p.cond.lower()] 
 
     problems.sort(key=lambda p: p.inline)
     return problems
