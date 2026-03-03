@@ -33,6 +33,7 @@ async def get_solving_list(
     """
     Показує сторінку з задачами, розподіленими по задачникам.
     Враховуються лише відкриті та доступні поточному юзеру задачники.
+    Послідовність здач в задачнику зберігається.
     """
     problemsets: list[ProblemSet] = db.query(ProblemSet).all()
     open_problemsets = [
@@ -42,10 +43,16 @@ async def get_solving_list(
     psets = []
 
     for problemset in open_problemsets:
+
+        # get problems with the id in ids_list
         ids = problemset.get_problem_ids_list()
-        
         problems = db.query(Problem).filter(Problem.id.in_(ids)).all()
 
+        # sort problems as ordered identifiers in a list of identifiers
+        dic = {p.id:p for p in problems}
+        problems = [dic[id] for id in ids]
+
+        # select unsolved problems only
         unsolved_problems = [
             p for p in problems
             if not any(
@@ -59,7 +66,8 @@ async def get_solving_list(
             "username": problemset.username,
             "rest": problemset.rest_time,
             "problems": unsolved_problems})
-    # ск задач вирішено
+    
+    # скільки задач вже вирішено
     problem_count = db.query(Ticket).filter(Ticket.username == user.username).filter(Ticket.state == 1).count()
 
     return templates.TemplateResponse("solving/list.html", 
