@@ -22,3 +22,15 @@ footer.grid a[role="button"] {
 .my-error {
     color: red;
 }
+
+.no-copy {
+  user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+}
+
+.pre-like {
+  white-space: pre;
+  font-family: monospace;
+  font-size: larger;
+}

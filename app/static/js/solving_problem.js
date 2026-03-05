@@ -5,37 +5,6 @@ const message = document.getElementById("message");
 
 // константи TRACE_INTERVAL, LINK_SEP і CHECK_SEP у файлі trace_const.js
 
-
-// Відстежувач треку рішення
-// //
-// class SolveTracer {
-//     constructor() {
-//         this.prevSolving = "";
-//         this.track = "";
-//     }
-
-//     add(solving) {
-//         this.track += LINK_SEP + this.diff(solving);
-//         this.prevSolving = solving;
-//     }
-
-//     diff(s2)  {
-//         let s1 = this.prevSolving;
-//         // співпадіння 
-//         if (s1 === s2)
-//             return "";
-        
-//         let l = 0, r = 0;
-//         while (s1[l] === s2[l]) l++;
-//         while (s1[s1.length - 1 - r] === s2[s2.length - 1 - r]) r++;
-//         let mid = r ? s2.slice(l, -r) : s2.slice(l);
-//         return `${l}|${mid}|${r}`;
-//     }
-
-// }
-
-// const tracer = new SolveTracer();
-
 // Покроково кодує історію документу
 // track - результат кодування
 //
@@ -116,3 +85,11 @@ checkButton.addEventListener("click", async () => {
     }
 });
 
+// ----------------------------------- втрати фокусу
+let fcounter = 0
+
+window.addEventListener('blur', () => { 
+    fcounter++; 
+    tracer.add(editor.getValue() + CHECK_SEP + "FOCUS LOST " + fcounter )
+})
+   

@@ -104,22 +104,23 @@ setTimeout(diagram, 0);
 
 // малює діаграму на канвасі
 function diagram() {
-  const n = codes.length, cH = canvas1.height, cW = canvas1.width;
+  const n = codes.length, canH = canvas1.height, cW = canvas1.width;
   const w = cW / n;
   const maxCodeLength = Math.max(...codes.map(x => x.length));
-  const dy = cH / maxCodeLength;
+  const dy = canH / maxCodeLength;
 
   const ctx = canvas1.getContext("2d");
 
 
   ctx.lineWidth = 0.5;
+  ctx.fillStyle = "#0000FF40"; 
+  ctx.strokeStyle = "#0000FFFF"; 
 
   for (let i = 0; i < n; i++) {
     // diagram
-    const x = w * i, y = cH - dy * codes[i].length + 5;
+    const x = w * i, y = canH - dy * codes[i].length + 5;
     const h = i > 0 ? (codes[i].length - codes[i-1].length) * dy : 0;
-    ctx.fillStyle = "#0000FF40"; 
-    ctx.strokeStyle = "#0000FFFF"; 
+
     if (h) {
        ctx.fillRect(x, y, w, h);
     } else {
@@ -130,11 +131,17 @@ function diagram() {
     }
     // checks
     if (checks[i]) {
-        ctx.strokeStyle = checks[i].indexOf("OK") > -1 ? "green" : "red";
+        ctx.save()
+        ctx.strokeStyle = 
+            checks[i].indexOf("OK") > -1    ? "green" : 
+            checks[i].indexOf("FOCUS") > -1 ? "black" :
+            /* else */                        "red";
+        ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.moveTo(x + w/2, cH/2);
-        ctx.lineTo(x + w/2, cH);
+        ctx.moveTo(x + w/2, canH * 0.75);
+        ctx.lineTo(x + w/2, canH);
         ctx.stroke();
+        ctx.restore();
     }
   }  
   
