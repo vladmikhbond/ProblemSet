@@ -104,20 +104,22 @@ async def get_solving_problem(
             expire_time=problemset.close_time,            
         )
         ticket.add_record("Вперше побачив задачу.", "User saw the task for the first time.");
+        db.add(ticket)
 
-        try:
-            db.add(ticket)
-            db.commit()
-        except Exception as e:
-            db.rollback()
-            err_mes = f"Error during a ticket creating: {e}"
-            logger(err_mes)
-
-    # show the ticket solving
+    # find the old ticket
     else:
+        # show the ticket solving
         records = ticket.get_records()
         if len(records) > 1:
             problem.view = records[len(records)-1]["code"]
+        ticket.add_record("Не вперше бачить задачу.", "SECONDHAND");
+    
+    try:
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        err_mes = f"Error during a ticket creating: {e}"
+        logger(err_mes)
 
     # open a problem window
     dict = {"py": "python", "js": "javascript", "cs": "csharp"}
@@ -174,7 +176,7 @@ async def post_check(
      
     db.commit()
     return check_message
-
+[].
 
 def regex_helper(lang:str):
     if lang == 'js' or lang == 'cs':

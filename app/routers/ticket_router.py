@@ -14,29 +14,10 @@ templates = Jinja2Templates(directory="app/templates")
 
 router = APIRouter()
 
-# логування
-import logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-# ------- show
-
-@router.get("/ticket/show/{id}")
-async def get_solving_ticket(
-    id: str, 
-    request: Request, 
-    db: Session = Depends(get_pss_db),
-    user: User=Depends(get_current_tutor)
-):
-    """ 
-    Показ вирішень з одного тікету.
-    """
-    ticket = db.get(Ticket, id)
-    records = ticket.get_records()
-    track64 = base64.b64encode(ticket.track.encode()).decode()
-    return templates.TemplateResponse("ticket/show.html", 
-            {"request": request, "ticket": ticket,  "record": records[-1], "track64": track64})
-    
+# # логування
+# import logging
+# logging.basicConfig(level=logging.INFO)
+# logger = logging.getLogger(__name__)
 
 
 # ------- del 
@@ -73,4 +54,29 @@ async def post_ticket_del(
     db.delete(ticket)
     db.commit()
     return RedirectResponse(url=f"/problemset/show/{pset_id}", status_code=302)
+
+
+# ------- show
+
+@router.get("/ticket/show/{id}")
+async def get_solving_ticket(
+    id: str, 
+    request: Request, 
+    db: Session = Depends(get_pss_db),
+    user: User=Depends(get_current_tutor)
+):
+    """ 
+    Показ вирішень з одного тікету.
+    """
+    ticket = db.get(Ticket, id)
+    records = ticket.get_records()
+    track64 = base64.b64encode(ticket.track.encode()).decode()
+
+    return templates.TemplateResponse("ticket/show.html", {
+        "request": request, 
+        "ticket": ticket,  
+        "record": records[-1], 
+        "track64": track64,
+        "secondhand": "SECONDHAND" in ticket.records })
+    
 

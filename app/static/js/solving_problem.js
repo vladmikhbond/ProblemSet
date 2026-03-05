@@ -50,7 +50,10 @@ setInterval(() => {
 
 // ---------------- Перевірка рішення 
 
-checkButton.addEventListener("click", async () => {
+checkButton.addEventListener("click", check);
+    
+    
+async function check() {
     const data = {
         problem_id: problemId.value,
         solving: editor.getValue(),
@@ -83,7 +86,7 @@ checkButton.addEventListener("click", async () => {
         console.error("Request failed:", err);
         message.innerHTML = "Помилка: " + err.message;
     }
-});
+}
 
 // ----------------------------------- втрати фокусу
 let fcounter = 0
@@ -91,5 +94,17 @@ let fcounter = 0
 window.addEventListener('blur', () => { 
     fcounter++; 
     tracer.add(editor.getValue() + CHECK_SEP + "FOCUS LOST " + fcounter )
+    check();
 })
    
+// document.addEventListener("visibilitychange", async () => 
+// {
+//     if (document.visibilityState === "visible") {
+       
+//     }
+//     if (document.visibilityState === "hidden") {
+//        fcounter += 10;
+//        tracer.add(editor.getValue() + CHECK_SEP + "FOCUS LOST " + fcounter )
+//        check();
+//     }
+// });
