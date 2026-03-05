@@ -176,7 +176,6 @@ async def post_check(
      
     db.commit()
     return check_message
-[].
 
 def regex_helper(lang:str):
     if lang == 'js' or lang == 'cs':

@@ -96,15 +96,3 @@ window.addEventListener('blur', () => {
     tracer.add(editor.getValue() + CHECK_SEP + "FOCUS LOST " + fcounter )
     check();
 })
-   
-// document.addEventListener("visibilitychange", async () => 
-// {
-//     if (document.visibilityState === "visible") {
-       
-//     }
-//     if (document.visibilityState === "hidden") {
-//        fcounter += 10;
-//        tracer.add(editor.getValue() + CHECK_SEP + "FOCUS LOST " + fcounter )
-//        check();
-//     }
-// });
