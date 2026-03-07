@@ -1,5 +1,5 @@
 
-import httpx, re
+import httpx, re, json
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
@@ -108,10 +108,10 @@ async def get_solving_problem(
 
     # find the old ticket
     else:
-        # show the ticket solving
-        records = ticket.get_records()
-        if len(records) > 1:
-            problem.view = records[len(records)-1]["code"]
+        # # show the ticket solving
+        # records = ticket.get_records()
+        # if len(records) > 1:
+        #     problem.view = records[len(records)-1]["code"]
         ticket.add_record("Не вперше бачить задачу.", "SECONDHAND");
     
     try:
@@ -170,9 +170,16 @@ async def post_check(
     except Exception as e:
         return f"Error. Is url '{url}' responding?"
   
-    # Write solving to the ticket
+    # Add solving to the ticket
     ticket.add_record(answer.solving, check_message)
-    ticket.track = answer.track
+    
+    # Add trace to the ticket: 1) diffs from json, 2) add comment, 3) add to ticket
+    diffs = json.loads(answer.trace)
+    diffs.append([check_message[:10]])
+
+    track = json.loads(ticket.track) if ticket.track else []
+    track.extend(diffs)
+    ticket.track =json.dumps(track)
      
     db.commit()
     return check_message

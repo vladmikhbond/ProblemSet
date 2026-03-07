@@ -3,7 +3,7 @@ from pydantic import BaseModel
 class AnswerSchema(BaseModel):
     problem_id: str
     solving: str
-    track: str
+    trace: str
     
 
     class Config:
