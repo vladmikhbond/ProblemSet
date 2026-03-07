@@ -91,8 +91,20 @@ async function check() {
 // ----------------------------------- втрати фокусу
 let fcounter = 0
 
-window.addEventListener('blur', () => { 
-    fcounter++; 
-    tracer.add(editor.getValue() + CHECK_SEP + "FOCUS LOST " + fcounter )
-    check();
-})
+// window.addEventListener('blur', () => { 
+//     fcounter++; 
+//     tracer.add(editor.getValue() + CHECK_SEP + "FOCUS LOST " + fcounter )
+//     check();
+// })
+
+document.addEventListener("visibilitychange", async () => 
+{
+    if (document.visibilityState === "visible") {
+       
+    }
+    if (document.visibilityState === "hidden") {
+       fcounter += 1;
+       tracer.add(editor.getValue() + CHECK_SEP + "FOCUS LOST " + fcounter )
+       check();
+    }
+});
