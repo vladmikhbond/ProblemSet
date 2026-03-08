@@ -124,7 +124,7 @@ async def get_solving_problem(
         logger(err_mes)
 
     # open a problem window
-    dict = {"py": "python", "js": "javascript", "cs": "csharp"}
+    dict = {"py": "python", "js": "javascript", "cs": "csharp", "hs": "haskell"}
     problem.lang = dict[problem.lang] 
 
     return templates.TemplateResponse("solving/problem.html", {"request": request, "problem": problem})

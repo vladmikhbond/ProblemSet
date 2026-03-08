@@ -15,7 +15,7 @@ class Problem(Base):
 
     title: Mapped[str] = mapped_column(String)
     attr: Mapped[str] = mapped_column(String)
-    lang: Mapped[str] = mapped_column(String)
+    lang: Mapped[str] = mapped_column(String)  # py, cs, js, hs
     cond: Mapped[str] = mapped_column(String)
     view: Mapped[str] = mapped_column(String)
     hint: Mapped[str] = mapped_column(String)
