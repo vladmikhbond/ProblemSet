@@ -5,81 +5,26 @@ const stepTime = document.getElementById("stepTime");
 const codeArea = document.getElementById('codeArea');
 const canvas1 = document.getElementById('canvas1');
 
-// константи TRACE_INTERVAL, LINK_SEP і CHECK_SEP у файлі trace_const.js
-// константа track_in_base64 на веб сторінці
-
-// Розгортає трек у масив знімків.
-//
-class TrackDecoder {
-
-    constructor(track) {
-        this.track = track;
-    }
-
-    decode() {
-        if (!this.track) 
-            return [];
-
-        let shots = [];
-        const chain = this.track.split(LINK_SEP);
-
-        let shot = "";
-        const regex = /(\d+)\|(.*)\|(\d+)/s
-
-        for (let link of chain) {
-            if (link) {
-                const match = regex.exec(link);
-                if (!match) {
-                    throw Error("ERROR: wrong format of trace");
-                } 
-                const l = +match[1];
-                const r = +match[3];
-                const left = shot.slice(0, l);
-                const right = r ? shot.slice(-r) : "";
-                shot = left + match[2] + right;       
-            } 
-            shots.push(shot);
-        }
-        return shots;
-    }
-
-    decode2() {
-        return TrackDecoder.separate(this.decode());
-    }
-
-    // Розділяє масив знімків на масив кодів і масив повідомлень.
-    static separate(shots) {
-        let codes = [], checks = [];
-        for (let screen of shots) {
-            if (screen.indexOf(CHECK_SEP) != -1) {
-                let [co, ch] = screen.split(CHECK_SEP);
-                codes.push(co);
-                checks.push(ch);
-            } else {
-                codes.push(screen);
-                checks.push("");
-            }
-        }
-        return [codes, checks];
-    }
-}
+// константа TRACE_INTERVAL, класс Trace у файлі trace_const.js
+// константа track_in_base64 на веб сторінці ticket/show.html
 
 
 // декодує трек 
 const bytes = Uint8Array.from(atob(track_in_base64), c => c.charCodeAt(0));
-const track =  new TextDecoder("utf-8").decode(bytes);
+let str =  new TextDecoder("utf-8").decode(bytes);
 
-const tracer = new TrackDecoder(track);
+let t = JSON.parse(str);
+
+const trace = Trace.fromDifferences(t);
 
 // розділяє трек на код и відповідь перевірки
-const [codes, checks] = tracer.decode2();
+const pairs = trace.decode();
+const codes = pairs.map(p => p[0]);
+const checks = pairs.map(p => p[1]);
 
-// додає в трек останню ланку
-codes.push(codeArea.value);
-checks.push(checkDiv.innerHTML);
 
 // готує слайдер
-timeRange.max = codes.length - 1;
+timeRange.max = pairs.length - 1;
 timeRange.value = timeRange.max;
 timeRange.focus();
 

@@ -31,9 +31,8 @@
 
 {% block script %}
 
-
 <script>
-  const track_in_base64 = {{ track64 | tojson }};
+  const track_in_base64 = "{{track64}}";
 </script>
 <script src="/static/js/trace_const.js" type="text/javascript" charset="utf-8"></script>
 <script src="/static/js/ticket_show.js" type="text/javascript" charset="utf-8"></script>

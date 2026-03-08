@@ -1,4 +1,4 @@
-import base64
+import json, base64
 
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import RedirectResponse
@@ -70,7 +70,9 @@ async def get_solving_ticket(
     """
     ticket = db.get(Ticket, id)
     records = ticket.get_records()
-    track64 = base64.b64encode(ticket.track.encode()).decode()
+    bs = bytes(ticket.track, encoding="utf-8")
+
+    track64 = base64.b64encode(bs).decode()
 
     return templates.TemplateResponse("ticket/show.html", {
         "request": request, 

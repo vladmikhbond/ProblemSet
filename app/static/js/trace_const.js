@@ -71,11 +71,11 @@ class Trace {
             {
                 pairs.push([text, ""])
             }
-            // add comment to last shot
+            // add comment to last pair
             else if (slide.length == 1) 
             {
-                if (this.diffs.length > 0) {
-                    this.diffs[this.diffs.length - 1][1] = slide[0] 
+                if (pairs.length > 0) {
+                    pairs[pairs.length - 1][1] = slide[0] 
                 }
             }
         }
