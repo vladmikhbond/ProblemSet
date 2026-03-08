@@ -3,7 +3,7 @@ const checkImage = document.getElementById("checkImage");
 const problemId = document.getElementById("problemId");
 const message = document.getElementById("message");
 
-// константи TRACE_INTERVAL і класс Trace у файлі trace_const.js
+// константа TRACE_INTERVAL, класс Trace у файлі Trace.js
 
 let trace = new Trace();
 trace.addText(editor.getValue());

@@ -1,4 +1,3 @@
-
 import httpx, re, json
 from datetime import datetime
 
@@ -22,6 +21,9 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+TRACK_LIMIT = 10000  
+CHECK_MES_LIMIT = 80
+    
 # ------------------------------ list
 
 @router.get("/solving")
@@ -173,13 +175,21 @@ async def post_check(
     # Add solving to the ticket
     ticket.add_record(answer.solving, check_message)
     
-    # Add trace to the ticket: 1) diffs from json, 2) add comment, 3) add to ticket
-    diffs = json.loads(answer.trace)
-    diffs.append([check_message[:10]])
+    # Add trace to the ticket
+    if len(ticket.track) < TRACK_LIMIT: 
 
-    track = json.loads(ticket.track) if ticket.track else []
-    track.extend(diffs)
-    ticket.track =json.dumps(track)
+
+        # diffs from json
+        diffs = json.loads(answer.trace)
+
+        # add comment to diffs
+        comment = check_message[:CHECK_MES_LIMIT]
+        diffs.append([comment])
+
+        # add trace to ticket 
+        track = json.loads(ticket.track) if ticket.track else []
+        track.extend(diffs)
+        ticket.track =json.dumps(track)
      
     db.commit()
     return check_message

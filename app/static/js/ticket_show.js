@@ -5,17 +5,15 @@ const stepTime = document.getElementById("stepTime");
 const codeArea = document.getElementById('codeArea');
 const canvas1 = document.getElementById('canvas1');
 
-// константа TRACE_INTERVAL, класс Trace у файлі trace_const.js
+// константа TRACE_INTERVAL, класс Trace у файлі Trace.js
 // константа track_in_base64 на веб сторінці ticket/show.html
 
 
-// декодує трек 
+// декодує трек з base64
 const bytes = Uint8Array.from(atob(track_in_base64), c => c.charCodeAt(0));
 let str =  new TextDecoder("utf-8").decode(bytes);
 
-let t = JSON.parse(str);
-
-const trace = Trace.fromDifferences(t);
+const trace = Trace.fromDifferences(JSON.parse(str));
 
 // розділяє трек на код и відповідь перевірки
 const pairs = trace.decode();
@@ -49,9 +47,9 @@ setTimeout(diagram, 0);
 
 // малює діаграму на канвасі
 function diagram() {
-  const n = codes.length, canH = canvas1.height, cW = canvas1.width;
+  const n = pairs.length, canH = canvas1.height, cW = canvas1.width;
   const w = cW / n;
-  const maxCodeLength = Math.max(...codes.map(x => x.length));
+  const maxCodeLength = Math.max(...pairs.map(p => p[0].length));
   const dy = canH / maxCodeLength;
 
   const ctx = canvas1.getContext("2d");
