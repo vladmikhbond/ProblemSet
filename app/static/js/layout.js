@@ -6,6 +6,17 @@ if (toStudent) {
         .replace("7071","7074/disc/list")
 }
 
+// ---------------------------- фільтр задачників -----------------------------
+
+const WORKBOOK_FILTER_KEY = "problemset_workbook_filter"
+const workbook_filter = document.getElementById("workbook_filter");
+workbook_filter.value = getCookie(WORKBOOK_FILTER_KEY);
+
+workbook_filter.addEventListener("change", async (e) => {
+    setCookie(WORKBOOK_FILTER_KEY, encodeURIComponent(workbook_filter.value.trim()) )
+    location.reload();
+})
+
 // ---------------------------- фільтр задач -----------------------------
 
 const PROBLEM_FILTER_KEY = "problemset_problem_filter"

@@ -5,9 +5,9 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
-from .utils import delta_to_str, get_filtered_lines, USER_FILTER_KEY, str_to_time, time_to_str
+from .utils import delta_to_str, str_to_time, time_to_str
+from .utils import USER_FILTER_KEY, get_filtered_lines, get_filtered_problemsets, get_filtered_problems
 from .login_router import get_current_tutor
-from .problem_router import get_filtered_problems
 from ..models.models import Problem, ProblemSet, User
 from ..dal import get_pss_db  # Функція для отримання сесії БД
 
@@ -28,7 +28,7 @@ async def get_problemset_list(
     """ 
     Усі задачники поточного юзера (викладача).
     """
-    all_problemsets: list[ProblemSet] = db.query(ProblemSet).all()
+    all_problemsets = get_filtered_problemsets(db, request)
 
     problemsets = [p for p in all_problemsets if p.username == user.username ] 
     for p in problemsets: 
@@ -212,6 +212,7 @@ async def problemset_show(
     Показ вирішень з одного задачника.
     """
     problemset = db.get(ProblemSet, id)
+
     problem_ids = problemset.get_problem_ids_list()
     dict = {}
     

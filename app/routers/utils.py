@@ -4,12 +4,33 @@ from urllib.parse import unquote
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
-from ..models.models import Problem
+from ..models.models import Problem, ProblemSet
 
 # -------------------- FILTERS
 
+WORKBOOK_FILTER_KEY = "problemset_workbook_filter"
 PROBLEM_FILTER_KEY = "problemset_problem_filter"
 USER_FILTER_KEY = "problemset_user_filter"
+
+def get_filtered_problemsets(db, request):
+    """
+    Повертає відфільтровані задачники з бази даних.
+    """
+    problemsets = db.query(ProblemSet).all()
+
+    filter = unquote(request.cookies.get(WORKBOOK_FILTER_KEY, "")).strip()
+
+    if filter:
+        try:
+            pattern = re.compile(filter, re.UNICODE)
+            problemsets = [ p for p in problemsets if p.title and pattern.search(p.title) ]
+        except re.error:
+            # Invalid regex — ignore filter or log error
+            pass 
+
+    problemsets.sort(key=lambda p: p.title)
+    return problemsets
+
 
 def get_filtered_problems(db, request):
     """

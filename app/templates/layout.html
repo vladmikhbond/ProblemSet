@@ -18,6 +18,7 @@
         <ul>
             <li><a href="/problemset/list">Workbooks</a></li>
             <li><a href="/problem/list">Problems</a></li>
+            <li><a href="/ticket/report">Report</a></li>
             <li><a href="/solving" >Solving</a></li>
             <li><a href="/login/logout" >Logout</a></li>
             <li><a href="/login/help">❓</a></li>
@@ -25,16 +26,16 @@
          
         {# ----------- filters ---------- #}         
         <fieldset role="group" style="width: 390px; margin-top: 20px;">
+            <input id="workbook_filter" title="Фільтр задачників"  class="filter" placeholder="Workbooks">        
             <input id="problem_filter" title="Фільтр задач: 're ... str'"  class="filter" placeholder="Problems">        
-            <input id="user_filter"     title="Фільтр юзерів" class="filter" placeholder="Users"> 
+            <input id="user_filter" title="Фільтр юзерів" class="filter" placeholder="Users"> 
         </fieldset>
+
         {% else %}
             <li><a id="to_student">Home</a></li>
         {% endif %}
         </nav>
              
-
-
         {% block content %}
         {% endblock %}
     </main>

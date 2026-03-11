@@ -1,0 +1,31 @@
+{% extends "layout.html" %}
+
+{% block title %}{% endblock %}
+
+{% block content %}
+    
+<h2> Report </h2>
+<table>
+    <thead>
+    <tr>
+        <th>NAME</th>
+        {% for s in seances %}
+        <th> {{s.title}}</th>   
+        {% endfor%} 
+        <th title="Without the worst result.">SUM</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for u in usernames %}
+        <tr>
+            <td>{{u}}</td>
+            {% for s in seances %}
+                <td>{{dict[u, s.id]}}</td>   
+            {% endfor%} 
+            <td>{{sums[u]}}</td>
+        </tr>
+    {% endfor%}
+    </tbody>
+</table>
+
+{% endblock %}
