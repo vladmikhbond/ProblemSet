@@ -8,21 +8,15 @@
 <table>
     <thead>
     <tr>
-        <th>NAME</th>
-        {% for s in seances %}
-        <th> {{s.title}}</th>   
-        {% endfor%} 
-        <th title="Without the worst result.">SUM</th>
+        <th>Name</th>
+        <th>Count</th>
     </tr>
     </thead>
     <tbody>
-    {% for u in usernames %}
+    {% for username, count in groups %}
         <tr>
-            <td>{{u}}</td>
-            {% for s in seances %}
-                <td>{{dict[u, s.id]}}</td>   
-            {% endfor%} 
-            <td>{{sums[u]}}</td>
+            <td>{{username}}</td>
+            <td>{{count}}</td>
         </tr>
     {% endfor%}
     </tbody>

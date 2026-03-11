@@ -3,6 +3,7 @@ import json, base64
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from .login_router import get_current_tutor
@@ -79,40 +80,25 @@ async def get_solving_ticket(
 
 # -------------------------- report 
 
-# @router.get("/ticket/report")
-# async def get_ticket_report(
-#     request: Request, 
-#     db: Session = Depends(get_pss_db),
-#     user: User=Depends(get_current_tutor)
-# ):
-#     """ 
-#     Звіт
-#     """
-#     # define usernames
-#     seances = get_filtered_problemsets(db, request)
+@router.get("/ticket/report")
+async def get_ticket_report(
+    request: Request, 
+    db: Session = Depends(get_pss_db),
+    user: User=Depends(get_current_tutor)
+):
+    """ 
+    Рахує кількість розв'язаних задач для кожного користувача.
+    """
+    groups = (
+        db.query(Ticket.username, func.count(Ticket.id))
+        .filter(Ticket.state == 1)
+        .group_by(Ticket.username)
+        .all()
+    )
+    groups.sort(key=lambda g: -g[1] )
 
-#     set_of_usernames = set()
-#     cell_values_dict: Dict[Tuple[str, int], float] = {} 
-
-#     for seance in seances:
-#         for ticket in seance.tickets:
-#             set_of_usernames.add(ticket.username)
-#             seance_questions = seance.get_questions(db)
-#             cell_values_dict[ticket.username, seance.id] = result_from_ticket(ticket, seance_questions)[0]
-
-#     usernames = sorted(user_filter(list(set_of_usernames), request))
-
-#     # define cell values and sums
-#     sums = {}
-#     for username in usernames: 
-#         row_values = [cell_values_dict.get((username, seance.id), 0)
-#                        for seance in seances]
-        
-#         if   len(seances) == 0: sums[username] = 0
-#         elif len(seances) == 1: sums[username] = sum(row_values)
-#         else:                   sums[username] = round((sum(row_values) - min(row_values)) / (len(seances) - 1), 0)
-
-         
-#     return templates.TemplateResponse("ticket/report.html", {
-#         "request": request, "seances": seances, "usernames": usernames, "dict": cell_values_dict, "sums": sums })
+    return templates.TemplateResponse(
+        "ticket/report.html",
+        {"request": request, "groups": groups},
+    )
 
