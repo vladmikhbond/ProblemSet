@@ -13,6 +13,7 @@ class ProblemSchema(BaseModel):
     lang: str
     cond: str
     view: str
+    seconds: int
 
     class Config:
         from_attributes=True

@@ -16,8 +16,6 @@ setInterval(() => {
 
 checkButton.addEventListener("click", check);
     
-
-
 async function check() {
 
     trace.addText(editor.getValue());
@@ -56,19 +54,10 @@ async function check() {
 }
 
 // ----------------------------------- втрати фокусу
-let fcounter = 0
-
-// window.addEventListener('blur', () => { 
-//     fcounter++; 
-//     tracer.add(editor.getValue() + CHECK_SEP + "FOCUS LOST " + fcounter )
-//     check();
-// })
+let fcounter = 0;
 
 document.addEventListener("visibilitychange", async () => 
 {
-    if (document.visibilityState === "visible") {
-       
-    }
     if (document.visibilityState === "hidden") {
        fcounter += 1;
        trace.addComment("FOCUS LOST " + fcounter )

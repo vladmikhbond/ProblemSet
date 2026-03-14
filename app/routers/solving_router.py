@@ -186,7 +186,9 @@ async def get_solving_vscode(
         id=problem_id, 
         lang=dict[problem.lang], 
         cond=problem.cond, 
-        view=problem.view)
+        view=problem.view,
+        seconds=pset.rest_time.total_seconds        
+    )
     
 
 #-------------- check (AJAX)
