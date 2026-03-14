@@ -187,7 +187,7 @@ async def get_solving_vscode(
         lang=dict[problem.lang], 
         cond=problem.cond, 
         view=problem.view,
-        seconds=pset.rest_time.total_seconds        
+        seconds = int(pset.rest_time.total_seconds())
     )
     
 
