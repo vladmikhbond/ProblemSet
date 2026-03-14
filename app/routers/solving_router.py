@@ -7,7 +7,7 @@ from sqlalchemy import and_
 from sqlalchemy.orm import Session
 
 from .login_router import get_current_user, JUDGE
-from ..models.schemas import AnswerSchema
+from ..models.schemas import AnswerSchema, ProblemSchema
 from ..dal import get_pss_db  # Функція для отримання сесії БД
 from ..models.models import Problem, ProblemSet, Ticket, User
 
@@ -129,6 +129,66 @@ async def get_solving_problem(
 
     return templates.TemplateResponse("solving/problem.html", {"request": request, "problem": problem})
 
+
+# ---------------------------- open in vs code (ajax)
+
+@router.get("/solving/vscode/{pset_title}")  
+async def get_solving_vscode(
+    pset_title: str,
+    db: Session = Depends(get_pss_db),
+    user: User=Depends(get_current_user)
+):
+    """
+    Визначає pset_id і problem_id.
+    Створює тікет і зберігає його в базі даних, якщо це вже не зроблене раніше.
+    """  
+    # pset_id & problem_id
+    try:
+        pset = db.query(ProblemSet).filter(ProblemSet.title == pset_title).first()
+        pset_id = pset.id
+        problem_id = pset.get_problem_ids_list()[0]
+        problem = db.get(Problem, problem_id)
+    except Exception as ex:
+        raise HTTPException(404, ex.args)
+
+    # get user's ticket
+    ticket = db.query(Ticket) \
+        .filter(Ticket.username == user.username, Ticket.problem_id == problem_id) \
+        .first()
+
+    # create a new ticket
+    if ticket is None:
+        problemset:ProblemSet = db.get(ProblemSet, pset_id) 
+        ticket = Ticket(
+            username=user.username, 
+            problem_id=problem_id, 
+            records="",
+            expire_time=problemset.close_time,            
+        )
+        ticket.add_record("Вперше побачив задачу.", "User saw the task for the first time.");
+        db.add(ticket)
+
+    # found the old ticket
+    else:
+        ticket.add_record("Не вперше бачить задачу.", "SECONDHAND");
+    
+    try:
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        err_mes = f"Error during a ticket creating: {e}"
+        logger(err_mes)
+
+    # open a problem window
+    dict = {"py": "python", "js": "javascript", "cs": "csharp", "hs": "haskell"}
+
+    return ProblemSchema(
+        id=problem_id, 
+        lang=dict[problem.lang], 
+        cond=problem.cond, 
+        view=problem.view)
+    
+
 #-------------- check (AJAX)
 
 @router.post("/check")
@@ -138,7 +198,7 @@ async def post_check(
     user: User=Depends(get_current_user)
 ) -> str:
     """
-    Відправляє рішення задачі на перевірку до judje і повертає відповідь .
+    Відправляє рішення задачі на перевірку до judge і повертає відповідь .
     Додає в тіскет рішення і відповідь. 
     Приймає JSON у тілі у форматі AnswerSchema.
     """
@@ -193,6 +253,8 @@ async def post_check(
      
     db.commit()
     return check_message
+
+
 
 def regex_helper(lang:str):
     if lang == 'js' or lang == 'cs':
