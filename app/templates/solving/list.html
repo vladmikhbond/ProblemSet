@@ -19,9 +19,9 @@
 
       <ul>
         {% for problem in pset.problems %}
-          <li>
+          <li title="{{ problem.attr }}">
             <a href="/solving/problem/{{ problem.id }}/{{ pset.id }}">
-              <span>{{ problem.title }} <small>/{{ problem.attr }}</small></span><br>
+              <span>{{pset.title}}.{{ problem.title }}</span>
             </a>
           </li>
         {% endfor %}

@@ -63,6 +63,10 @@ class ProblemSet(Base):
 
     def set_problem_ids(self, lst: List[str] ):
         self.problem_ids = "\n".join(lst)
+    
+    def get_prob_id_by_name(self, name:str):
+        res = [line[44:80] for line in self.problem_ids.splitlines() if name in line ]
+        return res[0] if len(res) == 1 else None
 
 # --------------- time props
 

@@ -110,10 +110,6 @@ async def get_solving_problem(
 
     # find the old ticket
     else:
-        # # show the ticket solving
-        # records = ticket.get_records()
-        # if len(records) > 1:
-        #     problem.view = records[len(records)-1]["code"]
         ticket.add_record("Не вперше бачить задачу.", "SECONDHAND");
     
     try:
@@ -132,9 +128,9 @@ async def get_solving_problem(
 
 # ---------------------------- open in vs code (ajax)
 
-@router.get("/solving/vscode/{pset_title}")  
+@router.get("/solving/vscode")  
 async def get_solving_vscode(
-    pset_title: str,
+    fullname: str,
     db: Session = Depends(get_pss_db),
     user: User=Depends(get_current_user)
 ):
@@ -143,11 +139,13 @@ async def get_solving_vscode(
     Створює тікет і зберігає його в базі даних, якщо це вже не зроблене раніше.
     """  
     # pset_id & problem_id
+    pset_name, prob_name = fullname.split('.')
     try:
-        pset = db.query(ProblemSet).filter(ProblemSet.title == pset_title).first()
+        pset = db.query(ProblemSet).filter(ProblemSet.title == pset_name).first()
         pset_id = pset.id
-        problem_id = pset.get_problem_ids_list()[0]
+        problem_id = pset.get_prob_id_by_name(prob_name) 
         problem = db.get(Problem, problem_id)
+
     except Exception as ex:
         raise HTTPException(404, ex.args)
 
