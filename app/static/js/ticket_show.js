@@ -78,6 +78,7 @@ function diagram() {
         ctx.strokeStyle = 
             checks[i].indexOf("OK") > -1    ? "green" : 
             checks[i].indexOf("FOCUS") > -1 ? "black" :
+            checks[i].indexOf("TAB") > -1   ? "blue" :
             /* else */                        "red";
         ctx.lineWidth = 2;
         ctx.beginPath();

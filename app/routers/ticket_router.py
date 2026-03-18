@@ -1,4 +1,5 @@
-import json, base64
+import json
+import base64
 
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import RedirectResponse
@@ -16,15 +17,16 @@ templates = Jinja2Templates(directory="app/templates")
 
 router = APIRouter()
 
-# ------- del 
+# ------- del
+
 
 @router.get("/ticket/del/{id}/{pset_title}")
 async def get_ticket_del(
-    id: str, 
-    pset_title: str, 
-    request: Request, 
+    id: str,
+    pset_title: str,
+    request: Request,
     db: Session = Depends(get_pss_db),
-    user: User=Depends(get_current_tutor)
+    user: User = Depends(get_current_tutor)
 ):
     """ 
     Видалення тікету.
@@ -32,16 +34,16 @@ async def get_ticket_del(
     ticket = db.get(Ticket, id)
     if not ticket:
         return "No ticket to delete."
-    return templates.TemplateResponse("ticket/del.html", 
-            {"request": request, "ticket": ticket, "pset_title": pset_title})
+    return templates.TemplateResponse("ticket/del.html",
+                                      {"request": request, "ticket": ticket, "pset_title": pset_title})
 
 
 @router.post("/ticket/del/{id}/{pset_id}")
 async def post_ticket_del(
     id: str,
-    pset_id: str, 
+    pset_id: str,
     db: Session = Depends(get_pss_db),
-    user: User=Depends(get_current_tutor)
+    user: User = Depends(get_current_tutor)
 ):
     """ 
     Видалення тікету.
@@ -56,10 +58,10 @@ async def post_ticket_del(
 
 @router.get("/ticket/show/{id}")
 async def get_solving_ticket(
-    id: str, 
-    request: Request, 
+    id: str,
+    request: Request,
     db: Session = Depends(get_pss_db),
-    user: User=Depends(get_current_tutor)
+    user: User = Depends(get_current_tutor)
 ):
     """ 
     Показ вирішень з одного тікету.
@@ -71,20 +73,20 @@ async def get_solving_ticket(
     track64 = base64.b64encode(bs).decode()
 
     return templates.TemplateResponse("ticket/show.html", {
-        "request": request, 
-        "ticket": ticket,  
-        "record": records[-1], 
+        "request": request,
+        "ticket": ticket,
+        "record": records[-1],
         "track64": track64,
-        "secondhand": "SECONDHAND" in ticket.records })
-    
+        "secondhand": "SECONDHAND" in ticket.records})
 
-# -------------------------- report 
+
+# -------------------------- report
 
 @router.get("/ticket/report")
 async def get_ticket_report(
-    request: Request, 
+    request: Request,
     db: Session = Depends(get_pss_db),
-    user: User=Depends(get_current_tutor)
+    user: User = Depends(get_current_tutor)
 ):
     """ 
     Рахує кількість розв'язаних задач для кожного користувача.
@@ -95,10 +97,9 @@ async def get_ticket_report(
         .group_by(Ticket.username)
         .all()
     )
-    groups.sort(key=lambda g: -g[1] )
+    groups.sort(key=lambda g: -g[1])
 
     return templates.TemplateResponse(
         "ticket/report.html",
         {"request": request, "groups": groups},
     )
-
