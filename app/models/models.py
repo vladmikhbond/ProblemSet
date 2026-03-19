@@ -26,9 +26,11 @@ class Problem(Base):
     tickets: Mapped[list["Ticket"]] = relationship(back_populates="problem", cascade="all, delete-orphan")
 
     @property
-    def inline(self):
+    def inline(self):  
         """
 cs/002/60/Ряд Сінуса........................aab65ae1-376b-4f52-b120-5513457dd43f (id = inline[44:80])
+
+       using in templates/problemset/edit.html 
         """
         s = (self.attr + "/" + self.title)[:40]
         s += " " * (44 - len(s)) + str(self.id)
@@ -54,7 +56,9 @@ class ProblemSet(Base):
     stud_filter: Mapped[str] = mapped_column(String, default='')
 
 # --------------- problem_ids methods
-    
+
+        # [44:80] - problem id live here !!!!!
+  
     def get_problem_ids_list(self) -> List[str]:
         """return list of problem ids"""
         if not self.problem_ids:
@@ -67,6 +71,11 @@ class ProblemSet(Base):
     def get_prob_id_by_name(self, name:str):
         res = [line[44:80] for line in self.problem_ids.splitlines() if name in line ]
         return res[0] if len(res) == 1 else None
+    
+    def get_prob_comment_by_id(self, problem_id:str):
+        res = [line[80:].strip() for line in self.problem_ids.splitlines() if problem_id in line ]
+        return res[0] if len(res) == 1 else None
+
 
 # --------------- time props
 

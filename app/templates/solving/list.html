@@ -19,10 +19,14 @@
 
       <ul>
         {% for problem in pset.problems %}
-          <li title="{{ problem.attr }}">
-            <a href="/solving/problem/{{ problem.id }}/{{ pset.id }}">
-              <span>{{pset.title}}.{{ problem.title }}</span>
-            </a>
+          <li>
+            {% if problem.comment %}
+                <span title="for VS Code only">{{pset.title}}.{{ problem.title }}</span>
+            {% else %}
+              <a href="/solving/problem/{{ problem.id }}/{{ pset.id }}">
+                <span>{{pset.title}}.{{ problem.title }}</span>
+              </a>
+            {% endif %}
           </li>
         {% endfor %}
       </ul>

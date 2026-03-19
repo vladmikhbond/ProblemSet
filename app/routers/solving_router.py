@@ -51,8 +51,10 @@ async def get_solving_list(
         problems = db.query(Problem).filter(Problem.id.in_(ids)).all()
 
         # sort problems as ordered identifiers in a list of identifiers
-        dic = {p.id:p for p in problems}
-        problems = [dic[id] for id in ids]
+        dict = {p.id:p for p in problems}
+        problems = [dict[id] for id in ids]
+        for p in problems: 
+            p.comment = problemset.get_prob_comment_by_id(p.id)
 
         # select unsolved problems only
         unsolved_problems = [
@@ -67,7 +69,8 @@ async def get_solving_list(
             "title": problemset.title,
             "username": problemset.username,
             "rest": problemset.rest_time,
-            "problems": unsolved_problems})
+            "problems": unsolved_problems
+            })
     
     # скільки задач вже вирішено
     problem_count = db.query(Ticket).filter(Ticket.username == user.username).filter(Ticket.state == 1).count()
