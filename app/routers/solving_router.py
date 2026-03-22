@@ -142,8 +142,8 @@ async def get_solving_vscode(
     Створює тікет і зберігає його в базі даних, якщо це вже не зроблене раніше.
     """  
     # pset_id & problem_id
-    pset_name, prob_name = fullname.split('.')
     try:
+        pset_name, prob_name = fullname.split('.')
         pset = db.query(ProblemSet).filter(ProblemSet.title == pset_name).first()
         pset_id = pset.id
         problem_id = pset.get_prob_id_by_name(prob_name) 
