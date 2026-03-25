@@ -18,7 +18,7 @@ const trace = Trace.fromDifferences(JSON.parse(str));
 // розділяє трек на код и відповідь перевірки
 const pairs = trace.decode();
 const codes = pairs.map(p => p[0]);
-const checks = pairs.map(p => p[1]);
+const comments = pairs.map(p => p[1]);
 
 
 // готує слайдер
@@ -31,8 +31,8 @@ timeRange.addEventListener("change", (e) => {
     let i = timeRange.value;
     // code
     codeArea.value = codes[i];
-    checkDiv.innerHTML = checks[i];
-    codeArea.className = checks[i].indexOf('OK') != -1 ? "ok" : "wrong";
+    checkDiv.innerHTML = comments[i];
+    codeArea.className = comments[i].indexOf('OK') != -1 ? "ok" : "wrong";
     // time
     let s = i * 3 % 60, m = i * 3 / 60 | 0;
     stepTime.innerHTML = `+${m}' ${s}"`;
@@ -61,7 +61,8 @@ function diagram() {
 
   for (let i = 0; i < n; i++) {
     // diagram
-    const x = w * i, y = canH - dy * codes[i].length + 5;
+    const x = w * i;
+    const y = canH - dy * codes[i].length + 5;
     const h = i > 0 ? (codes[i].length - codes[i-1].length) * dy : 0;
 
     if (h) {
@@ -72,23 +73,53 @@ function diagram() {
         ctx.lineTo(x + w, y);
         ctx.stroke();
     }
-    // checks
-    if (checks[i]) {
+    // comments
+    if (comments[i]) {
         ctx.save()
-        ctx.strokeStyle = 
-            checks[i].indexOf("OK") > -1    ? "green" : 
-            checks[i].indexOf("FOCUS") > -1 ? "black" :
-            checks[i].indexOf("TAB") > -1   ? "blue" :
-            /* else */                        "red";
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(x + w/2, canH * 0.75);
-        ctx.lineTo(x + w/2, canH);
-        ctx.stroke();
+        // ctx.strokeStyle = 
+        //     comments[i].indexOf("OK") > -1    ? "green" : 
+        //     comments[i].indexOf("FOCUS") > -1 ? "black" :
+        //     comments[i].indexOf("TAB") > -1   ? "blue"  :
+        //     /* else */                          "red";
+        // ctx.lineWidth = 2;
+        // ctx.beginPath();
+        // ctx.moveTo(x + w/2, canH * 0.75);
+        // ctx.lineTo(x + w/2, canH);
+        // ctx.stroke();
+   
+        if (comments[i].indexOf("OK") > -1) {
+            drawCheck(x + w/2, canH * 0.9, "green");
+        } else if (comments[i].indexOf("Wrong") > -1) {
+            drawCheck(x + w/2, canH * 0.9, "red");
+        } else if (comments[i].indexOf("FOCUS") > -1) {
+            drawFocus(x + w/2, canH * 0.7, "darkred");
+        } else if (comments[i].indexOf("TAB") > -1) {
+            drawFocus(x + w/2, canH * 0.8, "black");
+        } 
         ctx.restore();
     }
+    // ----------------- inner functions --------------
+    function drawCheck(x, y, color) {
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(x, y, 5, 0, Math.PI*2);
+        ctx.fill();
+    }
+
+    function drawFocus(x,  y, color) {
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x, canH);
+        ctx.stroke();
+    } 
+
+
   }  
   
+
+
 }
   
 // Синхронізує розміри textarea і canvas
