@@ -30,7 +30,7 @@ async def get_problem_list(
     user: User = Depends(get_current_tutor)
 ):
     problems = get_filtered_problems(db, request)
-    return templates.TemplateResponse(request, "problem/list.html", {"request": request, "problems": problems})
+    return templates.TemplateResponse(request, "problem/list.html", {"problems": problems})
 
 # ---------------------- new
 
@@ -50,7 +50,7 @@ async def get_problem_new(
         timestamp=datetime.now(),
         title="", attr="", lang="js", cond="", view="", hint="", code="",
     )
-    return templates.TemplateResponse(request, "problem/edit.html", {"request": request, "problem": problem})
+    return templates.TemplateResponse(request, "problem/edit.html", {"problem": problem})
 
 # ----------------------- edit
 
@@ -71,7 +71,7 @@ async def get_problem_edit(
     if problem.author != user.username:
         raise HTTPException(status_code=403, detail="Access forbidden: not the author")
     
-    return templates.TemplateResponse(request, "problem/edit.html", {"request": request, "problem": problem}
+    return templates.TemplateResponse(request, "problem/edit.html", {"problem": problem}
     )
 
 
@@ -121,10 +121,10 @@ async def post_problem_edit(
 
         check_message = response.text
         if not check_message.startswith("OK"):
-            return templates.TemplateResponse(request, "problem/edit.html", {"request": request, "problem": problem, "error": check_message})
+            return templates.TemplateResponse(request, "problem/edit.html", {"problem": problem, "error": check_message})
     except Exception as e:
         err_mes = f"Помилка при перевірці рішення задачі: {e}"
-        return templates.TemplateResponse(request, "problem/edit.html", {"request": request, "problem": problem, "error": err_mes})
+        return templates.TemplateResponse(request, "problem/edit.html", {"problem": problem, "error": err_mes})
 
     # save changes in DB
     if is_new:
@@ -156,7 +156,7 @@ async def get_problem_copy(
     db.add(new_problem)
     db.commit()
 
-    return templates.TemplateResponse(request, "problem/edit.html", {"request": request, "problem": new_problem})
+    return templates.TemplateResponse(request, "problem/edit.html", {"problem": new_problem})
 
 
 def copy_instance(obj):
@@ -187,7 +187,7 @@ async def get_problem_del(
     if problem.author != user.username:
         raise HTTPException(status_code=403, detail="Access forbidden: not the author")
     
-    return templates.TemplateResponse(request, "problem/del.html", {"request": request, "problem": problem}
+    return templates.TemplateResponse(request, "problem/del.html", {"problem": problem}
     )
 
 

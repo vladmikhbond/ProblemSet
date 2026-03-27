@@ -31,7 +31,7 @@ router = APIRouter()
 
 @router.get("/")
 async def get_login(request: Request):
-    return templates.TemplateResponse(request, "login/login.html", {"request": request})
+    return templates.TemplateResponse(request, "login/login.html")
 
 
 @router.post("/")
@@ -52,8 +52,7 @@ async def login(
     if client_response.is_success:
         token = client_response.json()
     else: 
-        return templates.TemplateResponse(request, "login/login.html", {
-            "request": request, 
+        return templates.TemplateResponse(request, "login/login.html", { 
             "error": "Invalid credentials."
         })
 
@@ -83,7 +82,7 @@ async def get_logout(request: Request):
 @router.get("/login/help")
 async def logout(request: Request, response: Response):
     
-    return templates.TemplateResponse(request, "login/help.html", {"request": request})  
+    return templates.TemplateResponse(request, "login/help.html")  
 
 # ---------------------------- aux
 
