@@ -41,7 +41,7 @@ async def get_problemset_list(
             p.rest_time_as_str = "-"
         p.problems_count = len(p.get_problem_ids_list())
 
-    return templates.TemplateResponse("problemset/list.html", {"request": request, "problemsets": problemsets})
+    return templates.TemplateResponse(request, "problemset/list.html", {"request": request, "problemsets": problemsets})
 
 # ------- new 
 
@@ -65,8 +65,7 @@ async def get_problemset_new(
 
     problems = get_filtered_problems(db, request)
     
-    return templates.TemplateResponse("problemset/edit.html", 
-            {"request": request, "problemset": problemset, "problems": problems})
+    return templates.TemplateResponse(request, "problemset/edit.html", {"request": request, "problemset": problemset, "problems": problems})
 
 
 @router.post("/problemset/new")
@@ -97,8 +96,7 @@ async def post_problemset_new(
     except Exception as e:
         db.rollback()
         err_mes = f"Error during a problem request: {e}"
-        return templates.TemplateResponse("problemset/edit.html", 
-                {"request": request, "problemset": problemset, "problems": problems, "err_mes": err_mes})
+        return templates.TemplateResponse(request, "problemset/edit.html", {"request": request, "problemset": problemset, "problems": problems, "err_mes": err_mes})
     
     return RedirectResponse(url="/problemset/list", status_code=302)
 
@@ -129,8 +127,7 @@ async def get_problemset_edit(
     for p in filtered_problems:
         p.checked = p.id in problem_ids_list
 
-    return templates.TemplateResponse("problemset/edit.html", 
-            {"request": request, "problemset": problemset, "problems": filtered_problems})
+    return templates.TemplateResponse(request, "problemset/edit.html", {"request": request, "problemset": problemset, "problems": filtered_problems})
 
 
 @router.post("/problemset/edit/{id}")
@@ -162,8 +159,7 @@ async def post_problemset_edit(
         err_mes = f"Error during a problemset edit: {e}"
         print(err_mes)
         problems = get_filtered_problems(db, request)
-        return templates.TemplateResponse("problemset/edit.html", 
-                {"request": request, "problemset": problemset, "problems": problems})
+        return templates.TemplateResponse(request, "problemset/edit.html", {"request": request, "problemset": problemset, "problems": problems})
     
     return RedirectResponse(url="/problemset/list", status_code=302)
 
@@ -182,7 +178,7 @@ async def get_problemset_del(
     problemset = db.get(ProblemSet, id)
     if not problemset:
         return RedirectResponse(url="/problemset/list", status_code=302)
-    return templates.TemplateResponse("problemset/del.html", {"request": request, "problemset": problemset})
+    return templates.TemplateResponse(request, "problemset/del.html", {"request": request, "problemset": problemset})
 
 
 @router.post("/problemset/del/{id}")
@@ -229,5 +225,5 @@ async def problemset_show(
         # sort
         problem.tickets.sort(key = lambda t: t.when_success())
 
-    return templates.TemplateResponse("problemset/show.html", {"request": request, "problemset": problemset, "dict": dict})
+    return templates.TemplateResponse(request, "problemset/show.html", {"request": request, "problemset": problemset, "dict": dict})
 

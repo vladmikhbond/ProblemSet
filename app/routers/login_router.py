@@ -22,7 +22,8 @@ JUDGE = {"cs": "http://judge_cs_cont:7010/verify",
 
 
 # шаблони Jinja2
-templates = Jinja2Templates(directory="app/templates")
+templates = Jinja2Templates(directory=f"{os.getcwd()}/app/templates")
+print(f"Current working directory: {os.getcwd()}")
 
 router = APIRouter()
 
@@ -30,7 +31,7 @@ router = APIRouter()
 
 @router.get("/")
 async def get_login(request: Request):
-    return templates.TemplateResponse("login/login.html", {"request": request})
+    return templates.TemplateResponse(request, "login/login.html", {"request": request})
 
 
 @router.post("/")
@@ -51,7 +52,7 @@ async def login(
     if client_response.is_success:
         token = client_response.json()
     else: 
-        return templates.TemplateResponse("login/login.html", {
+        return templates.TemplateResponse(request, "login/login.html", {
             "request": request, 
             "error": "Invalid credentials."
         })
@@ -82,7 +83,7 @@ async def get_logout(request: Request):
 @router.get("/login/help")
 async def logout(request: Request, response: Response):
     
-    return templates.TemplateResponse("login/help.html", {"request": request})  
+    return templates.TemplateResponse(request, "login/help.html", {"request": request})  
 
 # ---------------------------- aux
 

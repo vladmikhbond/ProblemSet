@@ -75,8 +75,7 @@ async def get_solving_list(
     # скільки задач вже вирішено
     problem_count = db.query(Ticket).filter(Ticket.username == user.username).filter(Ticket.state == 1).count()
 
-    return templates.TemplateResponse("solving/list.html", 
-            {"request": request, "psets": psets, "problem_count": problem_count})
+    return templates.TemplateResponse(request, "solving/list.html", {"request": request, "psets": psets, "problem_count": problem_count})
 
 # ---------------------------- open 
 
@@ -126,7 +125,7 @@ async def get_solving_problem(
     dict = {"py": "python", "js": "javascript", "cs": "csharp", "hs": "haskell"}
     problem.lang = dict[problem.lang] 
 
-    return templates.TemplateResponse("solving/problem.html", {"request": request, "problem": problem})
+    return templates.TemplateResponse(request, "solving/problem.html", {"request": request, "problem": problem})
 
 
 # ---------------------------- open in vs code (ajax)

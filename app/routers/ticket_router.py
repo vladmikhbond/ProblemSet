@@ -34,8 +34,7 @@ async def get_ticket_del(
     ticket = db.get(Ticket, id)
     if not ticket:
         return "No ticket to delete."
-    return templates.TemplateResponse("ticket/del.html",
-                                      {"request": request, "ticket": ticket, "pset_title": pset_title})
+    return templates.TemplateResponse(request, "ticket/del.html", {"request": request, "ticket": ticket, "pset_title": pset_title})
 
 
 @router.post("/ticket/del/{id}/{pset_id}")
@@ -72,7 +71,7 @@ async def get_solving_ticket(
 
     track64 = base64.b64encode(bs).decode()
 
-    return templates.TemplateResponse("ticket/show.html", {
+    return templates.TemplateResponse(request, "ticket/show.html", {
         "request": request,
         "ticket": ticket,
         "record": records[-1],
@@ -99,7 +98,5 @@ async def get_ticket_report(
     )
     groups.sort(key=lambda g: -g[1])
 
-    return templates.TemplateResponse(
-        "ticket/report.html",
-        {"request": request, "groups": groups},
+    return templates.TemplateResponse(request, "ticket/report.html", {"request": request, "groups": groups},
     )
