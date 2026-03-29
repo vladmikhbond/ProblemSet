@@ -165,12 +165,12 @@ async def get_solving_vscode(
             records="",
             expire_time=problemset.close_time,            
         )
-        ticket.add_record("Вперше побачив задачу.", "User saw the task for the first time.");
+        ticket.add_record("B1:Вперше побачив задачу.", "User saw the task for the first time.");
         db.add(ticket)
 
     # found the old ticket
     else:
-        ticket.add_record("Не вперше бачить задачу.", "SECONDHAND");
+        ticket.add_record("B1:Не вперше бачить задачу.", "SECONDHAND");
     
     try:
         db.commit()
