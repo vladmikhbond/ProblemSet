@@ -19,10 +19,12 @@ checkButton.addEventListener("click", check);
 async function check() {
 
     trace.addText(editor.getValue());
-    
+    // Якщо є дужки BEGIN ... END, на перевірку іде лише їх зміст
+    const solving = clearSolving(editor.getValue());
+
     const data = {
         problem_id: problemId.value,
-        solving: editor.getValue(),
+        solving: solving,
         trace: trace.toJson()
     };
 
@@ -52,6 +54,21 @@ async function check() {
         message.innerHTML = "Помилка: " + err.message;
     }
 }
+
+// Якщо є вікладацькі дужки, повертає лише зміст дужок
+function clearSolving(s) {    
+    let regex = /\/\/BEGIN([\s\S]*?)\/\/END/;
+    let match = regex.exec(s);
+    if (match && match[1] !== undefined)
+        return match[1];
+    regex = /#BEGIN([\s\S]*?)#END/gs;
+    match = s.match(regex);
+    if (match)
+        return match[1];
+
+    return s;
+}
+
 
 // ----------------------------------- втрати фокусу
 let fcounter = 0;
