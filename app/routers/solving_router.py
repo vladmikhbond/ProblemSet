@@ -77,7 +77,7 @@ async def get_solving_list(
 
     return templates.TemplateResponse(request, "solving/list.html", {"psets": psets, "problem_count": problem_count})
 
-# ---------------------------- open 
+# ---------------------------- open problem
 
 @router.get("/solving/problem/{problem_id}/{pset_id}")  
 async def get_solving_problem(
@@ -128,7 +128,7 @@ async def get_solving_problem(
     return templates.TemplateResponse(request, "solving/problem.html", {"problem": problem})
 
 
-# ---------------------------- open in vs code (ajax)
+# ---------------------------- open problem in vs code (ajax)
 
 @router.get("/solving/vscode")  
 async def get_solving_vscode(
