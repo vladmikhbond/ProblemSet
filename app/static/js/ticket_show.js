@@ -47,10 +47,10 @@ setTimeout(diagram, 0);
 
 // малює діаграму на канвасі
 function diagram() {
-  const n = pairs.length, canH = canvas1.height, cW = canvas1.width;
+  const n = pairs.length, canvasH = canvas1.height, cW = canvas1.width;
   const w = cW / n;
   const maxCodeLength = Math.max(...pairs.map(p => p[0].length));
-  const dy = canH / maxCodeLength;
+  const dy = canvasH / maxCodeLength;
 
   const ctx = canvas1.getContext("2d");
 
@@ -62,7 +62,7 @@ function diagram() {
   for (let i = 0; i < n; i++) {
     // diagram
     const x = w * i;
-    const y = canH - dy * codes[i].length + 5;
+    const y = canvasH - dy * codes[i].length + 5;
     const h = i > 0 ? (codes[i].length - codes[i-1].length) * dy : 0;
 
     if (h) {
@@ -75,26 +75,15 @@ function diagram() {
     }
     // comments
     if (comments[i]) {
-        ctx.save()
-        // ctx.strokeStyle = 
-        //     comments[i].indexOf("OK") > -1    ? "green" : 
-        //     comments[i].indexOf("FOCUS") > -1 ? "black" :
-        //     comments[i].indexOf("TAB") > -1   ? "blue"  :
-        //     /* else */                          "red";
-        // ctx.lineWidth = 2;
-        // ctx.beginPath();
-        // ctx.moveTo(x + w/2, canH * 0.75);
-        // ctx.lineTo(x + w/2, canH);
-        // ctx.stroke();
-   
+        ctx.save()   
         if (comments[i].indexOf("OK") > -1) {
-            drawCheck(x + w/2, canH * 0.9, "green");
-        } else if (comments[i].indexOf("Wrong") > -1) {
-            drawCheck(x + w/2, canH * 0.9, "red");
+            drawCheck(x + w/2, canvasH * 0.9, "green");
+        } else if (comments[i].indexOf("Wrong") > -1 || comments[i].indexOf("Error") > -1) {
+            drawCheck(x + w/2, canvasH * 0.9, "red");
         } else if (comments[i].indexOf("FOCUS") > -1) {
-            drawFocus(x + w/2, canH * 0.7, "darkred");
+            drawFocus(x + w/2, canvasH * 0.7, "darkred");
         } else if (comments[i].indexOf("TAB") > -1) {
-            drawFocus(x + w/2, canH * 0.8, "black");
+            drawFocus(x + w/2, canvasH * 0.8, "black");
         } 
         ctx.restore();
     }
@@ -111,7 +100,7 @@ function diagram() {
         ctx.lineWidth = 1;
         ctx.beginPath();
         ctx.moveTo(x, y);
-        ctx.lineTo(x, canH);
+        ctx.lineTo(x, canvasH);
         ctx.stroke();
     } 
 
