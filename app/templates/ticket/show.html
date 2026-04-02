@@ -8,9 +8,8 @@
 
 <link rel="stylesheet" href="/static/css/ticket_show.css">
 <div class="container">
-  <h5 class="title">
+  <h5 class="title" title="{{record0.code}}">
     User "{{ticket.username}}". Problem "{{ticket.problem.title}}"
-    {% if secondhand %}  😕   {% endif %}
   </h5>
 
   {% set class_ = "ok" if record.check.startswith('OK') else "wrong"  %}

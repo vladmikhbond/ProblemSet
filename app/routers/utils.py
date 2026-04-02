@@ -14,7 +14,7 @@ USER_FILTER_KEY = "problemset_user_filter"
 
 def get_filtered_problemsets(db, request):
     """
-    Повертає відфільтровані задачники з бази даних.
+    Повертає відфільтровані і впорядковані задачники з бази даних.
     """
     problemsets = db.query(ProblemSet).all()
 

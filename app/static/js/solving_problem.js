@@ -19,8 +19,7 @@ checkButton.addEventListener("click", check);
 async function check() {
 
     trace.addText(editor.getValue());
-    // Якщо є дужки BEGIN ... END, на перевірку іде лише їх зміст
-    const solving = clearSolving(editor.getValue());
+    const solving = purgeSolving(editor.getValue());
 
     const data = {
         problem_id: problemId.value,
@@ -56,16 +55,15 @@ async function check() {
 }
 
 // Якщо є вікладацькі дужки, повертає лише зміст дужок
-function clearSolving(s) {    
+function purgeSolving(s) {    
     let regex = /\/\/BEGIN([\s\S]*?)\/\/END/;
     let match = regex.exec(s);
     if (match && match[1] !== undefined)
         return match[1];
-    regex = /#BEGIN([\s\S]*?)#END/gs;
+    regex = /#BEGIN([\s\S]*?)#END/;
     match = s.match(regex);
     if (match)
         return match[1];
-
     return s;
 }
 

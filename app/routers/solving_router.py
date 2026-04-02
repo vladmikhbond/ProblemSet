@@ -147,14 +147,21 @@ async def get_solving_vscode(
         pset_id = pset.id
         problem_id = pset.get_prob_id_by_name(prob_name) 
         problem = db.get(Problem, problem_id)
-
     except Exception as ex:
         raise HTTPException(404, ex.args)
+    
+
+        
 
     # get user's ticket
     ticket = db.query(Ticket) \
         .filter(Ticket.username == user.username, Ticket.problem_id == problem_id) \
         .first()
+
+    # затриманий початок - виключно для однозадачних задачників
+    delay_sec = (datetime.now() - pset.open_time).seconds
+    prob_count = len(pset.get_problem_ids_list())
+    delay_message = f' Iз затримкою {delay_sec}"' if prob_count == 1 else "";
 
     # create a new ticket
     if ticket is None:
@@ -165,7 +172,7 @@ async def get_solving_vscode(
             records="",
             expire_time=problemset.close_time,            
         )
-        ticket.add_record("B1:Вперше побачив задачу.", "User saw the task for the first time.");
+        ticket.add_record(f"B1:Вперше побачив задачу.{delay_message}", "User saw the task for the first time.");
         db.add(ticket)
 
     # found the old ticket

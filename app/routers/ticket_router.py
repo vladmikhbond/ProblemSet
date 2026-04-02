@@ -73,9 +73,9 @@ async def get_solving_ticket(
 
     return templates.TemplateResponse(request, "ticket/show.html", {
         "ticket": ticket,
+        "record0": records[0],
         "record": records[-1],
-        "track64": track64,
-        "secondhand": "SECONDHAND" in ticket.records})
+        "track64": track64})
 
 
 # -------------------------- report
