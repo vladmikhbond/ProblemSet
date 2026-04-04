@@ -31,6 +31,7 @@ async def get_problemset_list(
     all_problemsets = get_filtered_problemsets(db, request)
 
     problemsets = [p for p in all_problemsets if p.username == user.username ] 
+    problemsets.sort(key=lambda p: p.title)
     for p in problemsets: 
         p.open_time_as_str = time_to_str(p.open_time).replace("T", " ")
         if p.is_open:

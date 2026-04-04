@@ -1,4 +1,4 @@
-import json
+import datetime
 import base64
 
 from fastapi import APIRouter, Depends, Request
@@ -55,15 +55,15 @@ async def post_ticket_del(
 
 # ------- show
 
-@router.get("/ticket/show/{id}")
-async def get_solving_ticket(
+@router.get("/ticket/anime/{id}")
+async def get_ticket_anime(
     id: str,
     request: Request,
     db: Session = Depends(get_pss_db),
     user: User = Depends(get_current_tutor)
 ):
     """ 
-    Показ вирішень з одного тікету.
+    Показ  з одного тікету.
     """
     ticket = db.get(Ticket, id)
     records = ticket.get_records()
@@ -99,3 +99,41 @@ async def get_ticket_report(
 
     return templates.TemplateResponse(request, "ticket/report.html", {"groups": groups},
     )
+
+
+# -------------------------- статистика по вирішенням
+
+@router.get("/ticket/statistics")
+async def get_ticket_statitics(
+    request: Request,
+    db: Session = Depends(get_pss_db),
+    user: User = Depends(get_current_tutor)
+):
+    """ 
+    Рахує довжину трас 
+    """
+    count = 0
+    sum_trace_len = 0
+    sum_code_len = 0
+    sum_time_tick = 0
+
+    tickets = db.query(Ticket).filter(Ticket.state == 1).all()
+    for t in tickets:
+        if not t.track or t.track[0] != '[':
+            continue
+        start_date = datetime.datetime.now() - datetime.timedelta(days=7)
+        if t.when_success() < start_date:
+            continue
+        count += 1
+        sum_trace_len += len(t.track)
+        c = t.get_records()[-1]["code"]
+        sum_code_len += len(c)
+        ticks = t.track.count('[') - 1
+        sum_time_tick += ticks
+     
+    return {
+        "Кількість вирішень": count,
+        "Середній розмір треку": sum_trace_len//count, 
+        "Сер. розмір коду вирішення": sum_code_len//count, 
+        "Сер. кількість тактів часу": sum_time_tick//count, 
+        }

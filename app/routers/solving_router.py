@@ -158,10 +158,9 @@ async def get_solving_vscode(
         .filter(Ticket.username == user.username, Ticket.problem_id == problem_id) \
         .first()
 
-    # затриманий початок - виключно для однозадачних задачників
+    # затриманий початок - виключно для короткострокових задачників
     delay_sec = (datetime.now() - pset.open_time).seconds
-    prob_count = len(pset.get_problem_ids_list())
-    delay_message = f' Iз затримкою {delay_sec}"' if prob_count == 1 else "";
+    delay_message = f' Iз затримкою {delay_sec}"' if pset.open_minutes < 100 else "";
 
     # create a new ticket
     if ticket is None:
