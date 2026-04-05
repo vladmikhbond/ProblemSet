@@ -127,7 +127,7 @@ class Ticket(Base):
     
     def get_records(self) -> List[TicketRecord]:
         """ 
-        Показ вирішень з тікету.
+        Отримання записів у вигляді списку словників TicketRecord.
         """
         REGEX = r"~0~(.*?)~1~(.*?)~2~(.*?)~3~"
         matches = re.findall(REGEX, self.records, flags=re.S)
@@ -140,8 +140,22 @@ class Ticket(Base):
             return datetime.min
         when = success_records[0]["when"].strip()
         return datetime.fromisoformat(when)
-
     
+    def solving_duration(self) -> timedelta:
+        """
+        Час, витрачений на успішне вирішення.
+        """
+        if self.state != 1:
+            return timedelta(0)
+        records = self.get_records()
+        when = records[0]["when"].strip()
+        t_start = datetime.fromisoformat(when) 
+        success_records = [r for r in records if r["check"].startswith("OK") ]
+        when = success_records[0]["when"].strip()
+        t_stop = datetime.fromisoformat(when)
+        return t_stop - t_start
+    
+
 class User(Base):
     __tablename__ = "users"
 
