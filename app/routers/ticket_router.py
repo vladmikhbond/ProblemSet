@@ -53,7 +53,7 @@ async def post_ticket_del(
     return RedirectResponse(url=f"/problemset/show/{pset_id}", status_code=302)
 
 
-# ------- show
+# --------------------------- anime
 
 @router.get("/ticket/anime/{id}")
 async def get_ticket_anime(
@@ -71,7 +71,7 @@ async def get_ticket_anime(
 
     track64 = base64.b64encode(bs).decode()
 
-    return templates.TemplateResponse(request, "ticket/show.html", {
+    return templates.TemplateResponse(request, "ticket/anime.html", {
         "ticket": ticket,
         "record0": records[0],
         "record": records[-1],

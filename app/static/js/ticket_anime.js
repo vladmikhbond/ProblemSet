@@ -36,6 +36,7 @@ timeRange.addEventListener("change", (e) => {
     // time
     let s = i * 3 % 60, m = i * 3 / 60 | 0;
     stepTime.innerHTML = `+${m}' ${s}"`;
+diagram() 
 })
 
 // Синхронізує розміри textarea і canvas
@@ -52,14 +53,14 @@ function diagram() {
   const maxCodeLength = Math.max(...pairs.map(p => p[0].length));
   const dy = canvasH / maxCodeLength;
 
-  const ctx = canvas1.getContext("2d");
-
-
-  ctx.lineWidth = 0.5;
-  ctx.fillStyle = "#0000FF40"; 
-  ctx.strokeStyle = "#0000FFFF"; 
+  const ctx = canvas1.getContext("2d");  
+  ctx.clearRect(0, 0, canvas1.width, canvas1.height)
 
   for (let i = 0; i < n; i++) {
+    ctx.lineWidth = 0.5;
+    ctx.fillStyle = "#0000FF40"; 
+    ctx.strokeStyle = "#0000FFFF"; 
+
     // diagram
     const x = w * i;
     const y = canvasH - dy * codes[i].length + 5;
@@ -87,6 +88,9 @@ function diagram() {
         } 
         ctx.restore();
     }
+    drawCursor()
+  }
+
     // ----------------- inner functions --------------
     function drawCheck(x, y, color) {
         ctx.fillStyle = color;
@@ -104,12 +108,21 @@ function diagram() {
         ctx.stroke();
     } 
 
+    function drawCursor() {
+        x = timeRange.value * w + w/2
+        ctx.strokeStyle = "gray";
+        ctx.lineWidth = 0.25;
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvasH);
+        ctx.stroke();
+    } 
 
-  }  
+}  
   
 
 
-}
+
   
 // Синхронізує розміри textarea і canvas
 //  
