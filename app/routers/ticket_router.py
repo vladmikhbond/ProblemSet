@@ -70,10 +70,11 @@ async def get_ticket_anime(
     bs = bytes(ticket.track, encoding="utf-8")
 
     track64 = base64.b64encode(bs).decode()
+    
+    
 
     return templates.TemplateResponse(request, "ticket/anime.html", {
         "ticket": ticket,
-        "record0": records[0],
         "record": records[-1],
         "track64": track64})
 

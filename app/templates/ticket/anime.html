@@ -8,10 +8,12 @@
 
 <link rel="stylesheet" href="/static/css/ticket_show.css">
 <div class="container">
-  <h5 class="title" title="{{record0.code}}">
+  <h5 class="title">
     User "{{ticket.username}}". Problem "{{ticket.problem.title}}"
   </h5>
-
+  {% if ticket.is_secondhand() %}
+    <h6 style="color: red;">Повторне відкриття задачі</h6>
+  {% endif %}
   {% set class_ = "ok" if record.check.startswith('OK') else "wrong"  %}
   {% set n_rows = (record.code | length - (record.code | replace('\n', '') | length)) + 1 %} 
 

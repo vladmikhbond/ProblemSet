@@ -112,7 +112,7 @@ async def get_solving_problem(
 
     # find the old ticket
     else:
-        ticket.add_record("Не вперше бачить задачу.", "SECONDHAND");
+        ticket.add_record("Не вперше бачить задачу.", Ticket.SECONDHAND);
     
     try:
         db.commit()
@@ -140,6 +140,8 @@ async def get_solving_vscode(
     Визначає pset_id і problem_id.
     Створює тікет і зберігає його в базі даних, якщо це вже не зроблене раніше.
     """  
+    dict_lang = {"py": "python", "js": "javascript", "cs": "csharp", "hs": "haskell"}
+
     # pset_id & problem_id
     try:
         pset_name, prob_name = fullname.split('.')
@@ -150,9 +152,6 @@ async def get_solving_vscode(
     except Exception as ex:
         raise HTTPException(404, ex.args)
     
-
-        
-
     # get user's ticket
     ticket = db.query(Ticket) \
         .filter(Ticket.username == user.username, Ticket.problem_id == problem_id) \
@@ -160,7 +159,15 @@ async def get_solving_vscode(
 
     # затриманий початок - виключно для короткострокових задачників
     delay_sec = (datetime.now() - pset.open_time).seconds
-    delay_message = f' Iз затримкою {delay_sec}"' if pset.open_minutes < 100 else "";
+
+    if delay_sec > 60: 
+        return ProblemSchema(
+            id=problem_id, 
+            lang=dict_lang[problem.lang], 
+            cond="You open a problem too late.", 
+            view=f"Delay is {delay_sec} sec.", 
+            seconds = 0
+        )
 
     # create a new ticket
     if ticket is None:
@@ -171,12 +178,12 @@ async def get_solving_vscode(
             records="",
             expire_time=problemset.close_time,            
         )
-        ticket.add_record(f"B1:Вперше побачив задачу.{delay_message}", "User saw the task for the first time.");
+        ticket.add_record("B1:Вперше побачив задачу.", "User saw the task for the first time.");
         db.add(ticket)
 
     # found the old ticket
     else:
-        ticket.add_record("B1:Не вперше бачить задачу.", "SECONDHAND");
+        ticket.add_record("B1:Не вперше бачить задачу.", Ticket.SECONDHAND);
     
     try:
         db.commit()
@@ -186,11 +193,10 @@ async def get_solving_vscode(
         logger(err_mes)
 
     # open a problem window
-    dict = {"py": "python", "js": "javascript", "cs": "csharp", "hs": "haskell"}
 
     return ProblemSchema(
         id=problem_id, 
-        lang=dict[problem.lang], 
+        lang=dict_lang[problem.lang], 
         cond=problem.cond, 
         view=problem.view,
         seconds = int(pset.rest_time.total_seconds())

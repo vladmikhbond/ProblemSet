@@ -156,6 +156,15 @@ class Ticket(Base):
         return t_stop - t_start
     
 
+    SECONDHAND = "SECONDHAND"
+
+    def is_secondhand(self):
+        """ Маркер, чи відкоивалася задача повторно. """
+        records = self.get_records()
+        return len(records) > 1 and records[1]["check"] == Ticket.SECONDHAND
+
+
+
 class User(Base):
     __tablename__ = "users"
 
