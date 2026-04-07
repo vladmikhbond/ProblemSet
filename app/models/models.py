@@ -68,9 +68,15 @@ class ProblemSet(Base):
     def set_problem_ids(self, lst: List[str] ):
         self.problem_ids = "\n".join(lst)
     
-    def get_prob_id_by_name(self, name:str):
-        res = [line[44:80] for line in self.problem_ids.splitlines() if name in line ]
-        return res[0] if len(res) == 1 else None
+    def get_prob_id_by_name(self, prob_name:str):
+        for line in self.problem_ids.splitlines():
+            pos = line.rindex('/')
+            trunketed_name = line[pos + 1:44].strip()
+            if prob_name.startswith(trunketed_name):
+                return line[44:80]
+        return None
+        # res = [line[44:80] for line in self.problem_ids.splitlines() if prob_name in line ]
+        # return res[0] if len(res) == 1 else None
     
     def get_prob_comment_by_id(self, problem_id:str):
         res = [line[80:].strip() for line in self.problem_ids.splitlines() if problem_id in line ]

@@ -148,6 +148,8 @@ async def get_solving_vscode(
         pset = db.query(ProblemSet).filter(ProblemSet.title == pset_name).first()
         pset_id = pset.id
         problem_id = pset.get_prob_id_by_name(prob_name) 
+        if problem_id is None:
+            raise HTTPException(404, "No the problem in the workbook.")
         problem = db.get(Problem, problem_id)
     except Exception as ex:
         raise HTTPException(404, ex.args)
@@ -157,10 +159,10 @@ async def get_solving_vscode(
         .filter(Ticket.username == user.username, Ticket.problem_id == problem_id) \
         .first()
 
-    # затриманий початок - виключно для короткострокових задачників
+    # затриманий початок - виключно для короткострокових задачників (open_minutes <= 60)
     delay_sec = (datetime.now() - pset.open_time).seconds
 
-    if delay_sec > 60: 
+    if delay_sec > 60 and pset.open_minutes <= 60: 
         return ProblemSchema(
             id=problem_id, 
             lang=dict_lang[problem.lang], 
