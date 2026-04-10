@@ -1,7 +1,7 @@
 import httpx, re, json
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, HTTPException, Request, Response
+from fastapi import APIRouter, Depends, HTTPException, Request, Form
 from fastapi.templating import Jinja2Templates
 from sqlalchemy import and_
 from sqlalchemy.orm import Session
@@ -128,7 +128,84 @@ async def get_solving_problem(
     return templates.TemplateResponse(request, "solving/problem.html", {"problem": problem})
 
 
-# ---------------------------- open problem in vs code (ajax)
+# ---------------------------- open problem in vs code (ajax)  B1 v.0.9.4
+
+@router.post("/solving/vs_code")  
+async def post_solving_vscode(
+    fullName: str = Form(""),
+    extList: str = Form(""),
+    db: Session = Depends(get_pss_db),
+    user: User=Depends(get_current_user)
+):
+    """
+    Визначає pset_id і problem_id.
+    Створює тікет і зберігає його в базі даних, якщо це вже не зроблене раніше.
+    """  
+    DICT_LANG = {"py": "python", "js": "javascript", "cs": "csharp", "hs": "haskell"}
+
+    # pset_id & problem_id
+    try:
+        pset_name, prob_name = fullName.split('.')
+        pset = db.query(ProblemSet).filter(ProblemSet.title == pset_name).first()
+        pset_id = pset.id
+        problem_id = pset.get_prob_id_by_name(prob_name) 
+        if problem_id is None:
+            raise HTTPException(404, "No the problem in the workbook.")
+        problem = db.get(Problem, problem_id)
+    except Exception as ex:
+        raise HTTPException(404, ex.args)
+    
+    # get user's ticket
+    ticket = db.query(Ticket) \
+        .filter(Ticket.username == user.username, Ticket.problem_id == problem_id) \
+        .first()
+
+    # затриманий початок - виключно для короткострокових задачників (open_minutes <= 60)
+    delay_sec = (datetime.now() - pset.open_time).seconds
+
+    if delay_sec > 60 and pset.open_minutes <= 60: 
+        return ProblemSchema(
+            id=problem_id, 
+            lang=DICT_LANG[problem.lang], 
+            cond="You open a problem too late.", 
+            view=f"Delay is {delay_sec} sec.", 
+            seconds = 0
+        )
+
+    # create a new ticket
+    if ticket is None:
+        problemset:ProblemSet = db.get(ProblemSet, pset_id) 
+        ticket = Ticket(
+            username=user.username, 
+            problem_id=problem_id, 
+            records="",
+            expire_time=problemset.close_time,            
+        )
+        ticket.add_record("B1:Вперше побачив задачу.", extList);
+        db.add(ticket)
+
+    # found the old ticket
+    else:
+        ticket.add_record("B1:Не вперше бачить задачу.", Ticket.SECONDHAND);
+    
+    try:
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        err_mes = f"Error during a ticket creating: {e}"
+        logger(err_mes)
+
+    # open a problem window
+
+    return ProblemSchema(
+        id=problem_id, 
+        lang=DICT_LANG[problem.lang], 
+        cond=problem.cond, 
+        view=problem.view,
+        seconds = int(pset.rest_time.total_seconds())
+    )
+    
+# ---------------------------------------------  B1 v.0.9.3
 
 @router.get("/solving/vscode")  
 async def get_solving_vscode(

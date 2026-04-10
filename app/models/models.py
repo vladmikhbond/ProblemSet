@@ -169,6 +169,11 @@ class Ticket(Base):
         records = self.get_records()
         return len(records) > 1 and records[1]["check"] == Ticket.SECONDHAND
 
+    def get_vscode_ext_list(self):
+        """ Список підозрілих розширень vs code. """
+        records = self.get_records()
+        return records[0]["check"]
+
 
 
 class User(Base):
