@@ -205,7 +205,7 @@ async def post_solving_vscode(
         seconds = int(pset.rest_time.total_seconds())
     )
     
-# ---------------------------------------------  B1 v.0.9.3
+# ----- open problem in vs code (ajax)  B1 v.0.9.3
 
 @router.get("/solving/vscode")  
 async def get_solving_vscode(
