@@ -41,10 +41,12 @@
 
   <ul>
       {% for problem in problems %}
+      {% set color = "gray" if problem.used else "black" %}
       <li style="list-style-type: none" title="{{problem.cond}}" >
         <input type="checkbox"  name="prob" value="{{problem.id}}" onchange="reset_problem_ids(event)"
-        {% if problem.checked %}checked{% endif %} >
-        <span style="white-space: pre;">{{problem.inline}}</span>
+              {% if problem.checked %}checked{% endif %} >
+        <a href="/problem/edit/{{problem.id}}" 
+              style="white-space: pre; text-decoration: none; color: {{color}}">{{problem.inline}}</a>
       </li>    
       {% endfor %}
   </ul>

@@ -62,6 +62,22 @@ def get_filtered_problems(db, request):
     problems.sort(key=lambda p: p.inline)
     return problems
 
+def get_filtered_and_marked_problems(db, request):
+    """
+    Повертає відфільтровані і промарковні задачі з бази даних.
+    """
+    problems = get_filtered_problems(db, request)
+    workbooks = db.query(ProblemSet).all()
+    set_used_problems = set()
+    for wb in workbooks:
+        set_used_problems = set_used_problems.union(wb.get_problem_ids_list())
+
+    for problem in problems:
+        problem.used = problem.id in set_used_problems
+
+    return problems
+
+
 
 def get_filtered_lines(lines: List[str], filter_key, request):
     """

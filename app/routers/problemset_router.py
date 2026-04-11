@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import List
 import uuid
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -6,7 +7,7 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
 from .utils import delta_to_str, str_to_time, time_to_str
-from .utils import USER_FILTER_KEY, get_filtered_lines, get_filtered_problemsets, get_filtered_problems
+from .utils import USER_FILTER_KEY, get_filtered_lines, get_filtered_problemsets, get_filtered_problems, get_filtered_and_marked_problems
 from .login_router import get_current_tutor
 from ..models.models import Problem, ProblemSet, User
 from ..dal import get_pss_db  # Функція для отримання сесії БД
@@ -44,6 +45,7 @@ async def get_problemset_list(
 
     return templates.TemplateResponse(request, "problemset/list.html", {"problemsets": problemsets})
 
+
 # ------- new 
 
 @router.get("/problemset/new")
@@ -63,11 +65,10 @@ async def get_problemset_new(
         open_minutes=20,
         stud_filter = "",
     )
-
-    problems = get_filtered_problems(db, request)
     
-    return templates.TemplateResponse(request, "problemset/edit.html", {"problemset": problemset, "problems": problems})
+    problems = get_filtered_and_marked_problems(db, request)
 
+    return templates.TemplateResponse(request, "problemset/edit.html", {"problemset": problemset, "problems": problems})
 
 @router.post("/problemset/new")
 async def post_problemset_new(
@@ -80,7 +81,6 @@ async def post_problemset_new(
     db: Session = Depends(get_pss_db),
     user: User=Depends(get_current_tutor)
 ):
-    problems = get_filtered_problems(db, request)
 
     problemset = ProblemSet(
         id = str(uuid.uuid4()),
@@ -91,13 +91,17 @@ async def post_problemset_new(
         open_minutes = open_minutes,
         stud_filter = stud_filter
     )
+    
     try:
         db.add(problemset)                        
         db.commit()
     except Exception as e:
         db.rollback()
         err_mes = f"Error during a problem request: {e}"
-        return templates.TemplateResponse(request, "problemset/edit.html", {"problemset": problemset, "problems": problems, "err_mes": err_mes})
+
+        problems = get_filtered_and_marked_problems(db, request)
+        return templates.TemplateResponse(request, "problemset/edit.html", 
+            {"problemset": problemset, "problems": problems, "err_mes": err_mes})
     
     return RedirectResponse(url="/problemset/list", status_code=302)
 
@@ -121,7 +125,7 @@ async def get_problemset_edit(
         raise HTTPException(403)
 
     problemset.open_time = time_to_str(problemset.open_time)
-    filtered_problems = get_filtered_problems(db, request)
+    filtered_problems = get_filtered_and_marked_problems(db, request)
 
     # set checkboxes of the problems
     problem_ids_list = problemset.get_problem_ids_list()  
@@ -159,7 +163,7 @@ async def post_problemset_edit(
         db.rollback()
         err_mes = f"Error during a problemset edit: {e}"
         print(err_mes)
-        problems = get_filtered_problems(db, request)
+        problems = get_filtered_and_marked_problems(db, request)
         return templates.TemplateResponse(request, "problemset/edit.html", {"problemset": problemset, "problems": problems})
     
     return RedirectResponse(url="/problemset/list", status_code=302)
