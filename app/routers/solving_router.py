@@ -77,7 +77,7 @@ async def get_solving_list(
 
     return templates.TemplateResponse(request, "solving/list.html", {"psets": psets, "problem_count": problem_count})
 
-# ---------------------------- open problem
+# ---------------------------- open problem in pset
 
 @router.get("/solving/problem/{problem_id}/{pset_id}")  
 async def get_solving_problem(
