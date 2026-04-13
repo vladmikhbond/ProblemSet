@@ -167,7 +167,7 @@ async def post_solving_vscode(
         return ProblemSchema(
             id=problem_id, 
             lang=DICT_LANG[problem.lang], 
-            cond="You open a problem too late.", 
+            cond="You opened a problem too late.", 
             view=f"Delay is {delay_sec} sec.", 
             seconds = 0
         )
@@ -239,11 +239,19 @@ async def get_solving_vscode(
     # затриманий початок - виключно для короткострокових задачників (open_minutes <= 60)
     delay_sec = (datetime.now() - pset.open_time).seconds
 
+    return ProblemSchema(
+        id=problem_id, 
+        lang=dict_lang[problem.lang], 
+        cond="Версія розширення b1 застаріла. Скачайте нову з DL.", 
+        view=f"Delay is {delay_sec} sec.", 
+        seconds = 0
+    )
+
     if delay_sec > 60 and pset.open_minutes <= 60: 
         return ProblemSchema(
             id=problem_id, 
             lang=dict_lang[problem.lang], 
-            cond="You open a problem too late.", 
+            cond="You opened a problem too late.", 
             view=f"Delay is {delay_sec} sec.", 
             seconds = 0
         )

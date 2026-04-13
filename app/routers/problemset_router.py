@@ -140,7 +140,7 @@ async def post_problemset_edit(
     request: Request,
     id: str,
     title: str = Form("noname"),
-    open_time: str = Form(...),
+    open_time: str = Form(""),
     open_minutes: int = Form(0),
     stud_filter: str = Form(""),
     problem_ids: str = Form(...),
@@ -153,7 +153,7 @@ async def post_problemset_edit(
 
     problemset.title = title 
     problemset.set_problem_ids(problem_ids)
-    problemset.open_time = str_to_time(open_time)
+    problemset.open_time = str_to_time(open_time) if open_time else datetime.now() 
     problemset.open_minutes = open_minutes
     problemset.stud_filter = stud_filter
     problemset.problem_ids = problem_ids

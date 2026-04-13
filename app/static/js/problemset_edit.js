@@ -26,20 +26,20 @@ const buttonNow = document.getElementById("buttonNow");
 //
 buttonNow.addEventListener("click", (e) => {
     e.preventDefault();
-    const now = new Date();
+    // const now = new Date();
 
-    const parts = new Intl.DateTimeFormat("en-GB", {
-        timeZone: "Europe/Kyiv",
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false
-    }).formatToParts(now).reduce((acc, p) => {
-        if (p.type !== "literal") acc[p.type] = p.value;
-        return acc;
-    }, {});
-    const value = `${parts.year}-${parts.month}-${parts.day}T${parts.hour}:${parts.minute}`;
-    openTime.value = value;
+    // const parts = new Intl.DateTimeFormat("en-GB", {
+    //     timeZone: "Europe/Kyiv",
+    //     year: "numeric",
+    //     month: "2-digit",
+    //     day: "2-digit",
+    //     hour: "2-digit",
+    //     minute: "2-digit",
+    //     hour12: false
+    // }).formatToParts(now).reduce((acc, p) => {
+    //     if (p.type !== "literal") acc[p.type] = p.value;
+    //     return acc;
+    // }, {});
+    // const value = `${parts.year}-${parts.month}-${parts.day}T${parts.hour}:${parts.minute}`;
+    openTime.value = "";
 })
