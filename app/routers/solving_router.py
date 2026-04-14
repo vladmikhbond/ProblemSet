@@ -245,50 +245,7 @@ async def get_solving_vscode(
         cond="Версія розширення b1 застаріла. Скачайте нову з DL.", 
         view=f"Delay is {delay_sec} sec.", 
         seconds = 0
-    )
-
-    if delay_sec > 60 and pset.open_minutes <= 60: 
-        return ProblemSchema(
-            id=problem_id, 
-            lang=dict_lang[problem.lang], 
-            cond="You opened a problem too late.", 
-            view=f"Delay is {delay_sec} sec.", 
-            seconds = 0
-        )
-
-    # create a new ticket
-    if ticket is None:
-        problemset:ProblemSet = db.get(ProblemSet, pset_id) 
-        ticket = Ticket(
-            username=user.username, 
-            problem_id=problem_id, 
-            records="",
-            expire_time=problemset.close_time,            
-        )
-        ticket.add_record("B1:Вперше побачив задачу.", "User saw the task for the first time.");
-        db.add(ticket)
-
-    # found the old ticket
-    else:
-        ticket.add_record("B1:Не вперше бачить задачу.", Ticket.SECONDHAND);
-    
-    try:
-        db.commit()
-    except Exception as e:
-        db.rollback()
-        err_mes = f"Error during a ticket creating: {e}"
-        logger(err_mes)
-
-    # open a problem window
-
-    return ProblemSchema(
-        id=problem_id, 
-        lang=dict_lang[problem.lang], 
-        cond=problem.cond, 
-        view=problem.view,
-        seconds = int(pset.rest_time.total_seconds())
-    )
-    
+    )    
 
 #-------------- check (AJAX)
 
