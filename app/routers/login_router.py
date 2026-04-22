@@ -3,11 +3,12 @@ import os
 from fastapi.security import APIKeyCookie
 import httpx
 import jwt
-
-from fastapi.security import OAuth2PasswordRequestForm
-from fastapi import APIRouter, HTTPException, Request, Form, Response, Security
+from typing import List
+from fastapi import APIRouter, HTTPException, Request, Form, Security
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
+
+from app.models.schemas import HelpItem
 
 from ..models.models import User
 
@@ -80,10 +81,27 @@ async def get_logout(request: Request):
 # -------------------------- help
 
 @router.get("/login/help")
-async def logout(request: Request, response: Response):
+async def help(request: Request):
+    """
+    Читає вміст файлу app/static/help/help.txt в список HelpItem.
+    В head рядок без відступу, в body рядки з відступом.
+    """
+    items: List[HelpItem] = []
+    with open("app/static/help/help.txt", "r", encoding="utf-8") as f:
+        current_item = None
+        for line in f:
+            line = line.rstrip('\n')
+            if line and line[0] != ' ':  # is a head
+                line = line.replace("(", "<small>(").replace(")", ")</small>")
+                if current_item is not None:
+                    items.append(current_item)
+                current_item = HelpItem(head=line, body=[])
+            elif line and current_item is not None:  # is a body
+                current_item.body.append(line.strip())
+        if current_item is not None:
+            items.append(current_item)
+    return templates.TemplateResponse(request, "login/help.html", {"items": items})
     
-    return templates.TemplateResponse(request, "login/help.html")  
-
 # ---------------------------- aux
 
 # описуємо джерело токена (cookie)
