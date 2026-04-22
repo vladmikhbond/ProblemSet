@@ -4,6 +4,9 @@ from urllib.parse import unquote
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
+from sqlalchemy.orm import Session
+from sqlalchemy import select
+
 from ..models.models import Problem, ProblemSet
 
 # -------------------- FILTERS
@@ -16,7 +19,7 @@ def get_filtered_problemsets(db, request):
     """
     Повертає відфільтровані і впорядковані задачники з бази даних.
     """
-    problemsets = db.query(ProblemSet).all()
+    problemsets = db.scalars(select(ProblemSet)).all()
 
     filter = unquote(request.cookies.get(WORKBOOK_FILTER_KEY, "")).strip()
 
@@ -32,12 +35,12 @@ def get_filtered_problemsets(db, request):
     return problemsets
 
 
-def get_filtered_problems(db, request):
+def get_filtered_problems(db: Session, request):
     """
     Повертає відфільтровані задачі з бази даних.
     Структура виразу фільтрації: [re_фільтру]...[str_фільтру_за_умовою]
     """
-    problems = db.query(Problem).all()
+    problems = db.scalars(select(Problem)).all()
     filter = unquote(request.cookies.get(PROBLEM_FILTER_KEY, "")).strip()
 
     if filter:
@@ -67,7 +70,7 @@ def get_filtered_and_marked_problems(db, request):
     Повертає відфільтровані і промарковні задачі з бази даних.
     """
     problems = get_filtered_problems(db, request)
-    workbooks = db.query(ProblemSet).all()
+    workbooks = db.scalars(select(ProblemSet)).all()
     set_used_problems = set()
     for wb in workbooks:
         set_used_problems = set_used_problems.union(wb.get_problem_ids_list())

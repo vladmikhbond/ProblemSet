@@ -3,7 +3,7 @@ from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Form
 from fastapi.templating import Jinja2Templates
-from sqlalchemy import and_
+from sqlalchemy import and_, select, func
 from sqlalchemy.orm import Session
 
 from .login_router import get_current_user, JUDGE
@@ -37,7 +37,7 @@ async def get_solving_list(
     Враховуються лише відкриті та доступні поточному юзеру задачники.
     Послідовність здач в задачнику зберігається.
     """
-    problemsets: list[ProblemSet] = db.query(ProblemSet).all()
+    problemsets: list[ProblemSet] = db.scalars(select(ProblemSet)).all()
     open_problemsets = [
         ps for ps in problemsets 
         if ps.is_open and re.match(ps.stud_filter, user.username)]
@@ -48,7 +48,7 @@ async def get_solving_list(
 
         # get problems with the id in ids_list
         ids = problemset.get_problem_ids_list()
-        problems = db.query(Problem).filter(Problem.id.in_(ids)).all()
+        problems = db.scalars(select(Problem).where(Problem.id.in_(ids))).all()
 
         # sort problems as ordered identifiers in a list of identifiers
         dict = {p.id:p for p in problems}
@@ -73,7 +73,7 @@ async def get_solving_list(
             })
     
     # скільки задач вже вирішено
-    problem_count = db.query(Ticket).filter(Ticket.username == user.username).filter(Ticket.state == 1).count()
+    problem_count = db.scalar(select(func.count()).select_from(select(Ticket).where(Ticket.username == user.username, Ticket.state == 1)))
 
     return templates.TemplateResponse(request, "solving/list.html", {"psets": psets, "problem_count": problem_count})
 
@@ -94,9 +94,7 @@ async def get_solving_problem(
     problem = db.get(Problem, problem_id)
 
     # get user's ticket
-    ticket = db.query(Ticket) \
-        .filter(and_(Ticket.username == user.username, Ticket.problem_id == problem_id)) \
-        .first()
+    ticket = db.scalar(select(Ticket).where(Ticket.username == user.username, Ticket.problem_id == problem_id))
 
     # create a new ticket
     if ticket is None:
@@ -146,7 +144,7 @@ async def post_solving_vscode(
     # pset_id & problem_id
     try:
         pset_name, prob_name = fullName.split('.')
-        pset = db.query(ProblemSet).filter(ProblemSet.title == pset_name).first()
+        pset = db.scalar(select(ProblemSet).where(ProblemSet.title == pset_name))
         pset_id = pset.id
         problem_id = pset.get_prob_id_by_name(prob_name) 
         if problem_id is None:
@@ -156,9 +154,7 @@ async def post_solving_vscode(
         raise HTTPException(404, ex.args)
     
     # get user's ticket
-    ticket = db.query(Ticket) \
-        .filter(Ticket.username == user.username, Ticket.problem_id == problem_id) \
-        .first()
+    ticket = db.scalar(select(Ticket).where(Ticket.username == user.username, Ticket.problem_id == problem_id))
 
     # затриманий початок - виключно для короткострокових задачників (open_minutes <= 60)
     delay_sec = (datetime.now() - pset.open_time).seconds
@@ -222,7 +218,7 @@ async def get_solving_vscode(
     # pset_id & problem_id
     try:
         pset_name, prob_name = fullname.split('.')
-        pset = db.query(ProblemSet).filter(ProblemSet.title == pset_name).first()
+        pset = db.scalar(select(ProblemSet).where(ProblemSet.title == pset_name))
         pset_id = pset.id
         problem_id = pset.get_prob_id_by_name(prob_name) 
         if problem_id is None:
@@ -232,9 +228,7 @@ async def get_solving_vscode(
         raise HTTPException(404, ex.args)
     
     # get user's ticket
-    ticket = db.query(Ticket) \
-        .filter(Ticket.username == user.username, Ticket.problem_id == problem_id) \
-        .first()
+    ticket = db.scalar(select(Ticket).where(Ticket.username == user.username, Ticket.problem_id == problem_id))
 
     # затриманий початок - виключно для короткострокових задачників (open_minutes <= 60)
     delay_sec = (datetime.now() - pset.open_time).seconds
@@ -261,9 +255,7 @@ async def post_check(
     Приймає JSON у тілі у форматі AnswerSchema.
     """
     # get a ticket
-    ticket = db.query(Ticket) \
-        .filter(and_(Ticket.username == user.username, Ticket.problem_id == answer.problem_id)) \
-        .first()
+    ticket = db.scalar(select(Ticket).where(Ticket.username == user.username, Ticket.problem_id == answer.problem_id))
                               
     if ticket is None:
         raise RuntimeError("не знайдений тікет")

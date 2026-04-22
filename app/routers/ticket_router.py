@@ -4,7 +4,7 @@ import base64
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
-from sqlalchemy import func
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from .login_router import get_current_tutor
@@ -90,12 +90,7 @@ async def get_ticket_report(
     """ 
     Рахує кількість розв'язаних задач для кожного користувача.
     """
-    groups = (
-        db.query(Ticket.username, func.count(Ticket.id))
-        .filter(Ticket.state == 1)
-        .group_by(Ticket.username)
-        .all()
-    )
+    groups = db.execute(select(Ticket.username, func.count(Ticket.id)).where(Ticket.state == 1).group_by(Ticket.username)).all()
     groups.sort(key=lambda g: -g[1])
 
     return templates.TemplateResponse(request, "ticket/report.html", {"groups": groups},
@@ -123,7 +118,7 @@ async def get_ticket_statitics(
 
     start_date = datetime.datetime.now() - datetime.timedelta(days=last_days)
 
-    tickets = db.query(Ticket).filter(Ticket.state == 1).filter(Ticket.expire_time > start_date).all()
+    tickets = db.scalars(select(Ticket).where(Ticket.state == 1, Ticket.expire_time > start_date)).all()
 
     usernames = list(set(t.username for t in tickets))
     filtered_usernames = get_filtered_lines(usernames, USER_FILTER_KEY, request)
